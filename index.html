@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Календар для вчителя</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #314755, #26a0da); /* Бірюзовий градієнт */
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+      animation: slideIn 0.6s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.8em;
+      margin-bottom: 25px;
+      color: #00a8cc;
+      font-weight: 700;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 25px;
+    }
+
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 14px;
+      border-left: 5px solid #00a8cc;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .section h3 {
+      color: #00a8cc;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+      font-weight: 600;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+
+    .day-card {
+      background: #f0fdfd;
+      border: 1px solid #d0f0f0;
+      border-radius: 10px;
+      padding: 10px;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .day-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      border-color: #00a8cc;
+    }
+
+    .day-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-weight: 600;
+      font-size: 1em;
+      margin-bottom: 6px;
+    }
+
+    .day-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #00a8cc;
+    }
+
+    .type-btn {
+      padding: 6px 8px;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.8em;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      width: 100%;
+      text-transform: uppercase;
+    }
+
+    .type-btn:hover {
+      transform: scale(1.03);
+    }
+
+    .weekly { background-color: #00a8cc; }
+    .numerator { background-color: #28a745; }
+    .denominator { background-color: #fd7e14; }
+
+    /* Кнопки швидкого вибору */
+    .quick-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .quick-btn {
+      flex: 1;
+      background-color: #00a8cc;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .quick-btn:hover {
+      background-color: #008fa3;
+      transform: translateY(-1px);
+    }
+
+    /* Блок Період + Канікули */
+    .period-holidays-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .period-box, .holidays-box {
+      padding: 16px;
+      background: #f8fdff;
+      border-radius: 12px;
+      border: 1px solid #d0f0f0;
+    }
+
+    .date-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .date-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .date-group label {
+      font-weight: 600;
+      color: #00a8cc;
+      font-size: 0.95em;
+    }
+
+    input[type="date"] {
+      padding: 10px;
+      border: 1px solid #d0f0f0;
+      border-radius: 8px;
+      font-size: 0.95em;
+      background-color: #fff;
+      transition: all 0.2s ease;
+    }
+
+    input[type="date"]:focus {
+      outline: none;
+      border-color: #00a8cc;
+      box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.1);
+    }
+
+    .holiday-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .btn {
+      background-color: #00a8cc;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: #008fa3;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 168, 204, 0.2);
+    }
+
+    .generate-btn {
+      background-color: #d9534f;
+      padding: 14px 28px;
+      font-size: 1.1em;
+      border-radius: 12px;
+      margin: 20px auto 0;
+      display: block;
+      animation: pulse 2s infinite;
+      font-weight: 600;
+    }
+
+    .generate-btn:hover {
+      background-color: #c12e2a;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .holiday-item {
+      background: #e6fcff;
+      padding: 10px 14px;
+      margin: 6px 0;
+      border-left: 4px solid #00a8cc;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95em;
+      transition: all 0.2s ease;
+    }
+
+    .holiday-item:hover {
+      transform: translateX(4px);
+      background: #d0f0f0;
+    }
+
+    .delete-btn {
+      background-color: #d9534f;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      font-weight: bold;
+    }
+
+    .delete-btn:hover {
+      background-color: #c12e2a;
+    }
+
+    /* Статистика — зменшена */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat-card {
+      background-color: #00a8cc;
+      color: white;
+      padding: 8px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 0.9em;
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      background-color: #008fa3;
+    }
+
+    .stat-number {
+      font-size: 1.2em;
+      font-weight: bold;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.75em;
+      opacity: 0.9;
+    }
+
+    #result {
+      background: white;
+      color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95em;
+      line-height: 1.5;
+      white-space: pre-line;
+      max-height: 280px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+    }
+
+    .copy-btn { background-color: #28a745; }
+    .copy-btn:hover { background-color: #218838; }
+
+    .word-btn { background-color: #3182ce; }
+    .word-btn:hover { background-color: #2c5aa0; }
+
+    /* Нотифікації */
+    .notification {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      z-index: 1000;
+      font-size: 1em;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      animation: slideInFromRight 0.3s ease-out;
+    }
+
+    @keyframes slideInFromRight {
+      from { opacity: 0; transform: translateX(100px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideOutToRight {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(100px); }
+    }
+
+     /* МОБІЛЬНА АДАПТАЦІЯ */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      .container {
+        max-width: 100%;
+        width: 100%;
+        padding: 20px;
+        border-radius: 15px;
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 1.5em;
+        margin-bottom: 20px;
+      }
+
+      .main-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .section {
+        padding: 18px;
+        border-radius: 12px;
+      }
+
+      .section h3 {
+        font-size: 1.2em;
+        margin-bottom: 12px;
+      }
+
+      .days-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .day-card {
+        padding: 12px 8px;
+      }
+
+      .day-label {
+        font-size: 0.9em;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+
+      .day-label input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+      }
+
+      .type-btn {
+        font-size: 0.75em;
+        padding: 6px 4px;
+      }
+
+      .quick-buttons {
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
+      .quick-btn {
+        padding: 12px;
+        font-size: 0.9em;
+      }
+
+      .period-holidays-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .period-box, .holidays-box {
+        padding: 15px;
+      }
+
+      .date-inputs {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .date-group label {
+        font-size: 0.9em;
+        margin-bottom: 6px;
+      }
+
+      input[type="date"] {
+        padding: 12px;
+        font-size: 0.9em;
+      }
+
+      .holiday-inputs {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .holiday-inputs input[type="date"] {
+        margin-bottom: 5px;
+      }
+
+      .btn {
+        padding: 12px 16px;
+        font-size: 0.9em;
+        width: 100%;
+      }
+
+      .generate-btn {
+        padding: 15px;
+        font-size: 1.1em;
+        width: 100%;
+        margin: 20px 0 0 0;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
+      .stat-card {
+        padding: 12px;
+        font-size: 0.9em;
+      }
+
+      .stat-number {
+        font-size: 1.4em;
+      }
+
+      .stat-label {
+        font-size: 0.8em;
+      }
+
+      #result {
+        font-size: 0.85em;
+        max-height: 250px;
+        padding: 15px;
+        line-height: 1.4;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .copy-btn, .word-btn {
+        width: 100%;
+        padding: 14px;
+        font-size: 0.95em;
+      }
+
+      .holiday-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        text-align: center;
+      }
+
+      .delete-btn {
+        align-self: center;
+        padding: 8px 16px;
+      }
+
+      .notification {
+        right: 10px;
+        left: 10px;
+        top: 10px;
+      }
+    }
+
+    /* Для дуже маленьких екранів */
+    @media (max-width: 480px) {
+      body {
+        padding: 5px;
+        font-size: 14px;
+      }
+
+      .container {
+        padding: 15px;
+        border-radius: 12px;
+      }
+
+      h1 {
+        font-size: 1.4em;
+        margin-bottom: 15px;
+      }
+
+      .section {
+        padding: 15px;
+      }
+
+      .section h3 {
+        font-size: 1.1em;
+      }
+
+      .days-grid {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .day-card {
+        padding: 10px;
+      }
+
+      .type-btn {
+        font-size: 0.7em;
+        padding: 5px;
+      }
+
+      .quick-btn {
+        padding: 10px;
+        font-size: 0.85em;
+      }
+
+      input[type="date"] {
+        padding: 10px;
+        font-size: 0.85em;
+      }
+
+      .generate-btn {
+        padding: 12px;
+        font-size: 1em;
+      }
+
+      #result {
+        font-size: 0.8em;
+        max-height: 200px;
+        padding: 12px;
+      }
+
+      .stat-card {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📚 Календар для вчителя</h1>
+
+    <div class="main-grid">
+      <!-- Ліва панель -->
+      <div class="left-panel">
+        <!-- Дні тижня -->
+        <div class="section">
+          <h3>📅 Дні тижня</h3>
+          <div class="days-grid">
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Пн">
+                <span>Пн</span>
+              </div>
+              <button id="type-Пн" class="type-btn weekly" onclick="cycle('Пн')">Щотижня</button>
+            </div>
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Вт">
+                <span>Вт</span>
+              </div>
+              <button id="type-Вт" class="type-btn weekly" onclick="cycle('Вт')">Щотижня</button>
+            </div>
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Ср">
+                <span>Ср</span>
+              </div>
+              <button id="type-Ср" class="type-btn weekly" onclick="cycle('Ср')">Щотижня</button>
+            </div>
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Чт">
+                <span>Чт</span>
+              </div>
+              <button id="type-Чт" class="type-btn weekly" onclick="cycle('Чт')">Щотижня</button>
+            </div>
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Пт">
+                <span>Пт</span>
+              </div>
+              <button id="type-Пт" class="type-btn weekly" onclick="cycle('Пт')">Щотижня</button>
+            </div>
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Сб">
+                <span>Сб</span>
+              </div>
+              <button id="type-Сб" class="type-btn weekly" onclick="cycle('Сб')">Щотижня</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Період + Канікули -->
+        <div class="section">
+          <h3>📆 Період та канікули</h3>
+          <div class="quick-buttons">
+            <button class="quick-btn" onclick="setHalfYear()">📅 Півріччя</button>
+            <button class="quick-btn" onclick="setFullYear()">📅 Рік</button>
+          </div>
+          <div class="period-holidays-grid">
+            <!-- Період -->
+            <div class="period-box">
+              <div class="date-inputs">
+                <div class="date-group">
+                  <label>Від:</label>
+                  <input type="date" id="start-date">
+                </div>
+                <div class="date-group">
+                  <label>До:</label>
+                  <input type="date" id="end-date">
+                </div>
+              </div>
+            </div>
+
+            <!-- Канікули -->
+            <div class="holidays-box">
+              <h4 style="color: #00a8cc; margin-bottom: 10px; font-size: 1em;">🏖️ Канікули</h4>
+              <div class="holiday-inputs">
+                <input type="date" id="hs" placeholder="Початок">
+                <input type="date" id="he" placeholder="Кінець">
+                <button class="btn" onclick="addHoliday()">➕</button>
+              </div>
+              <div id="holidays-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Кнопка генерації -->
+        <button class="btn generate-btn" onclick="generate()">
+          ✨ Генерувати
+        </button>
+      </div>
+
+      <!-- Права панель -->
+      <div class="right-panel">
+        <div class="section">
+          <h3>📋 Згенеровані дати</h3>
+          <div id="stats-container" style="display: none;" class="stats">
+            <div class="stat-card">
+              <span class="stat-number" id="s1">0</span>
+              <span class="stat-label">1-й семестр</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="s2">0</span>
+              <span class="stat-label">2-й семестр</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="total">0</span>
+              <span class="stat-label">Всього</span>
+            </div>
+          </div>
+          
+          <div id="result">Натисніть "Генерувати" для отримання дат. 
+          </br> Автор: Ігор Шуляк </div>
+          
+          <div class="action-buttons" id="action-buttons" style="display: none;">
+            <button class="btn copy-btn" onclick="copy()">📋 Копіювати</button>
+            <button class="btn word-btn" onclick="word()">📄 Word</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Автоматичні дати при завантаженні
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    document.getElementById("start-date").value = `${currentYear}-09-01`;
+    document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
+
+    // Встановити "Півріччя": 1 вересня — 31 грудня
+    function setHalfYear() {
+      const year = new Date().getFullYear();
+      document.getElementById("start-date").value = `${year}-09-01`;
+      document.getElementById("end-date").value = `${year}-12-31`;
+    }
+
+    // Встановити "Рік": 1 вересня — 31 травня
+    function setFullYear() {
+      const year = new Date().getFullYear();
+      document.getElementById("start-date").value = `${year}-09-01`;
+      document.getElementById("end-date").value = `${year + 1}-05-31`;
+    }
+
+    // Зміна типу заняття
+    function cycle(day) {
+      const btn = document.getElementById(`type-${day}`);
+      btn.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        if (btn.classList.contains("weekly")) {
+          btn.className = "type-btn numerator";
+          btn.textContent = "Чисельник";
+        } else if (btn.classList.contains("numerator")) {
+          btn.className = "type-btn denominator";
+          btn.textContent = "Знаменник";
+        } else {
+          btn.className = "type-btn weekly";
+          btn.textContent = "Щотижня";
+        }
+        btn.style.transform = 'scale(1)';
+      }, 100);
+    }
+
+    // Додати канікули
+    function addHoliday() {
+      const s = document.getElementById("hs").value;
+      const e = document.getElementById("he").value;
+      if (!s || !e) {
+        showNotification("Оберіть дати!", "error");
+        return;
+      }
+      
+      const item = document.createElement("div");
+      item.className = "holiday-item";
+      item.innerHTML = `
+        <span>${fmt(s)} — ${fmt(e)}</span>
+        <button class="delete-btn" onclick="removeHoliday(this)">×</button>
+      `;
+      document.getElementById("holidays-list").appendChild(item);
+      document.getElementById("hs").value = "";
+      document.getElementById("he").value = "";
+      showNotification("Додано!", "success");
+    }
+
+    // Видалити канікули
+    function removeHoliday(btn) {
+      btn.parentElement.style.animation = 'slideOutToRight 0.2s ease-out';
+      setTimeout(() => btn.parentElement.remove(), 200);
+    }
+
+    // Форматування дати
+    function fmt(d) {
+      return new Date(d).toLocaleDateString("uk");
+    }
+
+    // Повідомлення
+    function showNotification(message, type) {
+      const notification = document.createElement("div");
+      notification.className = "notification";
+      notification.style.backgroundColor = type === 'success' ? '#28a745' : '#d9534f';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        notification.style.animation = 'slideOutToRight 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
+    }
+
+    // Генерація дат
+    function generate() {
+      const start = new Date(document.getElementById("start-date").value);
+      const end = new Date(document.getElementById("end-date").value);
+      if (start > end) {
+        showNotification("Неправильні дати!", "error");
+        return;
+      }
+
+      const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+      const selected = {};
+      days.forEach(d => {
+        if (document.getElementById(`cb-${d}`).checked) {
+          const type = document.getElementById(`type-${d}`).textContent;
+          selected[d] = type;
+        }
+      });
+
+      if (Object.keys(selected).length === 0) {
+        showNotification("Оберіть хоча б один день!", "error");
+        return;
+      }
+
+      // Канікули
+      const holidays = [];
+      document.querySelectorAll("#holidays-list .holiday-item").forEach(h => {
+        const text = h.querySelector('span').textContent;
+        const [s, e] = text.split(" — ");
+        holidays.push({ 
+          s: new Date(s.split(".").reverse().join("-")), 
+          e: new Date(e.split(".").reverse().join("-")) 
+        });
+      });
+
+      // Генерація дат
+      const res = [];
+      let cur = new Date(start);
+      const startWeek = getWeek(start);
+
+      while (cur <= end) {
+        // Визначаємо день тижня: Пн = 0, Вт = 1, ..., Нд = 6
+        const dayIndex = (cur.getDay() + 6) % 7;
+        const dayName = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][dayIndex];
+
+        if (selected[dayName]) {
+          const weekDiff = (getWeek(cur) - startWeek) % 2;
+          const type = selected[dayName];
+          let add = false;
+
+          if (type === "Щотижня") add = true;
+          else if (type === "Чисельник" && weekDiff === 0) add = true;
+          else if (type === "Знаменник" && weekDiff === 1) add = true;
+
+          if (add) {
+            const isHoliday = holidays.some(h => cur >= h.s && cur <= h.e);
+            if (!isHoliday) {
+              res.push(cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" }));
+            }
+          }
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+
+      if (res.length === 0) {
+        showNotification("Не знайдено жодної дати!", "error");
+        return;
+      }
+
+      // Підрахунок за семестрами
+      const sem1 = res.filter(d => {
+        const [d1, m1, y1] = d.split(".");
+        const date = new Date(`20${y1}-${m1}-${d1}`);
+        return date <= new Date(`${start.getFullYear()}-12-31`);
+      }).length;
+
+      const sem2 = res.filter(d => {
+        const [d1, m1, y1] = d.split(".");
+        const date = new Date(`20${y1}-${m1}-${d1}`);
+        return date >= new Date(`${start.getFullYear() + 1}-01-01`);
+      }).length;
+
+      // Вивід
+      document.getElementById("s1").textContent = sem1;
+      document.getElementById("s2").textContent = sem2;
+      document.getElementById("total").textContent = res.length;
+      document.getElementById("result").textContent = res.join("\n");
+      document.getElementById("stats-container").style.display = "grid";
+      document.getElementById("action-buttons").style.display = "flex";
+      showNotification("Готово!", "success");
+    }
+
+    // Номер тижня за ISO (тиждень починається з понеділка)
+    function getWeek(date) {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+      const yearStart = new Date(d.getFullYear(), 0, 1);
+      return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+    }
+
+    // Копіювати в буфер
+    function copy() {
+      const text = document.getElementById("result").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showNotification("Скопійовано!", "success");
+      }).catch(() => {
+        showNotification("Помилка", "error");
+      });
+    }
+
+    // Експорт у Word
+    function word() {
+      const text = document.getElementById("result").innerText;
+      const total = document.getElementById("total").textContent;
+      const sem1 = document.getElementById("s1").textContent;
+      const sem2 = document.getElementById("s2").textContent;
+      
+      const htmlContent = `
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Календар уроків</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #00a8cc; text-align: center; }
+            .stats { background: #f0fdfd; padding: 12px; border-radius: 8px; margin: 15px 0; border: 1px solid #d0f0f0; font-size: 0.9em; }
+            .dates { background: white; padding: 20px; border: 1px solid #ddd; }
+          </style>
+        </head>
+        <body>
+          <h1>📚 Календар уроків</h1>
+          <div class="stats">
+            <p><strong>1-й семестр:</strong> ${sem1}</p>
+            <p><strong>2-й семестр:</strong> ${sem2}</p>
+            <p><strong>Всього:</strong> ${total}</p>
+          </div>
+          <div class="dates">
+            <h3>Дати уроків:</h3>
+            <pre>${text}</pre>
+          </div>
+        </body>
+        </html>
+      `;
+      
+      const blob = new Blob([htmlContent], { type: "application/msword" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "календар_уроків.doc";
+      a.click();
+      URL.revokeObjectURL(url);
+      showNotification("Файл завантажено!", "success");
+    }
+  </script>
+</body>
+</html>
