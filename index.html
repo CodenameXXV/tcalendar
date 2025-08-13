@@ -613,7 +613,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>📚 Календар для вчителя</h1>
+    <h1 id="title">📚 Календар для вчителя</h1>
 
     <div class="main-grid">
       <!-- Ліва панель -->
@@ -741,11 +741,32 @@
   </div>
 
   <script>
+    // Оновлення заголовка з навчальним роком
+    function updateTitle() {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      let startYear, endYear;
+
+      if (now.getMonth() >= 8) { // вересень–грудень
+        startYear = currentYear;
+        endYear = currentYear + 1;
+      } else { // січень–серпень
+        startYear = currentYear - 1;
+        endYear = currentYear;
+      }
+
+      document.getElementById("title").textContent = 
+        `📚 Календар для вчителя ${startYear}–${endYear}`;
+    }
+
     // Автоматичні дати при завантаженні
     const now = new Date();
     const currentYear = now.getFullYear();
     document.getElementById("start-date").value = `${currentYear}-09-01`;
     document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
+
+    // Оновлюємо заголовок
+    updateTitle();
 
     // Встановити I семестр: 1 вересня — 31 грудня
     function setSemester1() {
@@ -803,6 +824,13 @@
         <button class="delete-btn" onclick="removeHoliday(this)">×</button>
       `;
       document.getElementById("holidays-list").appendChild(item);
+
+      // ✅ Правильне додавання канікул
+      holidays.push({ 
+        s: new Date(s), 
+        e: new Date(e) 
+      });
+
       document.getElementById("hs").value = "";
       document.getElementById("he").value = "";
       showNotification("Додано!", "success");
@@ -836,6 +864,11 @@
     function generate() {
       const start = new Date(document.getElementById("start-date").value);
       const end = new Date(document.getElementById("end-date").value);
+
+      // ✅ Нормалізуємо час
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
       if (start > end) {
         showNotification("Неправильні дати!", "error");
         return;
@@ -860,19 +893,19 @@
       document.querySelectorAll("#holidays-list .holiday-item").forEach(h => {
         const text = h.querySelector('span').textContent;
         const [s, e] = text.split(" — ");
-		holidays.push({ 
-		  s: new Date(s),  // бо s вже у форматі YYYY-MM-DD
-		  e: new Date(e)   // можна передавати напряму
-		});
+        holidays.push({ 
+          s: new Date(s), 
+          e: new Date(e) 
+        });
       });
 
       // Генерація дат
       const res = [];
       let cur = new Date(start);
+      cur.setHours(0, 0, 0, 0); // нормалізація
       const startWeek = getWeek(start);
 
       while (cur <= end) {
-        // Визначаємо день тижня: Пн = 0, Вт = 1, ..., Нд = 6
         const dayIndex = (cur.getDay() + 6) % 7;
         const dayName = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][dayIndex];
 
@@ -886,13 +919,18 @@
           else if (type === "Знаменник" && weekDiff === 1) add = true;
 
           if (add) {
-            const isHoliday = holidays.some(h => cur >= h.s && cur <= h.e);
+            const isHoliday = holidays.some(h => {
+              const hs = new Date(h.s); hs.setHours(0,0,0,0);
+              const he = new Date(h.e); he.setHours(0,0,0,0);
+              return cur >= hs && cur <= he;
+            });
             if (!isHoliday) {
               res.push(cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" }));
             }
           }
         }
         cur.setDate(cur.getDate() + 1);
+        cur.setHours(0, 0, 0, 0); // нормалізація
       }
 
       if (res.length === 0) {
