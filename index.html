@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <title>Календар для вчителя</title>
   <style>
     * {
@@ -371,7 +372,7 @@
       to { opacity: 0; transform: translateX(100px); }
     }
 
-     /* МОБІЛЬНА АДАПТАЦІЯ */
+    /* МОБІЛЬНА АДАПТАЦІЯ */
     @media (max-width: 768px) {
       body {
         padding: 10px;
@@ -670,8 +671,9 @@
         <div class="section">
           <h3>📆 Період та канікули</h3>
           <div class="quick-buttons">
-            <button class="quick-btn" onclick="setHalfYear()">📅 Півріччя</button>
-            <button class="quick-btn" onclick="setFullYear()">📅 Рік</button>
+            <button class="quick-btn" onclick="setSemester1()">📘 I семестр</button>
+            <button class="quick-btn" onclick="setSemester2()">📘 II семестр</button>
+            <button class="quick-btn" onclick="setFullYear()">📘 Весь рік</button>
           </div>
           <div class="period-holidays-grid">
             <!-- Період -->
@@ -745,14 +747,21 @@
     document.getElementById("start-date").value = `${currentYear}-09-01`;
     document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
 
-    // Встановити "Півріччя": 1 вересня — 31 грудня
-    function setHalfYear() {
+    // Встановити I семестр: 1 вересня — 31 грудня
+    function setSemester1() {
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year}-09-01`;
       document.getElementById("end-date").value = `${year}-12-31`;
     }
 
-    // Встановити "Рік": 1 вересня — 31 травня
+    // Встановити II семестр: 1 січня — 31 травня
+    function setSemester2() {
+      const year = new Date().getFullYear();
+      document.getElementById("start-date").value = `${year + 1}-01-01`;
+      document.getElementById("end-date").value = `${year + 1}-05-31`;
+    }
+
+    // Встановити "Весь рік": 1 вересня — 31 травня
     function setFullYear() {
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year}-09-01`;
@@ -851,10 +860,10 @@
       document.querySelectorAll("#holidays-list .holiday-item").forEach(h => {
         const text = h.querySelector('span').textContent;
         const [s, e] = text.split(" — ");
-        holidays.push({ 
-          s: new Date(s.split(".").reverse().join("-")), 
-          e: new Date(e.split(".").reverse().join("-")) 
-        });
+		holidays.push({ 
+		  s: new Date(s),  // бо s вже у форматі YYYY-MM-DD
+		  e: new Date(e)   // можна передавати напряму
+		});
       });
 
       // Генерація дат
