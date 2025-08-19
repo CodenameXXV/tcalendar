@@ -115,27 +115,6 @@
       cursor: pointer;
     }
 
-    .type-btn {
-      padding: 5px 6px;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      cursor: pointer;
-      font-size: 0.75em;
-      font-weight: 500;
-      transition: all 0.2s ease;
-      width: 100%;
-      text-transform: uppercase;
-    }
-
-    .type-btn:hover {
-      transform: scale(1.02);
-    }
-
-    .weekly { background-color: #00a8cc; }
-    .numerator { background-color: #28a745; }
-    .denominator { background-color: #fd7e14; }
-
     .lesson-toggle {
       margin-top: 6px;
       display: flex;
@@ -172,23 +151,22 @@
       text-align: center;
     }
 
-    /* Кнопки "I семестр", "II семестр", "Весь рік" — в один ряд */
     .quick-buttons {
       display: flex;
       gap: 8px;
       margin-bottom: 12px;
-      flex-wrap: nowrap; /* Не переносити */
-      overflow-x: auto;  /* Прокрутка, якщо не вміщаються */
+      flex-wrap: nowrap;
+      overflow-x: auto;
       padding: 4px 0;
-      scrollbar-width: none; /* Приховуємо скролбар у Firefox */
+      scrollbar-width: none;
     }
 
     .quick-buttons::-webkit-scrollbar {
-      display: none; /* Приховуємо скролбар у Chrome/Safari */
+      display: none;
     }
 
     .quick-btn {
-      flex: 0 0 auto; /* Не стискати */
+      flex: 0 0 auto;
       background-color: #00a8cc;
       color: white;
       border: none;
@@ -273,9 +251,8 @@
       background-color: #008fa3;
     }
 
-    /* Кнопка "Генерувати" — синя */
     .generate-btn {
-      background-color: #3182ce; /* Синій */
+      background-color: #3182ce;
       color: white;
       padding: 8px 20px;
       border: none;
@@ -290,11 +267,6 @@
 
     .generate-btn:hover {
       background-color: #2c5aa0;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.03); }
     }
 
     .holiday-item {
@@ -381,7 +353,6 @@
     .word-btn { background-color: #3182ce; }
     .word-btn:hover { background-color: #2c5aa0; }
 
-    /* Компактне повідомлення у кутку */
     .notification {
       position: fixed;
       top: 10px;
@@ -409,7 +380,6 @@
       to { opacity: 0; transform: translateX(100px); }
     }
 
-    /* === МОБІЛЬНА АДАПТАЦІЯ === */
     @media (max-width: 768px) {
       body {
         padding: 10px;
@@ -458,11 +428,6 @@
       .day-label input[type="checkbox"] {
         width: 15px;
         height: 15px;
-      }
-
-      .type-btn {
-        padding: 5px;
-        font-size: 0.7em;
       }
 
       .lesson-toggle {
@@ -576,82 +541,108 @@
     <h1>📚 Календар для вчителя</h1>
 
     <div class="main-grid">
-      <!-- Ліва панель -->
       <div class="left-panel">
-        <!-- Дні тижня -->
         <div class="section">
           <h3>📅 Дні тижня</h3>
           <div class="days-grid">
+            <!-- Понеділок -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Пн">
                 <span>Пн</span>
               </div>
-              <button id="type-Пн" class="type-btn weekly" onclick="cycle('Пн')">Щотижня</button>
-              <div class="lesson-toggle" onclick="cycleLesson(this)">
-                <span class="label">ур./день:</span>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
                 <span class="number">1</span>
               </div>
             </div>
+
+            <!-- Вівторок -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Вт">
                 <span>Вт</span>
               </div>
-              <button id="type-Вт" class="type-btn weekly" onclick="cycle('Вт')">Щотижня</button>
-              <div class="lesson-toggle" onclick="cycleLesson(this)">
-                <span class="label">ур./день:</span>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
                 <span class="number">1</span>
               </div>
             </div>
+
+            <!-- Середа -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Ср">
                 <span>Ср</span>
               </div>
-              <button id="type-Ср" class="type-btn weekly" onclick="cycle('Ср')">Щотижня</button>
-              <div class="lesson-toggle" onclick="cycleLesson(this)">
-                <span class="label">ур./день:</span>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
                 <span class="number">1</span>
               </div>
             </div>
+
+            <!-- Четвер -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Чт">
                 <span>Чт</span>
               </div>
-              <button id="type-Чт" class="type-btn weekly" onclick="cycle('Чт')">Щотижня</button>
-              <div class="lesson-toggle" onclick="cycleLesson(this)">
-                <span class="label">ур./день:</span>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
                 <span class="number">1</span>
               </div>
             </div>
+
+            <!-- П'ятниця -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Пт">
                 <span>Пт</span>
               </div>
-              <button id="type-Пт" class="type-btn weekly" onclick="cycle('Пт')">Щотижня</button>
-              <div class="lesson-toggle" onclick="cycleLesson(this)">
-                <span class="label">ур./день:</span>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
                 <span class="number">1</span>
               </div>
             </div>
+
+            <!-- Субота -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Сб">
                 <span>Сб</span>
               </div>
-              <button id="type-Сб" class="type-btn weekly" onclick="cycle('Сб')">Щотижня</button>
-              <div class="lesson-toggle" onclick="cycleLesson(this)">
-                <span class="label">ур./день:</span>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
                 <span class="number">1</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Період + Канікули -->
         <div class="section">
           <h3>📆 Період та канікули</h3>
           <div class="quick-buttons">
@@ -687,28 +678,29 @@
         <button class="btn generate-btn" onclick="generate()">✨ Генерувати</button>
       </div>
 
-      <!-- Права панель -->
       <div class="right-panel">
         <div class="section">
           <h3>📋 Згенеровані дати</h3>
           <div id="stats-container" style="display: none;" class="stats">
             <div class="stat-card">
-              <span class="stat-number" id="s1">0</span>
+              <span class="stat-number" id="s1">0</span> <br>
               <span class="stat-label">1-й семестр</span>
             </div>
             <div class="stat-card">
-              <span class="stat-number" id="s2">0</span>
+              <span class="stat-number" id="s2">0</span> <br>
               <span class="stat-label">2-й семестр</span>
             </div>
             <div class="stat-card">
-              <span class="stat-number" id="total">0</span>
+              <span class="stat-number" id="total">0</span> <br>
               <span class="stat-label">Всього</span>
             </div>
           </div>
-          <div id="result">Натисніть "Генерувати" для отримання дат. 
-          <br> Автор: Ігор Шуляк 
-          <br> Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a>
-          <br> або шукайте в Телеграм @ittchr
+          <div id="result">
+            <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).&nbsp;</p>
+            <p>Натисніть "Генерувати" для отримання дат.&nbsp;</p>
+            <p><br>
+              Автор: Ігор Шуляк 
+              Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr </p>
           </div>
           <div class="action-buttons" id="action-buttons" style="display: none;">
             <button class="btn copy-btn" onclick="copy()">📋 Копіювати</button>
@@ -722,13 +714,11 @@
   <script>
     let holidays = [];
 
-    // Початкові дати
     const now = new Date();
     const currentYear = now.getFullYear();
     document.getElementById("start-date").value = `${currentYear}-09-01`;
     document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
 
-    // Швидкі кнопки
     function setSemester1() {
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year}-09-01`;
@@ -746,28 +736,10 @@
       document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
     }
 
-    function cycle(day) {
-      const btn = document.getElementById(`type-${day}`);
-      btn.style.transform = 'scale(0.95)';
-      setTimeout(() => {
-        if (btn.classList.contains("weekly")) {
-          btn.className = "type-btn numerator";
-          btn.textContent = "Чисельник";
-        } else if (btn.classList.contains("numerator")) {
-          btn.className = "type-btn denominator";
-          btn.textContent = "Знаменник";
-        } else {
-          btn.className = "type-btn weekly";
-          btn.textContent = "Щотижня";
-        }
-        btn.style.transform = 'scale(1)';
-      }, 100);
-    }
-
     function cycleLesson(el) {
       const numberSpan = el.querySelector('.number');
       const current = parseInt(numberSpan.textContent);
-      const next = current === 3 ? 1 : current + 1;
+      const next = current === 3 ? 0 : current + 1; // Тепер: 0 → 1 → 2 → 3 → 0
       numberSpan.textContent = next;
     }
 
@@ -843,12 +815,10 @@
 
       days.forEach(d => {
         if (document.getElementById(`cb-${d}`).checked) {
-          const type = document.getElementById(`type-${d}`).textContent;
-          const lessons = parseInt(
-            document.querySelector(`#cb-${d}`).closest('.day-card')
-              .querySelector('.lesson-toggle .number').textContent
-          );
-          selected[d] = { type, lessons };
+          const card = document.querySelector(`#cb-${d}`).closest('.day-card');
+          const num = parseInt(card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent);
+          const den = parseInt(card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent);
+          selected[d] = { numerator: num, denominator: den };
         }
       });
 
@@ -867,25 +837,27 @@
         const dayName = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][dayIndex];
 
         if (selected[dayName]) {
-          const { type, lessons } = selected[dayName];
+          const { numerator, denominator } = selected[dayName];
           const weekDiff = (getWeek(cur) - startWeek) % 2;
-          let add = false;
+          const lessons = weekDiff === 0 ? numerator : denominator;
 
-          if (type === "Щотижня") add = true;
-          else if (type === "Чисельник" && weekDiff === 0) add = true;
-          else if (type === "Знаменник" && weekDiff === 1) add = true;
+          // Якщо lessons === 0, то дата не додається
+          if (lessons === 0) {
+            cur.setDate(cur.getDate() + 1);
+            cur.setHours(0, 0, 0, 0);
+            continue;
+          }
 
-          if (add) {
-            const isHoliday = holidays.some(h => {
-              const hs = new Date(h.s); hs.setHours(0,0,0,0);
-              const he = new Date(h.e); he.setHours(0,0,0,0);
-              return cur >= hs && cur <= he;
-            });
-            if (!isHoliday) {
-              const dateStr = cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" });
-              for (let i = 0; i < lessons; i++) {
-                res.push(dateStr);
-              }
+          const isHoliday = holidays.some(h => {
+            const hs = new Date(h.s); hs.setHours(0,0,0,0);
+            const he = new Date(h.e); he.setHours(0,0,0,0);
+            return cur >= hs && cur <= he;
+          });
+
+          if (!isHoliday) {
+            const dateStr = cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" });
+            for (let i = 0; i < lessons; i++) {
+              res.push(dateStr);
             }
           }
         }
@@ -933,7 +905,7 @@
       const total = document.getElementById("total").textContent;
       const sem1 = document.getElementById("s1").textContent;
       const sem2 = document.getElementById("s2").textContent;
-      
+
       const htmlContent = `
         <html>
         <head>
@@ -960,7 +932,7 @@
         </body>
         </html>
       `;
-      
+
       const blob = new Blob([htmlContent], { type: "application/msword" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
