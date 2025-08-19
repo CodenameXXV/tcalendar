@@ -137,7 +137,6 @@
     .numerator { background-color: #28a745; }
     .denominator { background-color: #fd7e14; }
 
-    /* Кнопки швидкого вибору */
     .quick-buttons {
       display: flex;
       gap: 10px;
@@ -162,7 +161,6 @@
       transform: translateY(-1px);
     }
 
-    /* Блок Період + Канікули */
     .period-holidays-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -287,7 +285,6 @@
       background-color: #c12e2a;
     }
 
-    /* Статистика — зменшена */
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -347,7 +344,6 @@
     .word-btn { background-color: #3182ce; }
     .word-btn:hover { background-color: #2c5aa0; }
 
-    /* Нотифікації */
     .notification {
       position: fixed;
       top: 15px;
@@ -372,7 +368,6 @@
       to { opacity: 0; transform: translateX(100px); }
     }
 
-    /* МОБІЛЬНА АДАПТАЦІЯ */
     @media (max-width: 768px) {
       body {
         padding: 10px;
@@ -545,7 +540,6 @@
       }
     }
 
-    /* Для дуже маленьких екранів */
     @media (max-width: 480px) {
       body {
         padding: 5px;
@@ -728,11 +722,11 @@
             </div>
           </div>
           
-			<div id="result">Натисніть "Генерувати" для отримання дат. 
-			<br> Автор: Ігор Шуляк 
-			<br> Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a>
-			<br> або шукайте в Телеграм @ittchr
-			</div>
+          <div id="result">Натисніть "Генерувати" для отримання дат. 
+          <br> Автор: Ігор Шуляк 
+          <br> Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a>
+          <br> або шукайте в Телеграм @ittchr
+          </div>
           
           <div class="action-buttons" id="action-buttons" style="display: none;">
             <button class="btn copy-btn" onclick="copy()">📋 Копіювати</button>
@@ -744,6 +738,9 @@
   </div>
 
   <script>
+    // Глобальний масив для канікул
+    let holidays = [];
+
     // Оновлення заголовка з навчальним роком
     function updateTitle() {
       const now = new Date();
@@ -828,7 +825,7 @@
       `;
       document.getElementById("holidays-list").appendChild(item);
 
-      // ✅ Правильне додавання канікул
+      // Додаємо у глобальний масив
       holidays.push({ 
         s: new Date(s), 
         e: new Date(e) 
@@ -841,6 +838,12 @@
 
     // Видалити канікули
     function removeHoliday(btn) {
+      const text = btn.parentElement.querySelector('span').textContent;
+      const [s, e] = text.split(" — ");
+      const hs = new Date(s);
+      const he = new Date(e);
+      holidays = holidays.filter(h => !(h.s.getTime() === hs.getTime() && h.e.getTime() === he.getTime()));
+
       btn.parentElement.style.animation = 'slideOutToRight 0.2s ease-out';
       setTimeout(() => btn.parentElement.remove(), 200);
     }
@@ -868,7 +871,6 @@
       const start = new Date(document.getElementById("start-date").value);
       const end = new Date(document.getElementById("end-date").value);
 
-      // ✅ Нормалізуємо час
       start.setHours(0, 0, 0, 0);
       end.setHours(0, 0, 0, 0);
 
@@ -891,22 +893,12 @@
         return;
       }
 
-      // Канікули
-      const holidays = [];
-      document.querySelectorAll("#holidays-list .holiday-item").forEach(h => {
-        const text = h.querySelector('span').textContent;
-        const [s, e] = text.split(" — ");
-        holidays.push({ 
-          s: new Date(s), 
-          e: new Date(e) 
-        });
-      });
+      // Використовуємо глобальний масив `holidays`
 
-      // Генерація дат
       const res = [];
       let cur = new Date(start);
-      cur.setHours(0, 0, 0, 0); // нормалізація
-      const startWeek = getWeek(start);
+      cur.setHours(0, 0, 0, 0);
+      const startWeek = getWeek(cur);
 
       while (cur <= end) {
         const dayIndex = (cur.getDay() + 6) % 7;
@@ -933,7 +925,7 @@
           }
         }
         cur.setDate(cur.getDate() + 1);
-        cur.setHours(0, 0, 0, 0); // нормалізація
+        cur.setHours(0, 0, 0, 0);
       }
 
       if (res.length === 0) {
@@ -941,7 +933,6 @@
         return;
       }
 
-      // Підрахунок за семестрами
       const sem1 = res.filter(d => {
         const [d1, m1, y1] = d.split(".");
         const date = new Date(`20${y1}-${m1}-${d1}`);
@@ -954,7 +945,6 @@
         return date >= new Date(`${start.getFullYear() + 1}-01-01`);
       }).length;
 
-      // Вивід
       document.getElementById("s1").textContent = sem1;
       document.getElementById("s2").textContent = sem2;
       document.getElementById("total").textContent = res.length;
@@ -964,7 +954,7 @@
       showNotification("Готово!", "success");
     }
 
-    // Номер тижня за ISO (тиждень починається з понеділка)
+    // Номер тижня за ISO
     function getWeek(date) {
       const d = new Date(date);
       d.setHours(0, 0, 0, 0);
