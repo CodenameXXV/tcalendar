@@ -4,7 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Календар для вчителя</title>
+
+  <!-- Favicon -->
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <!-- Підключення browserconfig.xml для Windows -->
+  <link rel="browserconfig" href="/browserconfig.xml">
+
+  <!-- Manifest (для PWA) -->
+  <link rel="manifest" href="/site.webmanifest">
+
   <style>
     * {
       margin: 0;
@@ -696,11 +710,13 @@
             </div>
           </div>
           <div id="result">
-            <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).&nbsp;</p>
-            <p>Натисніть "Генерувати" для отримання дат.&nbsp;</p>
-            <p><br>
-              Автор: Ігор Шуляк 
-              Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr </p>
+            <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
+            <p>Натисніть "Генерувати" для отримання дат.</p>
+            <p><br>Автор: Ігор Шуляк</p>
+            <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
+<p style="text-align: center; font-weight: bold;">Спробуйте зручний:
+            <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+            </p>
           </div>
           <div class="action-buttons" id="action-buttons" style="display: none;">
             <button class="btn copy-btn" onclick="copy()">📋 Копіювати</button>
@@ -739,7 +755,7 @@
     function cycleLesson(el) {
       const numberSpan = el.querySelector('.number');
       const current = parseInt(numberSpan.textContent);
-      const next = current === 3 ? 0 : current + 1; // Тепер: 0 → 1 → 2 → 3 → 0
+      const next = current === 3 ? 0 : current + 1;
       numberSpan.textContent = next;
     }
 
@@ -841,7 +857,6 @@
           const weekDiff = (getWeek(cur) - startWeek) % 2;
           const lessons = weekDiff === 0 ? numerator : denominator;
 
-          // Якщо lessons === 0, то дата не додається
           if (lessons === 0) {
             cur.setDate(cur.getDate() + 1);
             cur.setHours(0, 0, 0, 0);
