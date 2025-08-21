@@ -871,115 +871,128 @@
       });
     });
 
-    function generate() {
-      const start = new Date(document.getElementById("start-date").value);
-      const end = new Date(document.getElementById("end-date").value);
-      start.setHours(0, 0, 0, 0);
-      end.setHours(0, 0, 0, 0);
+	function generate() {
+	  const start = new Date(document.getElementById("start-date").value);
+	  const end = new Date(document.getElementById("end-date").value);
+	  start.setHours(0, 0, 0, 0);
+	  end.setHours(0, 0, 0, 0);
 
-      if (start > end) {
-        showNotification("Неправильні дати!", "error");
-        return;
-      }
+	  if (start > end) {
+		showNotification("Неправильні дати!", "error");
+		return;
+	  }
 
-      const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-      const selected = {};
+	  const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+	  const selected = {};
 
-      days.forEach(d => {
-        if (document.getElementById(`cb-${d}`).checked) {
-          const card = document.querySelector(`#cb-${d}`).closest('.day-card');
-          const num = parseInt(card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent);
-          const den = parseInt(card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent);
-          selected[d] = { numerator: num, denominator: den };
-        }
-      });
+	  days.forEach(d => {
+		if (document.getElementById(`cb-${d}`).checked) {
+		  const card = document.querySelector(`#cb-${d}`).closest('.day-card');
+		  const num = parseInt(card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent);
+		  const den = parseInt(card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent);
+		  selected[d] = { numerator: num, denominator: den };
+		}
+	  });
 
-      if (Object.keys(selected).length === 0) {
-        // Якщо немає вибраних днів, очищаємо результат
-        document.getElementById("result").innerHTML = `
-          <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
-          <p><br>Автор: Ігор Шуляк
-          Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> 
+	  if (Object.keys(selected).length === 0) {
+		// Якщо немає вибраних днів, очищаємо результат
+		document.getElementById("result").innerHTML = `
+		  <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
+		  <p><br>Автор: Ігор Шуляк
+		  Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> 
 		  або шукайте в Телеграм @ittchr</p>
-          <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-          <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
-          </p>
-        `;
-        document.getElementById("stats-container").style.display = "none";
-        document.getElementById("action-buttons").style.display = "none";
-        return;
-      }
+		  <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
+		  <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+		  </p>
+		`;
+		document.getElementById("stats-container").style.display = "none";
+		document.getElementById("action-buttons").style.display = "none";
+		return;
+	  }
 
-      const res = [];
-      let cur = new Date(start);
-      cur.setHours(0, 0, 0, 0);
-      const startWeek = getWeek(cur);
+	  const res = [];
+	  let cur = new Date(start);
+	  cur.setHours(0, 0, 0, 0);
+	  const startWeek = getWeek(cur);
 
-      while (cur <= end) {
-        const dayIndex = (cur.getDay() + 6) % 7;
-        const dayName = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][dayIndex];
+	  while (cur <= end) {
+		const dayIndex = (cur.getDay() + 6) % 7;
+		const dayName = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][dayIndex];
 
-        if (selected[dayName]) {
-          const { numerator, denominator } = selected[dayName];
-          const weekDiff = (getWeek(cur) - startWeek) % 2;
-          const lessons = weekDiff === 0 ? numerator : denominator;
+		if (selected[dayName]) {
+		  const { numerator, denominator } = selected[dayName];
+		  const weekDiff = (getWeek(cur) - startWeek) % 2;
+		  const lessons = weekDiff === 0 ? numerator : denominator;
 
-          if (lessons === 0) {
-            cur.setDate(cur.getDate() + 1);
-            cur.setHours(0, 0, 0, 0);
-            continue;
-          }
+		  if (lessons === 0) {
+			cur.setDate(cur.getDate() + 1);
+			cur.setHours(0, 0, 0, 0);
+			continue;
+		  }
 
-          const isHoliday = holidays.some(h => {
-            const hs = new Date(h.s); hs.setHours(0,0,0,0);
-            const he = new Date(h.e); he.setHours(0,0,0,0);
-            return cur >= hs && cur <= he;
-          });
+		  const isHoliday = holidays.some(h => {
+			const hs = new Date(h.s); hs.setHours(0,0,0,0);
+			const he = new Date(h.e); he.setHours(0,0,0,0);
+			return cur >= hs && cur <= he;
+		  });
 
-          if (!isHoliday) {
-            const dateStr = cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" });
-            for (let i = 0; i < lessons; i++) {
-              res.push(dateStr);
-            }
-          }
-        }
-        cur.setDate(cur.getDate() + 1);
-        cur.setHours(0, 0, 0, 0);
-      }
+		  if (!isHoliday) {
+			const dateStr = cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" });
+			for (let i = 0; i < lessons; i++) {
+			  res.push(dateStr);
+			}
+		  }
+		}
+		cur.setDate(cur.getDate() + 1);
+		cur.setHours(0, 0, 0, 0);
+	  }
 
-      if (res.length === 0) {
-        document.getElementById("result").innerHTML = `
-          <p>Не знайдено жодної дати для вибраних параметрів!</p>
-          <p><br>Автор: Ігор Шуляк</p>
-          <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
-          <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-          <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
-          </p>
-        `;
-        document.getElementById("stats-container").style.display = "none";
-        document.getElementById("action-buttons").style.display = "none";
-        return;
-      }
+	  if (res.length === 0) {
+		document.getElementById("result").innerHTML = `
+		  <p>Не знайдено жодної дати для вибраних параметрів!</p>
+		  <p><br>Автор: Ігор Шуляк</p>
+		  <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
+		  <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
+		  <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+		  </p>
+		`;
+		document.getElementById("stats-container").style.display = "none";
+		document.getElementById("action-buttons").style.display = "none";
+		return;
+	  }
 
-      const sem1 = res.filter(d => {
-        const [d1, m1, y1] = d.split(".");
-        const date = new Date(`20${y1}-${m1}-${d1}`);
-        return date <= new Date(`${start.getFullYear()}-12-31`);
-      }).length;
+	  // ✅ ВИПРАВЛЕНА ЛОГІКА РОЗРАХУНКУ СЕМЕСТРІВ
+	  const startYear = start.getFullYear();
+	  const endYear = end.getFullYear();
 
-      const sem2 = res.filter(d => {
-        const [d1, m1, y1] = d.split(".");
-        const date = new Date(`20${y1}-${m1}-${d1}`);
-        return date >= new Date(`${start.getFullYear() + 1}-01-01`);
-      }).length;
+	  // Перший семестр: вересень по грудень
+	  const sem1Start = new Date(`${startYear}-09-01`);
+	  const sem1End = new Date(`${startYear}-12-31`);
 
-      document.getElementById("s1").textContent = sem1;
-      document.getElementById("s2").textContent = sem2;
-      document.getElementById("total").textContent = res.length;
-      document.getElementById("result").textContent = res.join("\n");
-      document.getElementById("stats-container").style.display = "grid";
-      document.getElementById("action-buttons").style.display = "flex";
-    }
+	  // Другий семестр: січень по травень
+	  const sem2Start = new Date(`${endYear}-01-01`);
+	  const sem2End = new Date(`${endYear}-05-31`);
+
+	  const sem1 = res.filter(d => {
+		const [day, month, year] = d.split(".");
+		const date = new Date(`20${year}-${month}-${day}`); // припускаємо, що 20xx
+		return date >= sem1Start && date <= sem1End && date >= start && date <= end;
+	  }).length;
+
+	  const sem2 = res.filter(d => {
+		const [day, month, year] = d.split(".");
+		const date = new Date(`20${year}-${month}-${day}`);
+		return date >= sem2Start && date <= sem2End && date >= start && date <= end;
+	  }).length;
+
+	  // Вивід у DOM
+	  document.getElementById("s1").textContent = sem1;
+	  document.getElementById("s2").textContent = sem2;
+	  document.getElementById("total").textContent = parseInt(document.getElementById("s1").textContent) + parseInt(document.getElementById("s2").textContent);
+	  document.getElementById("result").textContent = res.join("\n");
+	  document.getElementById("stats-container").style.display = "grid";
+	  document.getElementById("action-buttons").style.display = "flex";
+	}
 
     function copy() {
       const text = document.getElementById("result").innerText;
