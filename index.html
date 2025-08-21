@@ -689,7 +689,7 @@
           </div>
         </div>
 
-        <button class="btn generate-btn" onclick="generate()">✨ Генерувати</button>
+
       </div>
 
       <div class="right-panel">
@@ -711,9 +711,9 @@
           </div>
           <div id="result">
             <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
-            <p>Натисніть "Генерувати" для отримання дат.</p>
-            <p><br>Автор: Ігор Шуляк</p>
-            <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
+            <p><br>Автор: Ігор Шуляк
+            Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> 
+			або шукайте в Телеграм @ittchr</p>
 <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
             <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
             </p>
@@ -729,6 +729,7 @@
 
   <script>
     let holidays = [];
+    let hasGeneratedBefore = false; // Флаг для відстеження чи було згенеровано
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -739,17 +740,23 @@
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year}-09-01`;
       document.getElementById("end-date").value = `${year}-12-31`;
+      // Автоматично регенерувати
+      generate();
     }
 
     function setSemester2() {
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year + 1}-01-01`;
       document.getElementById("end-date").value = `${year + 1}-05-31`;
+      // Автоматично регенерувати
+      generate();
     }
 
     function setFullYear() {
       document.getElementById("start-date").value = `${currentYear}-09-01`;
       document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
+      // Автоматично регенерувати
+      generate();
     }
 
     function cycleLesson(el) {
@@ -757,6 +764,9 @@
       const current = parseInt(numberSpan.textContent);
       const next = current === 3 ? 0 : current + 1;
       numberSpan.textContent = next;
+      
+      // Автоматично регенерувати
+      generate();
     }
 
     function addHoliday() {
@@ -774,16 +784,44 @@
       document.getElementById("hs").value = "";
       document.getElementById("he").value = "";
       showNotification("Додано!", "success");
+      
+      // Автоматично регенерувати
+      generate();
     }
 
     function removeHoliday(btn) {
       const text = btn.parentElement.querySelector('span').textContent;
       const [s, e] = text.split(" — ");
-      const hs = new Date(s);
-      const he = new Date(e);
-      holidays = holidays.filter(h => !(h.s.getTime() === hs.getTime() && h.e.getTime() === he.getTime()));
+      
+      // Парсимо дати з української локалі
+      const dateParts1 = s.split('.');
+      const dateParts2 = e.split('.');
+      
+      // Створюємо дати у форматі YYYY-MM-DD для порівняння
+      const hs = new Date(dateParts1[2], dateParts1[1] - 1, dateParts1[0]);
+      const he = new Date(dateParts2[2], dateParts2[1] - 1, dateParts2[0]);
+      
+      // Видаляємо з масиву holidays
+      holidays = holidays.filter(h => {
+        const hStart = new Date(h.s.getTime());
+        const hEnd = new Date(h.e.getTime());
+        hStart.setHours(0, 0, 0, 0);
+        hEnd.setHours(0, 0, 0, 0);
+        hs.setHours(0, 0, 0, 0);
+        he.setHours(0, 0, 0, 0);
+        
+        return !(hStart.getTime() === hs.getTime() && hEnd.getTime() === he.getTime());
+      });
+      
       btn.parentElement.style.animation = 'slideOutToRight 0.2s ease-out';
-      setTimeout(() => btn.parentElement.remove(), 200);
+      setTimeout(() => {
+        btn.parentElement.remove();
+        
+        // Автоматично регенерувати після видалення
+        generate();
+      }, 200);
+      
+      showNotification("Видалено!", "success");
     }
 
     function fmt(d) {
@@ -815,6 +853,24 @@
       return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
     }
 
+    // Додаємо слухачі подій для автоматичної регенерації при зміні дат
+    document.getElementById('start-date').addEventListener('change', function() {
+      generate();
+    });
+    
+    document.getElementById('end-date').addEventListener('change', function() {
+      generate();
+    });
+
+    // Додаємо слухачі для чекбоксів днів тижня - автоматично генеруємо при зміні
+    const dayCheckboxes = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    dayCheckboxes.forEach(day => {
+      document.getElementById(`cb-${day}`).addEventListener('change', function() {
+        // Запускаємо генерацію при будь-якій зміні чекбоксів
+        generate();
+      });
+    });
+
     function generate() {
       const start = new Date(document.getElementById("start-date").value);
       const end = new Date(document.getElementById("end-date").value);
@@ -839,7 +895,18 @@
       });
 
       if (Object.keys(selected).length === 0) {
-        showNotification("Оберіть хоча б один день!", "error");
+        // Якщо немає вибраних днів, очищаємо результат
+        document.getElementById("result").innerHTML = `
+          <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
+          <p><br>Автор: Ігор Шуляк
+          Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> 
+		  або шукайте в Телеграм @ittchr</p>
+          <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
+          <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+          </p>
+        `;
+        document.getElementById("stats-container").style.display = "none";
+        document.getElementById("action-buttons").style.display = "none";
         return;
       }
 
@@ -881,7 +948,16 @@
       }
 
       if (res.length === 0) {
-        showNotification("Не знайдено жодної дати!", "error");
+        document.getElementById("result").innerHTML = `
+          <p>Не знайдено жодної дати для вибраних параметрів!</p>
+          <p><br>Автор: Ігор Шуляк</p>
+          <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
+          <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
+          <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+          </p>
+        `;
+        document.getElementById("stats-container").style.display = "none";
+        document.getElementById("action-buttons").style.display = "none";
         return;
       }
 
@@ -903,7 +979,6 @@
       document.getElementById("result").textContent = res.join("\n");
       document.getElementById("stats-container").style.display = "grid";
       document.getElementById("action-buttons").style.display = "flex";
-      showNotification("Готово!", "success");
     }
 
     function copy() {
