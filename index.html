@@ -3,9 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  
+  <!-- Основний колір теми -->
+  <meta name="theme-color" content="#00a8cc">
+  
   <title>Календар для вчителя</title>
 
-  <!-- Favicon -->
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Основні іконки -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  
+  <!-- Стандартні favicon -->
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -13,11 +24,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-  <!-- Підключення browserconfig.xml для Windows -->
-  <link rel="browserconfig" href="/browserconfig.xml">
+  <!-- iOS PWA налаштування -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Календар вчителя">
 
-  <!-- Manifest (для PWA) -->
-  <link rel="manifest" href="/site.webmanifest">
+  <!-- Windows налаштування -->
+  <link rel="browserconfig" href="/browserconfig.xml">
 
   <style>
     * {
@@ -729,7 +742,7 @@
 
   <script>
     let holidays = [];
-    let hasGeneratedBefore = false; // Флаг для відстеження чи було згенеровано
+    let hasGeneratedBefore = false;
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -740,7 +753,6 @@
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year}-09-01`;
       document.getElementById("end-date").value = `${year}-12-31`;
-      // Автоматично регенерувати
       generate();
     }
 
@@ -748,14 +760,12 @@
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year + 1}-01-01`;
       document.getElementById("end-date").value = `${year + 1}-05-31`;
-      // Автоматично регенерувати
       generate();
     }
 
     function setFullYear() {
       document.getElementById("start-date").value = `${currentYear}-09-01`;
       document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
-      // Автоматично регенерувати
       generate();
     }
 
@@ -765,7 +775,6 @@
       const next = current === 3 ? 0 : current + 1;
       numberSpan.textContent = next;
       
-      // Автоматично регенерувати
       generate();
     }
 
@@ -785,7 +794,6 @@
       document.getElementById("he").value = "";
       showNotification("Додано!", "success");
       
-      // Автоматично регенерувати
       generate();
     }
 
@@ -793,15 +801,12 @@
       const text = btn.parentElement.querySelector('span').textContent;
       const [s, e] = text.split(" — ");
       
-      // Парсимо дати з української локалі
       const dateParts1 = s.split('.');
       const dateParts2 = e.split('.');
       
-      // Створюємо дати у форматі YYYY-MM-DD для порівняння
       const hs = new Date(dateParts1[2], dateParts1[1] - 1, dateParts1[0]);
       const he = new Date(dateParts2[2], dateParts2[1] - 1, dateParts2[0]);
       
-      // Видаляємо з масиву holidays
       holidays = holidays.filter(h => {
         const hStart = new Date(h.s.getTime());
         const hEnd = new Date(h.e.getTime());
@@ -816,8 +821,6 @@
       btn.parentElement.style.animation = 'slideOutToRight 0.2s ease-out';
       setTimeout(() => {
         btn.parentElement.remove();
-        
-        // Автоматично регенерувати після видалення
         generate();
       }, 200);
       
@@ -853,7 +856,6 @@
       return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
     }
 
-    // Додаємо слухачі подій для автоматичної регенерації при зміні дат
     document.getElementById('start-date').addEventListener('change', function() {
       generate();
     });
@@ -862,11 +864,9 @@
       generate();
     });
 
-    // Додаємо слухачі для чекбоксів днів тижня - автоматично генеруємо при зміні
     const dayCheckboxes = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     dayCheckboxes.forEach(day => {
       document.getElementById(`cb-${day}`).addEventListener('change', function() {
-        // Запускаємо генерацію при будь-якій зміні чекбоксів
         generate();
       });
     });
@@ -895,7 +895,6 @@
 	  });
 
 	  if (Object.keys(selected).length === 0) {
-		// Якщо немає вибраних днів, очищаємо результат
 		document.getElementById("result").innerHTML = `
 		  <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
 		  <p><br>Автор: Ігор Шуляк
@@ -961,21 +960,18 @@
 		return;
 	  }
 
-	  // ✅ ВИПРАВЛЕНА ЛОГІКА РОЗРАХУНКУ СЕМЕСТРІВ
 	  const startYear = start.getFullYear();
 	  const endYear = end.getFullYear();
 
-	  // Перший семестр: вересень по грудень
 	  const sem1Start = new Date(`${startYear}-09-01`);
 	  const sem1End = new Date(`${startYear}-12-31`);
 
-	  // Другий семестр: січень по травень
 	  const sem2Start = new Date(`${endYear}-01-01`);
 	  const sem2End = new Date(`${endYear}-05-31`);
 
 	  const sem1 = res.filter(d => {
 		const [day, month, year] = d.split(".");
-		const date = new Date(`20${year}-${month}-${day}`); // припускаємо, що 20xx
+		const date = new Date(`20${year}-${month}-${day}`);
 		return date >= sem1Start && date <= sem1End && date >= start && date <= end;
 	  }).length;
 
@@ -985,7 +981,6 @@
 		return date >= sem2Start && date <= sem2End && date >= start && date <= end;
 	  }).length;
 
-	  // Вивід у DOM
 	  document.getElementById("s1").textContent = sem1;
 	  document.getElementById("s2").textContent = sem2;
 	  document.getElementById("total").textContent = parseInt(document.getElementById("s1").textContent) + parseInt(document.getElementById("s2").textContent);
