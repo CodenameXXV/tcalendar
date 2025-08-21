@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Календар для вчителя</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <!-- Підключення browserconfig.xml для Windows -->
+  <link rel="browserconfig" href="/browserconfig.xml">
+
+  <!-- Manifest (для PWA) -->
+  <link rel="manifest" href="/site.webmanifest">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #314755, #26a0da);
+      min-height: 100vh;
+      padding: 10px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.6em;
+      margin-bottom: 20px;
+      color: #00a8cc;
+      font-weight: 700;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 18px;
+      border-radius: 12px;
+      border-left: 4px solid #00a8cc;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .section h3 {
+      color: #00a8cc;
+      margin-bottom: 12px;
+      font-size: 1.2em;
+      font-weight: 600;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+
+    .day-card {
+      background: #f0fdfd;
+      border: 1px solid #d0f0f0;
+      border-radius: 8px;
+      padding: 10px;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .day-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .day-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-weight: 600;
+      font-size: 0.95em;
+      margin-bottom: 6px;
+    }
+
+    .day-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #00a8cc;
+      cursor: pointer;
+    }
+
+    .lesson-toggle {
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 1.0em;
+      font-weight: 500;
+      color: #00a8cc;
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid #00a8cc;
+      border-radius: 6px;
+      padding: 3px 5px;
+      background-color: #f8fdff;
+      transition: all 0.2s ease;
+      height: 26px;
+    }
+
+    .lesson-toggle:hover {
+      background-color: #e6f7fb;
+      transform: translateY(-1px);
+    }
+
+    .lesson-toggle .label {
+      font-size: 0.75em;
+      white-space: nowrap;
+    }
+
+    .lesson-toggle .number {
+      font-size: 13px;
+      font-weight: 600;
+      width: 16px;
+      text-align: center;
+    }
+
+    .quick-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 4px 0;
+      scrollbar-width: none;
+    }
+
+    .quick-buttons::-webkit-scrollbar {
+      display: none;
+    }
+
+    .quick-btn {
+      flex: 0 0 auto;
+      background-color: #00a8cc;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85em;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .quick-btn:hover {
+      background-color: #008fa3;
+    }
+
+    .period-holidays-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .period-box, .holidays-box {
+      padding: 14px;
+      background: #f8fdff;
+      border-radius: 10px;
+      border: 1px solid #d0f0f0;
+    }
+
+    .date-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .date-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .date-group label {
+      font-weight: 600;
+      color: #00a8cc;
+      font-size: 0.9em;
+    }
+
+    input[type="date"] {
+      padding: 9px;
+      border: 1px solid #d0f0f0;
+      border-radius: 8px;
+      font-size: 0.9em;
+      background-color: #fff;
+    }
+
+    input[type="date"]:focus {
+      outline: none;
+      border-color: #00a8cc;
+      box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.1);
+    }
+
+    .holiday-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .btn {
+      background-color: #00a8cc;
+      color: white;
+      border: none;
+      padding: 9px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: #008fa3;
+    }
+
+    .generate-btn {
+      background-color: #3182ce;
+      color: white;
+      padding: 8px 20px;
+      border: none;
+      font-size: 1.05em;
+      font-weight: 600;
+      border-radius: 10px;
+      margin: 12px auto 0;
+      display: block;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .generate-btn:hover {
+      background-color: #2c5aa0;
+    }
+
+    .holiday-item {
+      background: #e6fcff;
+      padding: 8px 10px;
+      margin: 5px 0;
+      border-left: 3px solid #00a8cc;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85em;
+    }
+
+    .holiday-item:hover {
+      background: #d0f0f0;
+    }
+
+    .delete-btn {
+      background-color: #d9534f;
+      border: none;
+      color: white;
+      padding: 5px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
+
+    .delete-btn:hover {
+      background-color: #c12e2a;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .stat-card {
+      background-color: #00a8cc;
+      color: white;
+      padding: 6px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.85em;
+    }
+
+    .stat-number {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+
+    #result {
+      background: white;
+      color: #333;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      line-height: 1.5;
+      white-space: pre-line;
+      max-height: auto;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .copy-btn { background-color: #28a745; }
+    .copy-btn:hover { background-color: #218838; }
+
+    .word-btn { background-color: #3182ce; }
+    .word-btn:hover { background-color: #2c5aa0; }
+
+    .notification {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      max-width: 280px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.95em;
+      background-color: #28a745;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      animation: slideInFromRight 0.3s ease-out;
+      transition: opacity 0.3s ease;
+    }
+
+    @keyframes slideInFromRight {
+      from { opacity: 0; transform: translateX(100px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideOutToRight {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(100px); }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+        font-size: 15px;
+      }
+
+      .container {
+        padding: 16px;
+        border-radius: 14px;
+      }
+
+      h1 {
+        font-size: 1.5em;
+        margin-bottom: 18px;
+      }
+
+      .main-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .section {
+        padding: 16px;
+        border-radius: 12px;
+      }
+
+      .section h3 {
+        font-size: 1.15em;
+        margin-bottom: 10px;
+      }
+
+      .days-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+
+      .day-card {
+        padding: 8px;
+      }
+
+      .day-label {
+        font-size: 0.9em;
+        gap: 3px;
+      }
+
+      .day-label input[type="checkbox"] {
+        width: 15px;
+        height: 15px;
+      }
+
+      .lesson-toggle {
+        font-size: 0.75em;
+        gap: 4px;
+        padding: 3px 4px;
+        height: 24px;
+      }
+
+      .lesson-toggle .label {
+        font-size: 0.7em;
+      }
+
+      .quick-buttons {
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+
+      .quick-btn {
+        padding: 8px 10px;
+        font-size: 0.8em;
+      }
+
+      .period-holidays-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .date-inputs {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .holiday-inputs {
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+      }
+
+      .btn {
+        font-size: 0.85em;
+        padding: 8px 12px;
+      }
+
+      .generate-btn {
+        padding: 12px;
+        font-size: 1em;
+        margin-top: 14px;
+      }
+
+      .stats {
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+
+      .stat-card {
+        padding: 6px;
+        font-size: 0.8em;
+      }
+
+      .stat-number {
+        font-size: 1em;
+      }
+
+      #result {
+        font-size: 0.85em;
+        max-height: 200px;
+        padding: 12px;
+      }
+
+      .action-buttons {
+        gap: 8px;
+        flex-direction: column;
+      }
+
+      .copy-btn, .word-btn {
+        padding: 10px;
+        font-size: 0.9em;
+      }
+
+      .holiday-item {
+        font-size: 0.8em;
+        padding: 7px 10px;
+      }
+
+      .delete-btn {
+        font-size: 0.8em;
+        padding: 4px 7px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 8px;
+        font-size: 14px;
+      }
+
+      .container {
+        padding: 12px;
+        border-radius: 12px;
+      }
+
+      .quick-btn {
+        font-size: 0.78em;
+        padding: 6px 9px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📚 Календар для вчителя</h1>
+
+    <div class="main-grid">
+      <div class="left-panel">
+        <div class="section">
+          <h3>📅 Дні тижня</h3>
+          <div class="days-grid">
+            <!-- Понеділок -->
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Пн">
+                <span>Пн</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+            </div>
+
+            <!-- Вівторок -->
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Вт">
+                <span>Вт</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+            </div>
+
+            <!-- Середа -->
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Ср">
+                <span>Ср</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+            </div>
+
+            <!-- Четвер -->
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Чт">
+                <span>Чт</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+            </div>
+
+            <!-- П'ятниця -->
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Пт">
+                <span>Пт</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+            </div>
+
+            <!-- Субота -->
+            <div class="day-card">
+              <div class="day-label">
+                <input type="checkbox" id="cb-Сб">
+                <span>Сб</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator">
+                <span class="label">1й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+              <div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator">
+                <span class="label">2й тиж/ур:</span>
+                <span class="number">1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>📆 Період та канікули</h3>
+          <div class="quick-buttons">
+            <button class="quick-btn" onclick="setSemester1()">📘 I семестр</button>
+            <button class="quick-btn" onclick="setSemester2()">📘 II семестр</button>
+            <button class="quick-btn" onclick="setFullYear()">📘 Весь рік</button>
+          </div>
+          <div class="period-holidays-grid">
+            <div class="period-box">
+              <div class="date-inputs">
+                <div class="date-group">
+                  <label>Від:</label>
+                  <input type="date" id="start-date">
+                </div>
+                <div class="date-group">
+                  <label>До:</label>
+                  <input type="date" id="end-date">
+                </div>
+              </div>
+            </div>
+            <div class="holidays-box">
+              <h4 style="color: #00a8cc; margin-bottom: 8px; font-size: 0.95em;">🏖️ Канікули</h4>
+              <div class="holiday-inputs">
+                <input type="date" id="hs" placeholder="Початок">
+                <input type="date" id="he" placeholder="Кінець">
+                <button class="btn" onclick="addHoliday()">➕</button>
+              </div>
+              <div id="holidays-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn generate-btn" onclick="generate()">✨ Генерувати</button>
+      </div>
+
+      <div class="right-panel">
+        <div class="section">
+          <h3>📋 Згенеровані дати</h3>
+          <div id="stats-container" style="display: none;" class="stats">
+            <div class="stat-card">
+              <span class="stat-number" id="s1">0</span> <br>
+              <span class="stat-label">1-й семестр</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="s2">0</span> <br>
+              <span class="stat-label">2-й семестр</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="total">0</span> <br>
+              <span class="stat-label">Всього</span>
+            </div>
+          </div>
+          <div id="result">
+            <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
+            <p>Натисніть "Генерувати" для отримання дат.</p>
+            <p><br>Автор: Ігор Шуляк</p>
+            <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
+<p style="text-align: center; font-weight: bold;">Спробуйте зручний:
+            <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+            </p>
+          </div>
+          <div class="action-buttons" id="action-buttons" style="display: none;">
+            <button class="btn copy-btn" onclick="copy()">📋 Копіювати</button>
+            <button class="btn word-btn" onclick="word()">📄 Word</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let holidays = [];
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    document.getElementById("start-date").value = `${currentYear}-09-01`;
+    document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
+
+    function setSemester1() {
+      const year = new Date().getFullYear();
+      document.getElementById("start-date").value = `${year}-09-01`;
+      document.getElementById("end-date").value = `${year}-12-31`;
+    }
+
+    function setSemester2() {
+      const year = new Date().getFullYear();
+      document.getElementById("start-date").value = `${year + 1}-01-01`;
+      document.getElementById("end-date").value = `${year + 1}-05-31`;
+    }
+
+    function setFullYear() {
+      document.getElementById("start-date").value = `${currentYear}-09-01`;
+      document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
+    }
+
+    function cycleLesson(el) {
+      const numberSpan = el.querySelector('.number');
+      const current = parseInt(numberSpan.textContent);
+      const next = current === 3 ? 0 : current + 1;
+      numberSpan.textContent = next;
+    }
+
+    function addHoliday() {
+      const s = document.getElementById("hs").value;
+      const e = document.getElementById("he").value;
+      if (!s || !e) {
+        showNotification("Оберіть дати!", "error");
+        return;
+      }
+      const item = document.createElement("div");
+      item.className = "holiday-item";
+      item.innerHTML = `<span>${fmt(s)} — ${fmt(e)}</span><button class="delete-btn" onclick="removeHoliday(this)">×</button>`;
+      document.getElementById("holidays-list").appendChild(item);
+      holidays.push({ s: new Date(s), e: new Date(e) });
+      document.getElementById("hs").value = "";
+      document.getElementById("he").value = "";
+      showNotification("Додано!", "success");
+    }
+
+    function removeHoliday(btn) {
+      const text = btn.parentElement.querySelector('span').textContent;
+      const [s, e] = text.split(" — ");
+      const hs = new Date(s);
+      const he = new Date(e);
+      holidays = holidays.filter(h => !(h.s.getTime() === hs.getTime() && h.e.getTime() === he.getTime()));
+      btn.parentElement.style.animation = 'slideOutToRight 0.2s ease-out';
+      setTimeout(() => btn.parentElement.remove(), 200);
+    }
+
+    function fmt(d) {
+      return new Date(d).toLocaleDateString("uk");
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement("div");
+      notification.className = "notification";
+      notification.style.backgroundColor = type === 'success' ? '#28a745' : '#d9534f';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          if (notification.parentElement) {
+            notification.remove();
+          }
+        }, 300);
+      }, 2000);
+    }
+
+    function getWeek(date) {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+      const yearStart = new Date(d.getFullYear(), 0, 1);
+      return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+    }
+
+    function generate() {
+      const start = new Date(document.getElementById("start-date").value);
+      const end = new Date(document.getElementById("end-date").value);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
+      if (start > end) {
+        showNotification("Неправильні дати!", "error");
+        return;
+      }
+
+      const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+      const selected = {};
+
+      days.forEach(d => {
+        if (document.getElementById(`cb-${d}`).checked) {
+          const card = document.querySelector(`#cb-${d}`).closest('.day-card');
+          const num = parseInt(card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent);
+          const den = parseInt(card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent);
+          selected[d] = { numerator: num, denominator: den };
+        }
+      });
+
+      if (Object.keys(selected).length === 0) {
+        showNotification("Оберіть хоча б один день!", "error");
+        return;
+      }
+
+      const res = [];
+      let cur = new Date(start);
+      cur.setHours(0, 0, 0, 0);
+      const startWeek = getWeek(cur);
+
+      while (cur <= end) {
+        const dayIndex = (cur.getDay() + 6) % 7;
+        const dayName = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][dayIndex];
+
+        if (selected[dayName]) {
+          const { numerator, denominator } = selected[dayName];
+          const weekDiff = (getWeek(cur) - startWeek) % 2;
+          const lessons = weekDiff === 0 ? numerator : denominator;
+
+          if (lessons === 0) {
+            cur.setDate(cur.getDate() + 1);
+            cur.setHours(0, 0, 0, 0);
+            continue;
+          }
+
+          const isHoliday = holidays.some(h => {
+            const hs = new Date(h.s); hs.setHours(0,0,0,0);
+            const he = new Date(h.e); he.setHours(0,0,0,0);
+            return cur >= hs && cur <= he;
+          });
+
+          if (!isHoliday) {
+            const dateStr = cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" });
+            for (let i = 0; i < lessons; i++) {
+              res.push(dateStr);
+            }
+          }
+        }
+        cur.setDate(cur.getDate() + 1);
+        cur.setHours(0, 0, 0, 0);
+      }
+
+      if (res.length === 0) {
+        showNotification("Не знайдено жодної дати!", "error");
+        return;
+      }
+
+      const sem1 = res.filter(d => {
+        const [d1, m1, y1] = d.split(".");
+        const date = new Date(`20${y1}-${m1}-${d1}`);
+        return date <= new Date(`${start.getFullYear()}-12-31`);
+      }).length;
+
+      const sem2 = res.filter(d => {
+        const [d1, m1, y1] = d.split(".");
+        const date = new Date(`20${y1}-${m1}-${d1}`);
+        return date >= new Date(`${start.getFullYear() + 1}-01-01`);
+      }).length;
+
+      document.getElementById("s1").textContent = sem1;
+      document.getElementById("s2").textContent = sem2;
+      document.getElementById("total").textContent = res.length;
+      document.getElementById("result").textContent = res.join("\n");
+      document.getElementById("stats-container").style.display = "grid";
+      document.getElementById("action-buttons").style.display = "flex";
+      showNotification("Готово!", "success");
+    }
+
+    function copy() {
+      const text = document.getElementById("result").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showNotification("Скопійовано!", "success");
+      }).catch(() => {
+        showNotification("Помилка", "error");
+      });
+    }
+
+    function word() {
+      const text = document.getElementById("result").innerText;
+      const total = document.getElementById("total").textContent;
+      const sem1 = document.getElementById("s1").textContent;
+      const sem2 = document.getElementById("s2").textContent;
+
+      const htmlContent = `
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Календар уроків</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #00a8cc; text-align: center; }
+            .stats { background: #f0fdfd; padding: 12px; border-radius: 8px; margin: 15px 0; border: 1px solid #d0f0f0; font-size: 0.9em; }
+            .dates { background: white; padding: 20px; border: 1px solid #ddd; }
+          </style>
+        </head>
+        <body>
+          <h1>📚 Календар уроків</h1>
+          <div class="stats">
+            <p><strong>1-й семестр:</strong> ${sem1}</p>
+            <p><strong>2-й семестр:</strong> ${sem2}</p>
+            <p><strong>Всього:</strong> ${total}</p>
+          </div>
+          <div class="dates">
+            <h3>Дати уроків:</h3>
+            <pre>${text}</pre>
+          </div>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob([htmlContent], { type: "application/msword" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "календар_уроків.doc";
+      a.click();
+      URL.revokeObjectURL(url);
+      showNotification("Файл завантажено!", "success");
+    }
+  </script>
+</body>
+</html>
