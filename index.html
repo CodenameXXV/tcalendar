@@ -3,20 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  
-  <!-- Основний колір теми -->
-  <meta name="theme-color" content="#00a8cc">
-  
   <title>Календар для вчителя</title>
 
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json">
-  
-  <!-- Основні іконки -->
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  
-  <!-- Стандартні favicon -->
+  <!-- Favicon -->
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -24,13 +13,11 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-  <!-- iOS PWA налаштування -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Календар вчителя">
-
-  <!-- Windows налаштування -->
+  <!-- Підключення browserconfig.xml для Windows -->
   <link rel="browserconfig" href="/browserconfig.xml">
+
+  <!-- Manifest (для PWA) -->
+  <link rel="manifest" href="/site.webmanifest">
 
   <style>
     * {
@@ -702,7 +689,7 @@
           </div>
         </div>
 
-
+        <button class="btn generate-btn" onclick="generate()">✨ Генерувати</button>
       </div>
 
       <div class="right-panel">
@@ -724,9 +711,9 @@
           </div>
           <div id="result">
             <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
-            <p><br>Автор: Ігор Шуляк
-            Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> 
-			або шукайте в Телеграм @ittchr</p>
+            <p>Натисніть "Генерувати" для отримання дат.</p>
+            <p><br>Автор: Ігор Шуляк</p>
+            <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
 <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
             <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
             </p>
@@ -742,7 +729,6 @@
 
   <script>
     let holidays = [];
-    let hasGeneratedBefore = false;
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -753,20 +739,17 @@
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year}-09-01`;
       document.getElementById("end-date").value = `${year}-12-31`;
-      generate();
     }
 
     function setSemester2() {
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year + 1}-01-01`;
       document.getElementById("end-date").value = `${year + 1}-05-31`;
-      generate();
     }
 
     function setFullYear() {
       document.getElementById("start-date").value = `${currentYear}-09-01`;
       document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
-      generate();
     }
 
     function cycleLesson(el) {
@@ -774,8 +757,6 @@
       const current = parseInt(numberSpan.textContent);
       const next = current === 3 ? 0 : current + 1;
       numberSpan.textContent = next;
-      
-      generate();
     }
 
     function addHoliday() {
@@ -793,38 +774,16 @@
       document.getElementById("hs").value = "";
       document.getElementById("he").value = "";
       showNotification("Додано!", "success");
-      
-      generate();
     }
 
     function removeHoliday(btn) {
       const text = btn.parentElement.querySelector('span').textContent;
       const [s, e] = text.split(" — ");
-      
-      const dateParts1 = s.split('.');
-      const dateParts2 = e.split('.');
-      
-      const hs = new Date(dateParts1[2], dateParts1[1] - 1, dateParts1[0]);
-      const he = new Date(dateParts2[2], dateParts2[1] - 1, dateParts2[0]);
-      
-      holidays = holidays.filter(h => {
-        const hStart = new Date(h.s.getTime());
-        const hEnd = new Date(h.e.getTime());
-        hStart.setHours(0, 0, 0, 0);
-        hEnd.setHours(0, 0, 0, 0);
-        hs.setHours(0, 0, 0, 0);
-        he.setHours(0, 0, 0, 0);
-        
-        return !(hStart.getTime() === hs.getTime() && hEnd.getTime() === he.getTime());
-      });
-      
+      const hs = new Date(s);
+      const he = new Date(e);
+      holidays = holidays.filter(h => !(h.s.getTime() === hs.getTime() && h.e.getTime() === he.getTime()));
       btn.parentElement.style.animation = 'slideOutToRight 0.2s ease-out';
-      setTimeout(() => {
-        btn.parentElement.remove();
-        generate();
-      }, 200);
-      
-      showNotification("Видалено!", "success");
+      setTimeout(() => btn.parentElement.remove(), 200);
     }
 
     function fmt(d) {
@@ -856,138 +815,96 @@
       return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
     }
 
-    document.getElementById('start-date').addEventListener('change', function() {
-      generate();
-    });
-    
-    document.getElementById('end-date').addEventListener('change', function() {
-      generate();
-    });
+    function generate() {
+      const start = new Date(document.getElementById("start-date").value);
+      const end = new Date(document.getElementById("end-date").value);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
 
-    const dayCheckboxes = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    dayCheckboxes.forEach(day => {
-      document.getElementById(`cb-${day}`).addEventListener('change', function() {
-        generate();
+      if (start > end) {
+        showNotification("Неправильні дати!", "error");
+        return;
+      }
+
+      const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+      const selected = {};
+
+      days.forEach(d => {
+        if (document.getElementById(`cb-${d}`).checked) {
+          const card = document.querySelector(`#cb-${d}`).closest('.day-card');
+          const num = parseInt(card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent);
+          const den = parseInt(card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent);
+          selected[d] = { numerator: num, denominator: den };
+        }
       });
-    });
 
-	function generate() {
-	  const start = new Date(document.getElementById("start-date").value);
-	  const end = new Date(document.getElementById("end-date").value);
-	  start.setHours(0, 0, 0, 0);
-	  end.setHours(0, 0, 0, 0);
+      if (Object.keys(selected).length === 0) {
+        showNotification("Оберіть хоча б один день!", "error");
+        return;
+      }
 
-	  if (start > end) {
-		showNotification("Неправильні дати!", "error");
-		return;
-	  }
+      const res = [];
+      let cur = new Date(start);
+      cur.setHours(0, 0, 0, 0);
+      const startWeek = getWeek(cur);
 
-	  const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-	  const selected = {};
+      while (cur <= end) {
+        const dayIndex = (cur.getDay() + 6) % 7;
+        const dayName = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][dayIndex];
 
-	  days.forEach(d => {
-		if (document.getElementById(`cb-${d}`).checked) {
-		  const card = document.querySelector(`#cb-${d}`).closest('.day-card');
-		  const num = parseInt(card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent);
-		  const den = parseInt(card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent);
-		  selected[d] = { numerator: num, denominator: den };
-		}
-	  });
+        if (selected[dayName]) {
+          const { numerator, denominator } = selected[dayName];
+          const weekDiff = (getWeek(cur) - startWeek) % 2;
+          const lessons = weekDiff === 0 ? numerator : denominator;
 
-	  if (Object.keys(selected).length === 0) {
-		document.getElementById("result").innerHTML = `
-		  <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
-		  <p><br>Автор: Ігор Шуляк
-		  Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> 
-		  або шукайте в Телеграм @ittchr</p>
-		  <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-		  <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
-		  </p>
-		`;
-		document.getElementById("stats-container").style.display = "none";
-		document.getElementById("action-buttons").style.display = "none";
-		return;
-	  }
+          if (lessons === 0) {
+            cur.setDate(cur.getDate() + 1);
+            cur.setHours(0, 0, 0, 0);
+            continue;
+          }
 
-	  const res = [];
-	  let cur = new Date(start);
-	  cur.setHours(0, 0, 0, 0);
-	  const startWeek = getWeek(cur);
+          const isHoliday = holidays.some(h => {
+            const hs = new Date(h.s); hs.setHours(0,0,0,0);
+            const he = new Date(h.e); he.setHours(0,0,0,0);
+            return cur >= hs && cur <= he;
+          });
 
-	  while (cur <= end) {
-		const dayIndex = (cur.getDay() + 6) % 7;
-		const dayName = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][dayIndex];
+          if (!isHoliday) {
+            const dateStr = cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" });
+            for (let i = 0; i < lessons; i++) {
+              res.push(dateStr);
+            }
+          }
+        }
+        cur.setDate(cur.getDate() + 1);
+        cur.setHours(0, 0, 0, 0);
+      }
 
-		if (selected[dayName]) {
-		  const { numerator, denominator } = selected[dayName];
-		  const weekDiff = (getWeek(cur) - startWeek) % 2;
-		  const lessons = weekDiff === 0 ? numerator : denominator;
+      if (res.length === 0) {
+        showNotification("Не знайдено жодної дати!", "error");
+        return;
+      }
 
-		  if (lessons === 0) {
-			cur.setDate(cur.getDate() + 1);
-			cur.setHours(0, 0, 0, 0);
-			continue;
-		  }
+      const sem1 = res.filter(d => {
+        const [d1, m1, y1] = d.split(".");
+        const date = new Date(`20${y1}-${m1}-${d1}`);
+        return date <= new Date(`${start.getFullYear()}-12-31`);
+      }).length;
 
-		  const isHoliday = holidays.some(h => {
-			const hs = new Date(h.s); hs.setHours(0,0,0,0);
-			const he = new Date(h.e); he.setHours(0,0,0,0);
-			return cur >= hs && cur <= he;
-		  });
+      const sem2 = res.filter(d => {
+        const [d1, m1, y1] = d.split(".");
+        const date = new Date(`20${y1}-${m1}-${d1}`);
+        return date >= new Date(`${start.getFullYear() + 1}-01-01`);
+      }).length;
 
-		  if (!isHoliday) {
-			const dateStr = cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" });
-			for (let i = 0; i < lessons; i++) {
-			  res.push(dateStr);
-			}
-		  }
-		}
-		cur.setDate(cur.getDate() + 1);
-		cur.setHours(0, 0, 0, 0);
-	  }
-
-	  if (res.length === 0) {
-		document.getElementById("result").innerHTML = `
-		  <p>Не знайдено жодної дати для вибраних параметрів!</p>
-		  <p><br>Автор: Ігор Шуляк</p>
-		  <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
-		  <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-		  <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
-		  </p>
-		`;
-		document.getElementById("stats-container").style.display = "none";
-		document.getElementById("action-buttons").style.display = "none";
-		return;
-	  }
-
-	  const startYear = start.getFullYear();
-	  const endYear = end.getFullYear();
-
-	  const sem1Start = new Date(`${startYear}-09-01`);
-	  const sem1End = new Date(`${startYear}-12-31`);
-
-	  const sem2Start = new Date(`${endYear}-01-01`);
-	  const sem2End = new Date(`${endYear}-05-31`);
-
-	  const sem1 = res.filter(d => {
-		const [day, month, year] = d.split(".");
-		const date = new Date(`20${year}-${month}-${day}`);
-		return date >= sem1Start && date <= sem1End && date >= start && date <= end;
-	  }).length;
-
-	  const sem2 = res.filter(d => {
-		const [day, month, year] = d.split(".");
-		const date = new Date(`20${year}-${month}-${day}`);
-		return date >= sem2Start && date <= sem2End && date >= start && date <= end;
-	  }).length;
-
-	  document.getElementById("s1").textContent = sem1;
-	  document.getElementById("s2").textContent = sem2;
-	  document.getElementById("total").textContent = parseInt(document.getElementById("s1").textContent) + parseInt(document.getElementById("s2").textContent);
-	  document.getElementById("result").textContent = res.join("\n");
-	  document.getElementById("stats-container").style.display = "grid";
-	  document.getElementById("action-buttons").style.display = "flex";
-	}
+      document.getElementById("s1").textContent = sem1;
+      document.getElementById("s2").textContent = sem2;
+      document.getElementById("total").textContent = res.length;
+      document.getElementById("result").textContent = res.join("\n");
+      document.getElementById("stats-container").style.display = "grid";
+      document.getElementById("action-buttons").style.display = "flex";
+      showNotification("Готово!", "success");
+    }
 
     function copy() {
       const text = document.getElementById("result").innerText;
