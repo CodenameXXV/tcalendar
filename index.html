@@ -12,11 +12,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-
-  <!-- Підключення browserconfig.xml для Windows -->
   <link rel="browserconfig" href="/browserconfig.xml">
-
-  <!-- Manifest (для PWA) -->
   <link rel="manifest" href="/site.webmanifest">
 
   <style>
@@ -193,8 +189,24 @@
       white-space: nowrap;
     }
 
-    .quick-btn:hover {
-      background-color: #008fa3;
+    /* Активна кнопка — обрана */
+    .quick-btn.active {
+      background-color: #00a8cc;
+      color: white;
+      box-shadow: 0 0 0 2px rgba(0, 168, 204, 0.3);
+      font-weight: 700;
+    }
+
+    /* Неактивні кнопки — світліші */
+    .quick-btn.inactive {
+      background-color: #e6f7fb;
+      color: #666;
+      border: 1px solid #d0f0f0;
+      font-weight: 500;
+    }
+
+    .quick-btn.inactive:hover {
+      background-color: #d0f0f0;
     }
 
     .period-holidays-grid {
@@ -208,6 +220,13 @@
       background: #f8fdff;
       border-radius: 10px;
       border: 1px solid #d0f0f0;
+      transition: all 0.2s ease;
+    }
+
+    .period-box:hover,
+    .holidays-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     .date-inputs {
@@ -395,154 +414,13 @@
     }
 
     @media (max-width: 768px) {
-      body {
-        padding: 10px;
-        font-size: 15px;
-      }
-
-      .container {
-        padding: 16px;
-        border-radius: 14px;
-      }
-
-      h1 {
-        font-size: 1.5em;
-        margin-bottom: 18px;
-      }
-
-      .main-grid {
-        grid-template-columns: 1fr;
-        gap: 18px;
-      }
-
-      .section {
-        padding: 16px;
-        border-radius: 12px;
-      }
-
-      .section h3 {
-        font-size: 1.15em;
-        margin-bottom: 10px;
-      }
-
-      .days-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-      }
-
-      .day-card {
-        padding: 8px;
-      }
-
-      .day-label {
-        font-size: 0.9em;
-        gap: 3px;
-      }
-
-      .day-label input[type="checkbox"] {
-        width: 15px;
-        height: 15px;
-      }
-
-      .lesson-toggle {
-        font-size: 0.75em;
-        gap: 4px;
-        padding: 3px 4px;
-        height: 24px;
-      }
-
-      .lesson-toggle .label {
-        font-size: 0.7em;
-      }
-
-      .quick-buttons {
-        gap: 6px;
-        margin-bottom: 10px;
-      }
-
       .quick-btn {
         padding: 8px 10px;
         font-size: 0.8em;
       }
-
-      .period-holidays-grid {
-        grid-template-columns: 1fr;
-        gap: 14px;
-      }
-
-      .date-inputs {
-        grid-template-columns: 1fr;
-        gap: 10px;
-      }
-
-      .holiday-inputs {
-        grid-template-columns: 1fr auto;
-        gap: 8px;
-      }
-
-      .btn {
-        font-size: 0.85em;
-        padding: 8px 12px;
-      }
-
-      .generate-btn {
-        padding: 12px;
-        font-size: 1em;
-        margin-top: 14px;
-      }
-
-      .stats {
-        gap: 6px;
-        margin-bottom: 10px;
-      }
-
-      .stat-card {
-        padding: 6px;
-        font-size: 0.8em;
-      }
-
-      .stat-number {
-        font-size: 1em;
-      }
-
-      #result {
-        font-size: 0.85em;
-        max-height: 200px;
-        padding: 12px;
-      }
-
-      .action-buttons {
-        gap: 8px;
-        flex-direction: column;
-      }
-
-      .copy-btn, .word-btn {
-        padding: 10px;
-        font-size: 0.9em;
-      }
-
-      .holiday-item {
-        font-size: 0.8em;
-        padding: 7px 10px;
-      }
-
-      .delete-btn {
-        font-size: 0.8em;
-        padding: 4px 7px;
-      }
     }
 
     @media (max-width: 480px) {
-      body {
-        padding: 8px;
-        font-size: 14px;
-      }
-
-      .container {
-        padding: 12px;
-        border-radius: 12px;
-      }
-
       .quick-btn {
         font-size: 0.78em;
         padding: 6px 9px;
@@ -559,7 +437,6 @@
         <div class="section">
           <h3>📅 Дні тижня</h3>
           <div class="days-grid">
-            <!-- Понеділок -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Пн">
@@ -574,8 +451,6 @@
                 <span class="number">1</span>
               </div>
             </div>
-
-            <!-- Вівторок -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Вт">
@@ -590,8 +465,6 @@
                 <span class="number">1</span>
               </div>
             </div>
-
-            <!-- Середа -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Ср">
@@ -606,8 +479,6 @@
                 <span class="number">1</span>
               </div>
             </div>
-
-            <!-- Четвер -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Чт">
@@ -622,8 +493,6 @@
                 <span class="number">1</span>
               </div>
             </div>
-
-            <!-- П'ятниця -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Пт">
@@ -638,8 +507,6 @@
                 <span class="number">1</span>
               </div>
             </div>
-
-            <!-- Субота -->
             <div class="day-card">
               <div class="day-label">
                 <input type="checkbox" id="cb-Сб">
@@ -660,9 +527,9 @@
         <div class="section">
           <h3>📆 Період та канікули</h3>
           <div class="quick-buttons">
-            <button class="quick-btn" onclick="setSemester1()">📘 I семестр</button>
-            <button class="quick-btn" onclick="setSemester2()">📘 II семестр</button>
-            <button class="quick-btn" onclick="setFullYear()">📘 Весь рік</button>
+            <button class="quick-btn active" id="btn-semester1" onclick="setSemester1()">📘 I семестр</button>
+            <button class="quick-btn inactive" id="btn-semester2" onclick="setSemester2()">📘 II семестр</button>
+            <button class="quick-btn inactive" id="btn-fullyear" onclick="setFullYear()">📘 Весь рік</button>
           </div>
           <div class="period-holidays-grid">
             <div class="period-box">
@@ -682,14 +549,12 @@
               <div class="holiday-inputs">
                 <input type="date" id="hs" placeholder="Початок">
                 <input type="date" id="he" placeholder="Кінець">
-                <button class="btn" onclick="addHoliday()">➕</button>
+                <button class="btn" onclick="addHoliday()">+</button>
               </div>
               <div id="holidays-list"></div>
             </div>
           </div>
         </div>
-
-
       </div>
 
       <div class="right-panel">
@@ -729,18 +594,34 @@
 
   <script>
     let holidays = [];
-    let hasGeneratedBefore = false; // Флаг для відстеження чи було згенеровано
+    let currentPeriod = 'semester1'; // за замовчуванням
 
     const now = new Date();
     const currentYear = now.getFullYear();
     document.getElementById("start-date").value = `${currentYear}-09-01`;
     document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
 
+    // Функція для оновлення стану кнопок
+    function updateButtonState(activeId) {
+      const buttons = ['btn-semester1', 'btn-semester2', 'btn-fullyear'];
+      buttons.forEach(id => {
+        const btn = document.getElementById(id);
+        if (id === activeId) {
+          btn.classList.remove('inactive');
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+          btn.classList.add('inactive');
+        }
+      });
+      currentPeriod = activeId.replace('btn-', '');
+    }
+
     function setSemester1() {
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year}-09-01`;
       document.getElementById("end-date").value = `${year}-12-31`;
-      // Автоматично регенерувати
+      updateButtonState('btn-semester1');
       generate();
     }
 
@@ -748,14 +629,14 @@
       const year = new Date().getFullYear();
       document.getElementById("start-date").value = `${year + 1}-01-01`;
       document.getElementById("end-date").value = `${year + 1}-05-31`;
-      // Автоматично регенерувати
+      updateButtonState('btn-semester2');
       generate();
     }
 
     function setFullYear() {
       document.getElementById("start-date").value = `${currentYear}-09-01`;
       document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
-      // Автоматично регенерувати
+      updateButtonState('btn-fullyear');
       generate();
     }
 
@@ -764,8 +645,6 @@
       const current = parseInt(numberSpan.textContent);
       const next = current === 3 ? 0 : current + 1;
       numberSpan.textContent = next;
-      
-      // Автоматично регенерувати
       generate();
     }
 
@@ -784,8 +663,6 @@
       document.getElementById("hs").value = "";
       document.getElementById("he").value = "";
       showNotification("Додано!", "success");
-      
-      // Автоматично регенерувати
       generate();
     }
 
@@ -793,15 +670,12 @@
       const text = btn.parentElement.querySelector('span').textContent;
       const [s, e] = text.split(" — ");
       
-      // Парсимо дати з української локалі
       const dateParts1 = s.split('.');
       const dateParts2 = e.split('.');
       
-      // Створюємо дати у форматі YYYY-MM-DD для порівняння
       const hs = new Date(dateParts1[2], dateParts1[1] - 1, dateParts1[0]);
       const he = new Date(dateParts2[2], dateParts2[1] - 1, dateParts2[0]);
       
-      // Видаляємо з масиву holidays
       holidays = holidays.filter(h => {
         const hStart = new Date(h.s.getTime());
         const hEnd = new Date(h.e.getTime());
@@ -816,8 +690,6 @@
       btn.parentElement.style.animation = 'slideOutToRight 0.2s ease-out';
       setTimeout(() => {
         btn.parentElement.remove();
-        
-        // Автоматично регенерувати після видалення
         generate();
       }, 200);
       
@@ -853,146 +725,170 @@
       return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
     }
 
-    // Додаємо слухачі подій для автоматичної регенерації при зміні дат
     document.getElementById('start-date').addEventListener('change', function() {
+      updatePeriodButtonsByDate();
       generate();
     });
     
     document.getElementById('end-date').addEventListener('change', function() {
+      updatePeriodButtonsByDate();
       generate();
     });
 
-    // Додаємо слухачі для чекбоксів днів тижня - автоматично генеруємо при зміні
+    // Визначаємо, який період відповідає датам
+    function updatePeriodButtonsByDate() {
+      const start = document.getElementById("start-date").value;
+      const end = document.getElementById("end-date").value;
+      const now = new Date();
+      const year = now.getFullYear();
+
+      const sem1Start = `${year}-09-01`;
+      const sem1End = `${year}-12-31`;
+      const sem2Start = `${year + 1}-01-01`;
+      const sem2End = `${year + 1}-05-31`;
+      const yearStart = `${year}-09-01`;
+      const yearEnd = `${year + 1}-05-31`;
+
+      if (start === sem1Start && end === sem1End) {
+        updateButtonState('btn-semester1');
+      } else if (start === sem2Start && end === sem2End) {
+        updateButtonState('btn-semester2');
+      } else if (start === yearStart && end === yearEnd) {
+        updateButtonState('btn-fullyear');
+      } else {
+        // Якщо дата не відповідає жодному шаблону — знімаємо активний стан
+        document.getElementById('btn-semester1').classList.remove('active');
+        document.getElementById('btn-semester1').classList.add('inactive');
+        document.getElementById('btn-semester2').classList.remove('active');
+        document.getElementById('btn-semester2').classList.add('inactive');
+        document.getElementById('btn-fullyear').classList.remove('active');
+        document.getElementById('btn-fullyear').classList.add('inactive');
+      }
+    }
+
     const dayCheckboxes = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     dayCheckboxes.forEach(day => {
       document.getElementById(`cb-${day}`).addEventListener('change', function() {
-        // Запускаємо генерацію при будь-якій зміні чекбоксів
         generate();
       });
     });
 
-	function generate() {
-	  const start = new Date(document.getElementById("start-date").value);
-	  const end = new Date(document.getElementById("end-date").value);
-	  start.setHours(0, 0, 0, 0);
-	  end.setHours(0, 0, 0, 0);
+    function generate() {
+      const start = new Date(document.getElementById("start-date").value);
+      const end = new Date(document.getElementById("end-date").value);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
 
-	  if (start > end) {
-		showNotification("Неправильні дати!", "error");
-		return;
-	  }
+      if (start > end) {
+        showNotification("Неправильні дати!", "error");
+        return;
+      }
 
-	  const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-	  const selected = {};
+      const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+      const selected = {};
 
-	  days.forEach(d => {
-		if (document.getElementById(`cb-${d}`).checked) {
-		  const card = document.querySelector(`#cb-${d}`).closest('.day-card');
-		  const num = parseInt(card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent);
-		  const den = parseInt(card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent);
-		  selected[d] = { numerator: num, denominator: den };
-		}
-	  });
+      days.forEach(d => {
+        if (document.getElementById(`cb-${d}`).checked) {
+          const card = document.querySelector(`#cb-${d}`).closest('.day-card');
+          const num = parseInt(card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent);
+          const den = parseInt(card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent);
+          selected[d] = { numerator: num, denominator: den };
+        }
+      });
 
-	  if (Object.keys(selected).length === 0) {
-		// Якщо немає вибраних днів, очищаємо результат
-		document.getElementById("result").innerHTML = `
-		  <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
-		  <p><br>Автор: Ігор Шуляк
-		  Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> 
-		  або шукайте в Телеграм @ittchr</p>
-		  <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-		  <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
-		  </p>
-		`;
-		document.getElementById("stats-container").style.display = "none";
-		document.getElementById("action-buttons").style.display = "none";
-		return;
-	  }
+      if (Object.keys(selected).length === 0) {
+        document.getElementById("result").innerHTML = `
+          <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
+          <p><br>Автор: Ігор Шуляк
+          Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> 
+          або шукайте в Телеграм @ittchr</p>
+          <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
+          <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+          </p>
+        `;
+        document.getElementById("stats-container").style.display = "none";
+        document.getElementById("action-buttons").style.display = "none";
+        return;
+      }
 
-	  const res = [];
-	  let cur = new Date(start);
-	  cur.setHours(0, 0, 0, 0);
-	  const startWeek = getWeek(cur);
+      const res = [];
+      let cur = new Date(start);
+      cur.setHours(0, 0, 0, 0);
+      const startWeek = getWeek(cur);
 
-	  while (cur <= end) {
-		const dayIndex = (cur.getDay() + 6) % 7;
-		const dayName = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][dayIndex];
+      while (cur <= end) {
+        const dayIndex = (cur.getDay() + 6) % 7;
+        const dayName = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"][dayIndex];
 
-		if (selected[dayName]) {
-		  const { numerator, denominator } = selected[dayName];
-		  const weekDiff = (getWeek(cur) - startWeek) % 2;
-		  const lessons = weekDiff === 0 ? numerator : denominator;
+        if (selected[dayName]) {
+          const { numerator, denominator } = selected[dayName];
+          const weekDiff = (getWeek(cur) - startWeek) % 2;
+          const lessons = weekDiff === 0 ? numerator : denominator;
 
-		  if (lessons === 0) {
-			cur.setDate(cur.getDate() + 1);
-			cur.setHours(0, 0, 0, 0);
-			continue;
-		  }
+          if (lessons === 0) {
+            cur.setDate(cur.getDate() + 1);
+            cur.setHours(0, 0, 0, 0);
+            continue;
+          }
 
-		  const isHoliday = holidays.some(h => {
-			const hs = new Date(h.s); hs.setHours(0,0,0,0);
-			const he = new Date(h.e); he.setHours(0,0,0,0);
-			return cur >= hs && cur <= he;
-		  });
+          const isHoliday = holidays.some(h => {
+            const hs = new Date(h.s); hs.setHours(0,0,0,0);
+            const he = new Date(h.e); he.setHours(0,0,0,0);
+            return cur >= hs && cur <= he;
+          });
 
-		  if (!isHoliday) {
-			const dateStr = cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" });
-			for (let i = 0; i < lessons; i++) {
-			  res.push(dateStr);
-			}
-		  }
-		}
-		cur.setDate(cur.getDate() + 1);
-		cur.setHours(0, 0, 0, 0);
-	  }
+          if (!isHoliday) {
+            const dateStr = cur.toLocaleDateString("uk", { day: "2-digit", month: "2-digit", year: "2-digit" });
+            for (let i = 0; i < lessons; i++) {
+              res.push(dateStr);
+            }
+          }
+        }
+        cur.setDate(cur.getDate() + 1);
+        cur.setHours(0, 0, 0, 0);
+      }
 
-	  if (res.length === 0) {
-		document.getElementById("result").innerHTML = `
-		  <p>Не знайдено жодної дати для вибраних параметрів!</p>
-		  <p><br>Автор: Ігор Шуляк</p>
-		  <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
-		  <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-		  <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
-		  </p>
-		`;
-		document.getElementById("stats-container").style.display = "none";
-		document.getElementById("action-buttons").style.display = "none";
-		return;
-	  }
+      if (res.length === 0) {
+        document.getElementById("result").innerHTML = `
+          <p>Не знайдено жодної дати для вибраних параметрів!</p>
+          <p><br>Автор: Ігор Шуляк</p>
+          <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
+          <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
+          <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+          </p>
+        `;
+        document.getElementById("stats-container").style.display = "none";
+        document.getElementById("action-buttons").style.display = "none";
+        return;
+      }
 
-	  // ✅ ВИПРАВЛЕНА ЛОГІКА РОЗРАХУНКУ СЕМЕСТРІВ
-	  const startYear = start.getFullYear();
-	  const endYear = end.getFullYear();
+      const startYear = start.getFullYear();
+      const endYear = end.getFullYear();
 
-	  // Перший семестр: вересень по грудень
-	  const sem1Start = new Date(`${startYear}-09-01`);
-	  const sem1End = new Date(`${startYear}-12-31`);
+      const sem1Start = new Date(`${startYear}-09-01`);
+      const sem1End = new Date(`${startYear}-12-31`);
+      const sem2Start = new Date(`${endYear}-01-01`);
+      const sem2End = new Date(`${endYear}-05-31`);
 
-	  // Другий семестр: січень по травень
-	  const sem2Start = new Date(`${endYear}-01-01`);
-	  const sem2End = new Date(`${endYear}-05-31`);
+      const sem1 = res.filter(d => {
+        const [day, month, year] = d.split(".");
+        const date = new Date(`20${year}-${month}-${day}`);
+        return date >= sem1Start && date <= sem1End && date >= start && date <= end;
+      }).length;
 
-	  const sem1 = res.filter(d => {
-		const [day, month, year] = d.split(".");
-		const date = new Date(`20${year}-${month}-${day}`); // припускаємо, що 20xx
-		return date >= sem1Start && date <= sem1End && date >= start && date <= end;
-	  }).length;
+      const sem2 = res.filter(d => {
+        const [day, month, year] = d.split(".");
+        const date = new Date(`20${year}-${month}-${day}`);
+        return date >= sem2Start && date <= sem2End && date >= start && date <= end;
+      }).length;
 
-	  const sem2 = res.filter(d => {
-		const [day, month, year] = d.split(".");
-		const date = new Date(`20${year}-${month}-${day}`);
-		return date >= sem2Start && date <= sem2End && date >= start && date <= end;
-	  }).length;
-
-	  // Вивід у DOM
-	  document.getElementById("s1").textContent = sem1;
-	  document.getElementById("s2").textContent = sem2;
-	  document.getElementById("total").textContent = parseInt(document.getElementById("s1").textContent) + parseInt(document.getElementById("s2").textContent);
-	  document.getElementById("result").textContent = res.join("\n");
-	  document.getElementById("stats-container").style.display = "grid";
-	  document.getElementById("action-buttons").style.display = "flex";
-	}
+      document.getElementById("s1").textContent = sem1;
+      document.getElementById("s2").textContent = sem2;
+      document.getElementById("total").textContent = parseInt(document.getElementById("s1").textContent) + parseInt(document.getElementById("s2").textContent);
+      document.getElementById("result").textContent = res.join("\n");
+      document.getElementById("stats-container").style.display = "grid";
+      document.getElementById("action-buttons").style.display = "flex";
+    }
 
     function copy() {
       const text = document.getElementById("result").innerText;
@@ -1045,6 +941,11 @@
       URL.revokeObjectURL(url);
       showNotification("Файл завантажено!", "success");
     }
+
+    // Ініціалізація стану кнопок
+    window.onload = function() {
+      updatePeriodButtonsByDate();
+    };
   </script>
 </body>
 </html>
