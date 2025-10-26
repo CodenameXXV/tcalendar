@@ -29,6 +29,8 @@
       padding: 10px;
       color: #333;
       font-size: 16px;
+      display: flex;
+      flex-direction: column;
     }
 
     .container {
@@ -40,6 +42,7 @@
       border-radius: 16px;
       box-shadow: 0 15px 30px rgba(0,0,0,0.15);
       animation: slideIn 0.5s ease-out;
+      flex: 1;
     }
 
     @keyframes slideIn {
@@ -642,6 +645,24 @@
         font-size: 0.8em;
       }
     }
+
+    /* Footer author link */
+	.author-footer {
+	  text-align: center;
+	  font-size: 0.85em;
+	  color: #ffffff; /* Білий колір тексту */
+	  margin-top: 20px;
+	  padding-bottom: 10px;
+	}
+	
+	.author-footer a {
+	  color: #ffffff; /* Білий колір посилання */
+	  text-decoration: none;
+	}
+	
+	.author-footer a:hover {
+	  text-decoration: underline;
+	}
   </style>
 </head>
 <body>
@@ -792,11 +813,10 @@
           </div>
           <div id="result">
             <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
-            <p><br>Автор: Ігор Шуляк
-            Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> 
+            Група в Телеграм: <a href="https://t.me/ittchr  " target="_blank">https://t.me/ittchr  </a> 
 			або шукайте в Телеграм @ittchr</p>
 <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-            <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+            <a href="https://codenamexxv.github.io/tCalc/  " target="_blank">▶️ Калькулятор оцінок ◀️</a>
             </p>
           </div>
           <div class="action-buttons" id="action-buttons" style="display: none;">
@@ -806,6 +826,10 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="author-footer">
+    Автор: <a href="https://codenamexxv.github.io/teacher/" target="_blank">Ігор Шуляк</a>
   </div>
 
   <script>
@@ -1076,10 +1100,10 @@
         document.getElementById("result").innerHTML = `
           <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тиждень (за необхідності).</p>
           <p><br>Автор: Ігор Шуляк
-          Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> 
+          Група в Телеграм: <a href="https://t.me/ittchr  " target="_blank">https://t.me/ittchr  </a> 
           або шукайте в Телеграм @ittchr</p>
           <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-          <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+          <a href="https://codenamexxv.github.io/tCalc/  " target="_blank">▶️ Калькулятор оцінок ◀️</a>
           </p>
         `;
         document.getElementById("stats-container").style.display = "none";
@@ -1128,9 +1152,9 @@
         document.getElementById("result").innerHTML = `
           <p>Не знайдено жодної дати для вибраних параметрів!</p>
           <p><br>Автор: Ігор Шуляк</p>
-          <p>Група в Телеграм: <a href="https://t.me/ittchr" target="_blank">https://t.me/ittchr</a> або шукайте в Телеграм @ittchr</p>
+          <p>Група в Телеграм: <a href="https://t.me/ittchr  " target="_blank">https://t.me/ittchr  </a> або шукайте в Телеграм @ittchr</p>
           <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-          <a href="https://codenamexxv.github.io/tCalc/" target="_blank">▶️ Калькулятор оцінок ◀️</a>
+          <a href="https://codenamexxv.github.io/tCalc/  " target="_blank">▶️ Калькулятор оцінок ◀️</a>
           </p>
         `;
         document.getElementById("stats-container").style.display = "none";
