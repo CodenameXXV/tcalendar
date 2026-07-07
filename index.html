@@ -207,22 +207,23 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
+      align-items: center;
     }
 
     .class-tab {
       background: #f0fdfd;
       color: #00a8cc;
       border: 1px solid #d0f0f0;
-      width: 38px;
-      height: 34px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 6px 12px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 0.85em;
+      font-size: 0.82em;
       font-weight: 600;
       transition: all 0.2s ease;
+      white-space: nowrap;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .class-tab:hover {
@@ -237,11 +238,74 @@
       box-shadow: 0 0 0 2px rgba(0, 168, 204, 0.3);
     }
 
+    .class-tab-add {
+      background: #e6f7fb;
+      color: #00a8cc;
+      border: 1px dashed #9fd8e6;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.82em;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .class-tab-add:hover {
+      background: #d0f0f0;
+      transform: translateY(-2px);
+    }
+
+    .selected-class-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed #d0f0f0;
+      font-size: 0.82em;
+      color: #555;
+    }
+
+    .selected-class-bar strong {
+      color: #00a8cc;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 200px;
+    }
+
+    .class-tab-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.65;
+      border-radius: 4px;
+      padding: 2px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .class-tab-action:hover {
+      opacity: 1;
+      background: rgba(0,0,0,0.08);
+    }
+
     @media (max-width: 480px) {
+      .class-tab, .class-tab-add {
+        font-size: 0.76em;
+        padding: 5px 7px;
+      }
       .class-tab {
-        width: 32px;
-        height: 30px;
-        font-size: 0.8em;
+        max-width: 110px;
+      }
+      .selected-class-bar strong {
+        max-width: 140px;
       }
     }
 
@@ -456,6 +520,123 @@
 
     #result, #stats-container, #action-buttons {
       animation: resultFadeIn 0.4s ease-out;
+    }
+
+    /* Модальні вікна (перейменування/підтвердження) у стилі сайту */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(20, 40, 50, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 16px;
+      animation: modalOverlayFadeIn 0.2s ease-out;
+    }
+
+    @keyframes modalOverlayFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+      border-top: 4px solid #00a8cc;
+      animation: modalBoxIn 0.25s ease-out;
+    }
+
+    @keyframes modalBoxIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-box.danger {
+      border-top-color: #d9534f;
+    }
+
+    .modal-title {
+      font-size: 1.05em;
+      font-weight: 700;
+      color: #00a8cc;
+      margin-bottom: 8px;
+    }
+
+    .modal-box.danger .modal-title {
+      color: #d9534f;
+    }
+
+    .modal-message {
+      font-size: 0.9em;
+      color: #555;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d0f0f0;
+      border-radius: 8px;
+      font-size: 0.95em;
+      margin-bottom: 16px;
+      font-family: inherit;
+      color: #333;
+    }
+
+    .modal-input:focus {
+      outline: none;
+      border-color: #00a8cc;
+      box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.1);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .modal-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.88em;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .modal-btn-cancel {
+      background: #f0fdfd;
+      color: #555;
+      border: 1px solid #d0f0f0;
+    }
+
+    .modal-btn-cancel:hover {
+      background: #e0f0f0;
+    }
+
+    .modal-btn-confirm {
+      background-color: #00a8cc;
+      color: white;
+    }
+
+    .modal-btn-confirm:hover {
+      background-color: #008fa3;
+    }
+
+    .modal-btn-danger {
+      background-color: #d9534f;
+      color: white;
+    }
+
+    .modal-btn-danger:hover {
+      background-color: #c9302c;
     }
 
     /* Мобільні стилі */
@@ -714,8 +895,14 @@
     <div class="main-grid">
       <div class="left-panel">
         <div class="section">
-          <h3><svg width="22" height="22" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="10" width="18" height="11" fill="#ffb74d"/><polygon points="12,3 22,10 2,10" fill="#e53935"/><rect x="10.5" y="14" width="3" height="7" fill="#5d4037"/><rect x="5" y="12" width="2.5" height="2.5" fill="#fff59d"/><rect x="16.5" y="12" width="2.5" height="2.5" fill="#fff59d"/></svg>Клас</h3>
+          <h3><svg width="22" height="22" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="10" width="18" height="11" fill="#ffb74d"/><polygon points="12,3 22,10 2,10" fill="#e53935"/><rect x="10.5" y="14" width="3" height="7" fill="#5d4037"/><rect x="5" y="12" width="2.5" height="2.5" fill="#fff59d"/><rect x="16.5" y="12" width="2.5" height="2.5" fill="#fff59d"/></svg>Клас / Предмет</h3>
           <div class="class-tabs" id="class-tabs"></div>
+          <div class="selected-class-bar" id="selected-class-bar">
+            <span>Обрано:</span>
+            <strong id="selected-class-label"></strong>
+            <span class="class-tab-action" id="rename-current-class-btn" title="Перейменувати"><svg width="12" height="12" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 21l1.5-5L16 4.5 19.5 8 8 19.5z" fill="#ffb74d"/><path d="M16 4.5L19.5 8" stroke="#fb8c00" stroke-width="1.5"/></svg></span>
+            <span class="class-tab-action" id="delete-current-class-btn" title="Видалити"><svg width="12" height="12" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#ef5350"/><path d="M8 8l8 8M16 8l-8 8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></span>
+          </div>
         </div>
 
         <div class="section">
@@ -865,8 +1052,6 @@
             <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
             Група в Телеграм: <a href="https://t.me/ittchr  " target="_blank">https://t.me/ittchr  </a> 
 			або шукайте в Телеграм @ittchr</p>
-<p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-
           </div>
           <div class="action-buttons" id="action-buttons" style="display: none;">
             <button class="btn copy-btn" onclick="copy()"><svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="16" height="19" rx="2" fill="#fafafa" stroke="#90a4ae" stroke-width="1"/><rect x="8" y="1.5" width="8" height="4" rx="1.5" fill="#78909c"/><path d="M8 10h8M8 13h8M8 16h5" stroke="#00a8cc" stroke-width="1.5" stroke-linecap="round"/></svg>Копіювати</button>
@@ -884,7 +1069,8 @@
   <script>
     let holidays = [];
     let currentPeriod = 'semester1'; // за замовчуванням
-    let currentClass = 1; // поточний обраний клас (1-12)
+    let slots = []; // список слотів [{ id, name }] — клас+предмет
+    let currentClass = null; // id поточного обраного слоту
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -893,9 +1079,48 @@
 
     const dayNamesList = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
-    // Ключ localStorage для конкретного класу
+    // Ключ localStorage для конкретного слоту (клас+предмет)
     function classKey(cls) {
       return `teacherCalendarClass_${cls}`;
+    }
+
+    // Завантажує список слотів (клас+предмет). Якщо його ще немає —
+    // мігрує зі старої системи нумерованих класів (1-12) або створює дефолтні
+    function loadSlots() {
+      try {
+        const saved = localStorage.getItem('teacherCalendarSlots');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            slots = parsed;
+            return;
+          }
+        }
+      } catch (error) {
+        console.log('Помилка завантаження списку класів:', error);
+      }
+
+      slots = [];
+      for (let i = 1; i <= 12; i++) {
+        if (localStorage.getItem(`teacherCalendarClass_${i}`) !== null) {
+          slots.push({ id: String(i), name: String(i) });
+        }
+      }
+      if (slots.length === 0) {
+        for (let i = 1; i <= 12; i++) {
+          slots.push({ id: String(i), name: String(i) });
+        }
+      }
+      saveSlots();
+    }
+
+    // Зберігає список слотів у localStorage
+    function saveSlots() {
+      try {
+        localStorage.setItem('teacherCalendarSlots', JSON.stringify(slots));
+      } catch (error) {
+        console.log('Помилка збереження списку класів:', error);
+      }
     }
 
     // Стан за замовчуванням для класу, який ще не зберігався
@@ -904,15 +1129,10 @@
       dayNamesList.forEach(d => {
         days[d] = { checked: false, numerator: 1, denominator: 1 };
       });
-      return {
-        days,
-        startDate: `${currentYear}-09-01`,
-        endDate: `${currentYear + 1}-05-31`,
-        holidays: []
-      };
+      return { days };
     }
 
-    // Збирає поточний стан інтерфейсу в об'єкт
+    // Збирає поточний стан інтерфейсу в об'єкт (лише розклад днів — індивідуально для класу)
     function collectState() {
       const days = {};
       dayNamesList.forEach(d => {
@@ -923,12 +1143,7 @@
         days[d] = { checked: cb.checked, numerator: num, denominator: den };
       });
 
-      return {
-        days,
-        startDate: document.getElementById("start-date").value,
-        endDate: document.getElementById("end-date").value,
-        holidays: holidays.map(h => ({ s: h.s.toISOString(), e: h.e.toISOString() }))
-      };
+      return { days };
     }
 
     // Застосовує стан (з localStorage або дефолтний) до інтерфейсу поточного класу
@@ -941,21 +1156,6 @@
         card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent = dayState.numerator;
         card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent = dayState.denominator;
       });
-
-      document.getElementById("start-date").value = state.startDate || `${currentYear}-09-01`;
-      document.getElementById("end-date").value = state.endDate || `${currentYear + 1}-05-31`;
-
-      holidays = (state.holidays || []).map(h => ({ s: new Date(h.s), e: new Date(h.e) }));
-      const holidaysList = document.getElementById('holidays-list');
-      holidaysList.innerHTML = '';
-      holidays.forEach(holiday => {
-        const item = document.createElement("div");
-        item.className = "holiday-item";
-        item.innerHTML = `<span>${fmt(holiday.s.toISOString().split('T')[0])} — ${fmt(holiday.e.toISOString().split('T')[0])}</span><button class="delete-btn" onclick="removeHoliday(this)">×</button>`;
-        holidaysList.appendChild(item);
-      });
-
-      updatePeriodButtonsByDate();
     }
 
     // Зберігає стан ПОТОЧНОГО класу в localStorage
@@ -980,30 +1180,270 @@
       }
     }
 
-    // Малює вкладки класів 1-12
-    function renderClassTabs() {
-      const container = document.getElementById('class-tabs');
-      container.innerHTML = '';
-      for (let i = 1; i <= 12; i++) {
-        const tab = document.createElement('div');
-        tab.className = 'class-tab' + (i === currentClass ? ' active' : '');
-        tab.textContent = i;
-        tab.id = `class-tab-${i}`;
-        tab.onclick = () => selectClass(i);
-        container.appendChild(tab);
+    // ==== Загальні (не прив'язані до класу) налаштування періоду та канікул ====
+
+    const PERIOD_KEY = 'teacherCalendarPeriod';
+
+    // Збирає поточний стан періоду/канікул в об'єкт
+    function collectPeriodState() {
+      return {
+        startDate: document.getElementById("start-date").value,
+        endDate: document.getElementById("end-date").value,
+        holidays: holidays.map(h => ({ s: h.s.toISOString(), e: h.e.toISOString() })),
+        currentPeriod
+      };
+    }
+
+    // Застосовує стан періоду/канікул до інтерфейсу
+    function applyPeriodState(state) {
+      document.getElementById("start-date").value = state.startDate || `${currentYear}-09-01`;
+      document.getElementById("end-date").value = state.endDate || `${currentYear + 1}-05-31`;
+
+      holidays = (state.holidays || []).map(h => ({ s: new Date(h.s), e: new Date(h.e) }));
+      const holidaysList = document.getElementById('holidays-list');
+      holidaysList.innerHTML = '';
+      holidays.forEach(holiday => {
+        const item = document.createElement("div");
+        item.className = "holiday-item";
+        item.innerHTML = `<span>${fmt(holiday.s.toISOString().split('T')[0])} — ${fmt(holiday.e.toISOString().split('T')[0])}</span><button class="delete-btn" onclick="removeHoliday(this)">×</button>`;
+        holidaysList.appendChild(item);
+      });
+
+      updatePeriodButtonsByDate();
+    }
+
+    // Зберігає загальний стан періоду/канікул у localStorage
+    function savePeriodState() {
+      try {
+        localStorage.setItem(PERIOD_KEY, JSON.stringify(collectPeriodState()));
+      } catch (error) {
+        console.log('Помилка збереження періоду:', error);
       }
     }
 
-    // Перемикання на інший клас
+    // Завантажує загальний стан періоду/канікул з localStorage (або дефолтний)
+    function loadPeriodState() {
+      try {
+        const saved = localStorage.getItem(PERIOD_KEY);
+        const state = saved ? JSON.parse(saved) : {
+          startDate: `${currentYear}-09-01`,
+          endDate: `${currentYear + 1}-05-31`,
+          holidays: [],
+          currentPeriod: 'semester1'
+        };
+        applyPeriodState(state);
+      } catch (error) {
+        console.log('Помилка завантаження періоду:', error);
+        applyPeriodState({
+          startDate: `${currentYear}-09-01`,
+          endDate: `${currentYear + 1}-05-31`,
+          holidays: [],
+          currentPeriod: 'semester1'
+        });
+      }
+    }
+
+    // Малює вкладки слотів (клас+предмет) з довільними назвами
+    // Показує модальне вікно вводу тексту (заміна window.prompt) у стилі сайту.
+    // Повертає Promise: рядок при підтвердженні, null при скасуванні.
+    function showInputModal({ title, message = '', defaultValue = '', confirmText = 'Зберегти' }) {
+      return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+
+        const box = document.createElement('div');
+        box.className = 'modal-box';
+        box.innerHTML = `
+          <div class="modal-title">${title}</div>
+          ${message ? `<div class="modal-message">${message}</div>` : ''}
+          <input type="text" class="modal-input" id="modal-input-field">
+          <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" id="modal-cancel-btn">Скасувати</button>
+            <button class="modal-btn modal-btn-confirm" id="modal-confirm-btn">${confirmText}</button>
+          </div>
+        `;
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        const input = box.querySelector('#modal-input-field');
+        input.value = defaultValue;
+        input.focus();
+        input.select();
+
+        function finish(value) {
+          overlay.remove();
+          resolve(value);
+        }
+
+        box.querySelector('#modal-confirm-btn').onclick = () => finish(input.value.trim());
+        box.querySelector('#modal-cancel-btn').onclick = () => finish(null);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) finish(null); });
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') finish(input.value.trim());
+          if (e.key === 'Escape') finish(null);
+        });
+      });
+    }
+
+    // Показує модальне вікно підтвердження (заміна window.confirm) у стилі сайту.
+    // Повертає Promise: true при підтвердженні, false при скасуванні.
+    function showConfirmModal({ title, message, confirmText = 'Видалити', danger = true }) {
+      return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+
+        const box = document.createElement('div');
+        box.className = 'modal-box' + (danger ? ' danger' : '');
+        box.innerHTML = `
+          <div class="modal-title">${title}</div>
+          <div class="modal-message">${message}</div>
+          <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" id="modal-cancel-btn">Скасувати</button>
+            <button class="modal-btn ${danger ? 'modal-btn-danger' : 'modal-btn-confirm'}" id="modal-confirm-btn">${confirmText}</button>
+          </div>
+        `;
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        function finish(value) {
+          overlay.remove();
+          resolve(value);
+        }
+
+        box.querySelector('#modal-confirm-btn').onclick = () => finish(true);
+        box.querySelector('#modal-cancel-btn').onclick = () => finish(false);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) finish(false); });
+        document.addEventListener('keydown', function escHandler(e) {
+          if (e.key === 'Escape') {
+            finish(false);
+            document.removeEventListener('keydown', escHandler);
+          }
+        });
+      });
+    }
+
+    function renderClassTabs() {
+      const container = document.getElementById('class-tabs');
+      container.innerHTML = '';
+
+      slots.forEach(slot => {
+        const tab = document.createElement('div');
+        tab.className = 'class-tab' + (slot.id === currentClass ? ' active' : '');
+        tab.id = `class-tab-${slot.id}`;
+        tab.textContent = slot.name;
+        tab.title = slot.name;
+        tab.onclick = () => selectClass(slot.id);
+        container.appendChild(tab);
+      });
+
+      const addTab = document.createElement('div');
+      addTab.className = 'class-tab-add';
+      addTab.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#66bb6a"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>Додати</span>';
+      addTab.onclick = () => addSlot();
+      container.appendChild(addTab);
+
+      renderSelectedClassBar();
+    }
+
+    // Оновлює компактну панель під тегами: назва обраного класу + редагування/видалення
+    function renderSelectedClassBar() {
+      const slot = slots.find(s => s.id === currentClass);
+      document.getElementById('selected-class-label').textContent = slot ? slot.name : '';
+      document.getElementById('rename-current-class-btn').onclick = () => renameSlot(currentClass);
+      document.getElementById('delete-current-class-btn').onclick = () => deleteSlot(currentClass);
+    }
+
+    // Додає новий слот (клас+предмет) з довільною назвою
+    async function addSlot() {
+      const name = await showInputModal({
+        title: 'Новий клас/предмет',
+        message: 'Наприклад, «8-А Алгебра»',
+        defaultValue: '',
+        confirmText: 'Додати'
+      });
+      if (name === null) return;
+      if (!name) {
+        showNotification('Введіть назву!', 'error');
+        return;
+      }
+
+      const id = 's' + Date.now();
+      slots.push({ id, name });
+      saveSlots();
+
+      if (currentClass !== null) saveClassState();
+      currentClass = id;
+      renderClassTabs();
+      loadClassState(id);
+      localStorage.setItem('teacherCalendarActiveClass', id);
+      generate();
+      showNotification('Клас додано!', 'success');
+    }
+
+    // Перейменовує слот
+    async function renameSlot(id) {
+      const slot = slots.find(s => s.id === id);
+      if (!slot) return;
+      const name = await showInputModal({
+        title: 'Перейменувати клас',
+        defaultValue: slot.name,
+        confirmText: 'Зберегти'
+      });
+      if (name === null) return;
+      if (!name) {
+        showNotification('Назва не може бути порожньою!', 'error');
+        return;
+      }
+      slot.name = name;
+      saveSlots();
+      renderClassTabs();
+      showNotification('Перейменовано!', 'success');
+    }
+
+    // Видаляє слот (з підтвердженням, бо втрачається розклад цього класу)
+    async function deleteSlot(id) {
+      if (slots.length <= 1) {
+        showNotification('Має залишитись хоча б один клас!', 'error');
+        return;
+      }
+      const slot = slots.find(s => s.id === id);
+      if (!slot) return;
+
+      const ok = await showConfirmModal({
+        title: 'Видалити клас?',
+        message: `Розклад «${slot.name}» буде втрачено безповоротно.`,
+        confirmText: 'Видалити'
+      });
+      if (!ok) return;
+
+      slots = slots.filter(s => s.id !== id);
+      saveSlots();
+      try { localStorage.removeItem(classKey(id)); } catch (error) {}
+
+      if (currentClass === id) {
+        const next = slots[0];
+        currentClass = next.id;
+        renderClassTabs();
+        loadClassState(next.id);
+        localStorage.setItem('teacherCalendarActiveClass', next.id);
+        generate();
+      } else {
+        renderClassTabs();
+      }
+      showNotification('Видалено!', 'success');
+    }
+
+    // Перемикання на інший слот
     function selectClass(cls) {
       if (cls === currentClass) return;
-      saveClassState(); // зберігаємо стан класу, який залишаємо
+      saveClassState(); // зберігаємо стан слоту, який залишаємо
       currentClass = cls;
       document.querySelectorAll('.class-tab').forEach(el => el.classList.remove('active'));
       const activeTab = document.getElementById(`class-tab-${cls}`);
       if (activeTab) activeTab.classList.add('active');
       loadClassState(cls);
-      localStorage.setItem('teacherCalendarActiveClass', String(cls));
+      localStorage.setItem('teacherCalendarActiveClass', cls);
+      renderSelectedClassBar();
       generate();
     }
 
@@ -1021,7 +1461,7 @@
         }
       });
       currentPeriod = activeId.replace('btn-', '');
-      saveClassState(); // Зберігаємо зміни для поточного класу
+      savePeriodState(); // Зберігаємо загальні (не прив'язані до класу) зміни періоду
     }
 
     function setSemester1() {
@@ -1071,7 +1511,7 @@
       document.getElementById("hs").value = "";
       document.getElementById("he").value = "";
       showNotification("Додано!", "success");
-      saveClassState(); // Зберігаємо після додавання
+      savePeriodState(); // Зберігаємо після додавання
       generate();
     }
 
@@ -1114,7 +1554,7 @@
         holidaysList.appendChild(item);
       });
 
-      saveClassState();
+      savePeriodState();
       generate();
 
       if (addedCount > 0) {
@@ -1148,7 +1588,7 @@
       btn.parentElement.style.animation = 'slideOutToRight 0.2s ease-out';
       setTimeout(() => {
         btn.parentElement.remove();
-        saveClassState(); // Зберігаємо після видалення
+        savePeriodState(); // Зберігаємо після видалення
         generate();
       }, 200);
       
@@ -1196,13 +1636,13 @@
 
     document.getElementById('start-date').addEventListener('change', function() {
       updatePeriodButtonsByDate();
-      saveClassState();
+      savePeriodState();
       generate();
     });
     
     document.getElementById('end-date').addEventListener('change', function() {
       updatePeriodButtonsByDate();
-      saveClassState();
+      savePeriodState();
       generate();
     });
 
@@ -1269,7 +1709,9 @@
       });
 
       if (Object.keys(selected).length > 0) {
-        document.getElementById("generated-dates-title").textContent = `Згенеровані дати в ${currentClass} класі`;
+        const activeSlot = slots.find(s => s.id === currentClass);
+        const activeClassName = activeSlot ? activeSlot.name : '';
+        document.getElementById("generated-dates-title").textContent = `Згенеровані дати — ${activeClassName}`;
       }
 
       if (Object.keys(selected).length === 0) {
@@ -1420,9 +1862,12 @@
 
     // Ініціалізація: вкладки класів та завантаження налаштувань обраного класу
     window.onload = function() {
-      const savedActiveClass = parseInt(localStorage.getItem('teacherCalendarActiveClass'), 10);
-      currentClass = (savedActiveClass >= 1 && savedActiveClass <= 12) ? savedActiveClass : 1;
+      loadSlots();
+      const savedActiveClass = localStorage.getItem('teacherCalendarActiveClass');
+      const activeExists = slots.some(s => s.id === savedActiveClass);
+      currentClass = activeExists ? savedActiveClass : slots[0].id;
       renderClassTabs();
+      loadPeriodState();
       loadClassState(currentClass);
       generate();
     };
