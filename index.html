@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Календар для вчителя</title>
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/CodenameXXV/tcalendar/refs/heads/main/calendar.png">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='4' width='18' height='17' rx='2' fill='%23ffffff' stroke='%2300a8cc' stroke-width='1.5'/%3E%3Crect x='3' y='4' width='18' height='5' rx='2' fill='%2300a8cc'/%3E%3Crect x='6' y='1.5' width='2' height='4' rx='1' fill='%230288d1'/%3E%3Crect x='16' y='1.5' width='2' height='4' rx='1' fill='%230288d1'/%3E%3Crect x='6' y='12' width='3' height='3' fill='%234fc3f7'/%3E%3Crect x='10.5' y='12' width='3' height='3' fill='%2366bb6a'/%3E%3Crect x='15' y='12' width='3' height='3' fill='%23ffb74d'/%3E%3Crect x='6' y='16' width='3' height='3' fill='%23ef5350'/%3E%3Crect x='10.5' y='16' width='3' height='3' fill='%23ab47bc'/%3E%3C/svg%3E">
 
   <style>
     * {
@@ -201,6 +201,48 @@
 
     .quick-btn.inactive:hover {
       background-color: #d0f0f0;
+    }
+
+    .class-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .class-tab {
+      background: #f0fdfd;
+      color: #00a8cc;
+      border: 1px solid #d0f0f0;
+      width: 38px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85em;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .class-tab:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .class-tab.active {
+      background-color: #00a8cc;
+      border-color: #00a8cc;
+      color: white;
+      box-shadow: 0 0 0 2px rgba(0, 168, 204, 0.3);
+    }
+
+    @media (max-width: 480px) {
+      .class-tab {
+        width: 32px;
+        height: 30px;
+        font-size: 0.8em;
+      }
     }
 
     .period-holidays-grid {
@@ -405,6 +447,15 @@
     @keyframes slideOutToRight {
       from { opacity: 1; transform: translateX(0); }
       to { opacity: 0; transform: translateX(100px); }
+    }
+
+    @keyframes resultFadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #result, #stats-container, #action-buttons {
+      animation: resultFadeIn 0.4s ease-out;
     }
 
     /* Мобільні стилі */
@@ -658,12 +709,17 @@
 </head>
 <body>
   <div class="container">
-    <h1>📚 Календар для вчителя</h1>
+    <h1><svg width="26" height="26" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:8px" xmlns="http://www.w3.org/2000/svg"><path d="M12 4C10 2.5 6.5 2 4 2.5V17c2.5-.5 6-.1 8 1.4V4z" fill="#4fc3f7"/><path d="M12 4C14 2.5 17.5 2 20 2.5V17c-2.5-.5-6-.1-8 1.4V4z" fill="#0288d1"/></svg>Календар для вчителя</h1>
 
     <div class="main-grid">
       <div class="left-panel">
         <div class="section">
-          <h3>📅 Дні тижня</h3>
+          <h3><svg width="22" height="22" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="10" width="18" height="11" fill="#ffb74d"/><polygon points="12,3 22,10 2,10" fill="#e53935"/><rect x="10.5" y="14" width="3" height="7" fill="#5d4037"/><rect x="5" y="12" width="2.5" height="2.5" fill="#fff59d"/><rect x="16.5" y="12" width="2.5" height="2.5" fill="#fff59d"/></svg>Клас</h3>
+          <div class="class-tabs" id="class-tabs"></div>
+        </div>
+
+        <div class="section">
+          <h3><svg width="22" height="22" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="17" rx="2" fill="#ffffff" stroke="#00a8cc" stroke-width="1.5"/><rect x="3" y="4" width="18" height="5" rx="2" fill="#00a8cc"/><rect x="6" y="1.5" width="2" height="4" rx="1" fill="#0288d1"/><rect x="16" y="1.5" width="2" height="4" rx="1" fill="#0288d1"/><rect x="6" y="12" width="3" height="3" fill="#4fc3f7"/><rect x="10.5" y="12" width="3" height="3" fill="#66bb6a"/><rect x="15" y="12" width="3" height="3" fill="#ffb74d"/><rect x="6" y="16" width="3" height="3" fill="#ef5350"/><rect x="10.5" y="16" width="3" height="3" fill="#ab47bc"/></svg>Дні тижня</h3>
           <div class="days-grid">
             <div class="day-card">
               <div class="day-label">
@@ -753,11 +809,11 @@
         </div>
 
         <div class="section">
-          <h3>📆 Період та канікули</h3>
+          <h3><svg width="22" height="22" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="16" rx="2" fill="#ffffff" stroke="#26a0da" stroke-width="1.5"/><rect x="3" y="5" width="18" height="5" rx="2" fill="#26a0da"/><rect x="6" y="2" width="2" height="4" rx="1" fill="#1565c0"/><rect x="16" y="2" width="2" height="4" rx="1" fill="#1565c0"/><path d="M6 14h12M6 17h8" stroke="#78909c" stroke-width="1.4" stroke-linecap="round"/><circle cx="17" cy="17" r="1.3" fill="#ef5350"/></svg>Період та канікули</h3>
           <div class="quick-buttons">
-            <button class="quick-btn active" id="btn-semester1" onclick="setSemester1()">📘 I семестр</button>
-            <button class="quick-btn inactive" id="btn-semester2" onclick="setSemester2()">📘 II семестр</button>
-            <button class="quick-btn inactive" id="btn-fullyear" onclick="setFullYear()">📘 Весь рік</button>
+            <button class="quick-btn active" id="btn-semester1" onclick="setSemester1()"><svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="16" height="18" rx="2" fill="#2196f3"/><rect x="4" y="3" width="4" height="18" rx="1" fill="#1565c0"/><rect x="10" y="7" width="8" height="1.4" fill="#bbdefb"/><rect x="10" y="10" width="8" height="1.4" fill="#bbdefb"/><rect x="10" y="13" width="5" height="1.4" fill="#bbdefb"/></svg>I семестр</button>
+            <button class="quick-btn inactive" id="btn-semester2" onclick="setSemester2()"><svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="16" height="18" rx="2" fill="#2196f3"/><rect x="4" y="3" width="4" height="18" rx="1" fill="#1565c0"/><rect x="10" y="7" width="8" height="1.4" fill="#bbdefb"/><rect x="10" y="10" width="8" height="1.4" fill="#bbdefb"/><rect x="10" y="13" width="5" height="1.4" fill="#bbdefb"/></svg>II семестр</button>
+            <button class="quick-btn inactive" id="btn-fullyear" onclick="setFullYear()"><svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="16" height="18" rx="2" fill="#2196f3"/><rect x="4" y="3" width="4" height="18" rx="1" fill="#1565c0"/><rect x="10" y="7" width="8" height="1.4" fill="#bbdefb"/><rect x="10" y="10" width="8" height="1.4" fill="#bbdefb"/><rect x="10" y="13" width="5" height="1.4" fill="#bbdefb"/></svg>Весь рік</button>
           </div>
           <div class="period-holidays-grid">
             <div class="period-box">
@@ -773,7 +829,10 @@
               </div>
             </div>
             <div class="holidays-box">
-              <h4 style="color: #00a8cc; margin-bottom: 8px; font-size: 0.95em;">🎉 Канікули</h4>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px;">
+                <h4 style="color: #00a8cc; font-size: 0.95em; margin: 0;"><svg width="18" height="18" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><path d="M4 20l6-14 10 4-14 10z" fill="#ffb74d"/><circle cx="18" cy="5" r="1.3" fill="#ef5350"/><circle cx="21" cy="9" r="1" fill="#66bb6a"/><circle cx="15" cy="3" r="1" fill="#42a5f5"/><rect x="6" y="14" width="2" height="2" fill="#ab47bc" transform="rotate(20 7 15)"/><rect x="10" y="17" width="2" height="2" fill="#26c6da" transform="rotate(-15 11 18)"/></svg>Канікули</h4>
+                <button onclick="addTypicalHolidays()" title="Додати типові канікули" style="display:flex; align-items:center; gap:3px; background-color:#f0fdfd; color:#00a8cc; border:1px solid #d0f0f0; border-radius:6px; padding:3px 7px; font-size:0.72em; font-weight:600; cursor:pointer; white-space:nowrap; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='#e6f7fb'" onmouseout="this.style.backgroundColor='#f0fdfd'"><svg width="12" height="12" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="10.5" y="3" width="2.2" height="14" rx="1" fill="#ab47bc" transform="rotate(45 12 10)"/><circle cx="17" cy="5" r="1.4" fill="#ffca28"/><circle cx="20" cy="9" r="1" fill="#26c6da"/><circle cx="14" cy="3" r="0.8" fill="#66bb6a"/></svg>Типові</button>
+              </div>
               <div class="holiday-inputs">
                 <input type="date" id="hs" placeholder="Початок">
                 <input type="date" id="he" placeholder="Кінець">
@@ -787,7 +846,7 @@
 
       <div class="right-panel">
         <div class="section">
-          <h3>📋 Згенеровані дати</h3>
+          <h3><svg width="20" height="20" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="16" height="19" rx="2" fill="#fafafa" stroke="#90a4ae" stroke-width="1"/><rect x="8" y="1.5" width="8" height="4" rx="1.5" fill="#78909c"/><path d="M8 10h8M8 13h8M8 16h5" stroke="#00a8cc" stroke-width="1.5" stroke-linecap="round"/></svg><span id="generated-dates-title">Згенеровані дати</span></h3>
           <div id="stats-container" style="display: none;" class="stats">
             <div class="stat-card">
               <span class="stat-number" id="s1">0</span> <br>
@@ -807,12 +866,11 @@
             Група в Телеграм: <a href="https://t.me/ittchr  " target="_blank">https://t.me/ittchr  </a> 
 			або шукайте в Телеграм @ittchr</p>
 <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-            <a href="https://codenamexxv.github.io/tCalc/  " target="_blank">▶️ Калькулятор оцінок ◀️</a>
-            </p>
+
           </div>
           <div class="action-buttons" id="action-buttons" style="display: none;">
-            <button class="btn copy-btn" onclick="copy()">📋 Копіювати</button>
-            <button class="btn word-btn" onclick="word()">📄 Word</button>
+            <button class="btn copy-btn" onclick="copy()"><svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="16" height="19" rx="2" fill="#fafafa" stroke="#90a4ae" stroke-width="1"/><rect x="8" y="1.5" width="8" height="4" rx="1.5" fill="#78909c"/><path d="M8 10h8M8 13h8M8 16h5" stroke="#00a8cc" stroke-width="1.5" stroke-linecap="round"/></svg>Копіювати</button>
+            <button class="btn word-btn" onclick="word()"><svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><path d="M6 2h8l4 4v16H6z" fill="#ffffff" stroke="#2b579a" stroke-width="1"/><path d="M14 2v4h4z" fill="#e3eefc"/><text x="8.3" y="17" font-size="7" font-weight="bold" fill="#2b579a" font-family="Arial">W</text></svg>Word</button>
           </div>
         </div>
       </div>
@@ -826,67 +884,127 @@
   <script>
     let holidays = [];
     let currentPeriod = 'semester1'; // за замовчуванням
+    let currentClass = 1; // поточний обраний клас (1-12)
 
     const now = new Date();
     const currentYear = now.getFullYear();
     document.getElementById("start-date").value = `${currentYear}-09-01`;
     document.getElementById("end-date").value = `${currentYear + 1}-05-31`;
 
-    // Завантаження налаштувань з localStorage
-    function loadSettings() {
-      try {
-        // Завантажуємо канікули
-        const savedHolidays = localStorage.getItem('teacherCalendarHolidays');
-        if (savedHolidays) {
-          const holidaysData = JSON.parse(savedHolidays);
-          holidays = holidaysData.map(h => ({
-            s: new Date(h.s),
-            e: new Date(h.e)
-          }));
-          
-          // Відображаємо завантажені канікули
-          const holidaysList = document.getElementById('holidays-list');
-          holidaysList.innerHTML = '';
-          holidays.forEach(holiday => {
-            const item = document.createElement("div");
-            item.className = "holiday-item";
-            item.innerHTML = `<span>${fmt(holiday.s.toISOString().split('T')[0])} — ${fmt(holiday.e.toISOString().split('T')[0])}</span><button class="delete-btn" onclick="removeHoliday(this)">×</button>`;
-            holidaysList.appendChild(item);
-          });
-        }
-        
-        // Завантажуємо останній період
-        const savedPeriod = localStorage.getItem('teacherCalendarPeriod');
-        if (savedPeriod) {
-          currentPeriod = savedPeriod;
-          if (savedPeriod === 'semester1') {
-            setSemester1();
-          } else if (savedPeriod === 'semester2') {
-            setSemester2();
-          } else if (savedPeriod === 'fullyear') {
-            setFullYear();
-          }
-        }
-      } catch (error) {
-        console.log('Помилка завантаження налаштувань:', error);
-      }
+    const dayNamesList = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+    // Ключ localStorage для конкретного класу
+    function classKey(cls) {
+      return `teacherCalendarClass_${cls}`;
     }
 
-    // Збереження налаштувань в localStorage
-    function saveSettings() {
+    // Стан за замовчуванням для класу, який ще не зберігався
+    function defaultClassState() {
+      const days = {};
+      dayNamesList.forEach(d => {
+        days[d] = { checked: false, numerator: 1, denominator: 1 };
+      });
+      return {
+        days,
+        startDate: `${currentYear}-09-01`,
+        endDate: `${currentYear + 1}-05-31`,
+        holidays: []
+      };
+    }
+
+    // Збирає поточний стан інтерфейсу в об'єкт
+    function collectState() {
+      const days = {};
+      dayNamesList.forEach(d => {
+        const cb = document.getElementById(`cb-${d}`);
+        const card = cb.closest('.day-card');
+        const num = parseInt(card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent);
+        const den = parseInt(card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent);
+        days[d] = { checked: cb.checked, numerator: num, denominator: den };
+      });
+
+      return {
+        days,
+        startDate: document.getElementById("start-date").value,
+        endDate: document.getElementById("end-date").value,
+        holidays: holidays.map(h => ({ s: h.s.toISOString(), e: h.e.toISOString() }))
+      };
+    }
+
+    // Застосовує стан (з localStorage або дефолтний) до інтерфейсу поточного класу
+    function applyState(state) {
+      dayNamesList.forEach(d => {
+        const cb = document.getElementById(`cb-${d}`);
+        const card = cb.closest('.day-card');
+        const dayState = (state.days && state.days[d]) || { checked: false, numerator: 1, denominator: 1 };
+        cb.checked = !!dayState.checked;
+        card.querySelector('.lesson-toggle[data-type="numerator"] .number').textContent = dayState.numerator;
+        card.querySelector('.lesson-toggle[data-type="denominator"] .number').textContent = dayState.denominator;
+      });
+
+      document.getElementById("start-date").value = state.startDate || `${currentYear}-09-01`;
+      document.getElementById("end-date").value = state.endDate || `${currentYear + 1}-05-31`;
+
+      holidays = (state.holidays || []).map(h => ({ s: new Date(h.s), e: new Date(h.e) }));
+      const holidaysList = document.getElementById('holidays-list');
+      holidaysList.innerHTML = '';
+      holidays.forEach(holiday => {
+        const item = document.createElement("div");
+        item.className = "holiday-item";
+        item.innerHTML = `<span>${fmt(holiday.s.toISOString().split('T')[0])} — ${fmt(holiday.e.toISOString().split('T')[0])}</span><button class="delete-btn" onclick="removeHoliday(this)">×</button>`;
+        holidaysList.appendChild(item);
+      });
+
+      updatePeriodButtonsByDate();
+    }
+
+    // Зберігає стан ПОТОЧНОГО класу в localStorage
+    function saveClassState() {
       try {
-        // Зберігаємо канікули
-        const holidaysData = holidays.map(h => ({
-          s: h.s.toISOString(),
-          e: h.e.toISOString()
-        }));
-        localStorage.setItem('teacherCalendarHolidays', JSON.stringify(holidaysData));
-        
-        // Зберігаємо поточний період
-        localStorage.setItem('teacherCalendarPeriod', currentPeriod);
+        localStorage.setItem(classKey(currentClass), JSON.stringify(collectState()));
+        localStorage.setItem('teacherCalendarActiveClass', String(currentClass));
       } catch (error) {
         console.log('Помилка збереження налаштувань:', error);
       }
+    }
+
+    // Завантажує стан обраного класу з localStorage (або дефолтний, якщо ще не зберігався)
+    function loadClassState(cls) {
+      try {
+        const saved = localStorage.getItem(classKey(cls));
+        const state = saved ? JSON.parse(saved) : defaultClassState();
+        applyState(state);
+      } catch (error) {
+        console.log('Помилка завантаження налаштувань:', error);
+        applyState(defaultClassState());
+      }
+    }
+
+    // Малює вкладки класів 1-12
+    function renderClassTabs() {
+      const container = document.getElementById('class-tabs');
+      container.innerHTML = '';
+      for (let i = 1; i <= 12; i++) {
+        const tab = document.createElement('div');
+        tab.className = 'class-tab' + (i === currentClass ? ' active' : '');
+        tab.textContent = i;
+        tab.id = `class-tab-${i}`;
+        tab.onclick = () => selectClass(i);
+        container.appendChild(tab);
+      }
+    }
+
+    // Перемикання на інший клас
+    function selectClass(cls) {
+      if (cls === currentClass) return;
+      saveClassState(); // зберігаємо стан класу, який залишаємо
+      currentClass = cls;
+      document.querySelectorAll('.class-tab').forEach(el => el.classList.remove('active'));
+      const activeTab = document.getElementById(`class-tab-${cls}`);
+      if (activeTab) activeTab.classList.add('active');
+      loadClassState(cls);
+      localStorage.setItem('teacherCalendarActiveClass', String(cls));
+      generate();
     }
 
     // Функція для оновлення стану кнопок
@@ -903,7 +1021,7 @@
         }
       });
       currentPeriod = activeId.replace('btn-', '');
-      saveSettings(); // Зберігаємо зміни
+      saveClassState(); // Зберігаємо зміни для поточного класу
     }
 
     function setSemester1() {
@@ -934,6 +1052,7 @@
       const current = parseInt(numberSpan.textContent);
       const next = current === 3 ? 0 : current + 1;
       numberSpan.textContent = next;
+      saveClassState();
       generate();
     }
 
@@ -952,8 +1071,57 @@
       document.getElementById("hs").value = "";
       document.getElementById("he").value = "";
       showNotification("Додано!", "success");
-      saveSettings(); // Зберігаємо після додавання
+      saveClassState(); // Зберігаємо після додавання
       generate();
+    }
+
+    // Автоматично додає стандартні (типові) канікули для навчального року,
+    // визначеного за датою "Від" (а не за поточною датою системи)
+    function addTypicalHolidays() {
+      const startVal = document.getElementById("start-date").value;
+      const startYear = startVal ? parseInt(startVal.split('-')[0], 10) : currentYear;
+
+      const standardPeriods = [
+        { s: `${startYear}-10-26`, e: `${startYear}-11-03` },
+        { s: `${startYear}-12-25`, e: `${startYear + 1}-01-12` },
+        { s: `${startYear + 1}-03-23`, e: `${startYear + 1}-03-31` }
+      ];
+
+      let addedCount = 0;
+
+      standardPeriods.forEach(period => {
+        const s = new Date(period.s);
+        const e = new Date(period.e);
+
+        const alreadyExists = holidays.some(h =>
+          h.s.getTime() === s.getTime() && h.e.getTime() === e.getTime()
+        );
+
+        if (!alreadyExists) {
+          holidays.push({ s, e });
+          addedCount++;
+        }
+      });
+
+      holidays.sort((a, b) => a.s - b.s);
+
+      const holidaysList = document.getElementById('holidays-list');
+      holidaysList.innerHTML = '';
+      holidays.forEach(holiday => {
+        const item = document.createElement("div");
+        item.className = "holiday-item";
+        item.innerHTML = `<span>${fmt(holiday.s.toISOString().split('T')[0])} — ${fmt(holiday.e.toISOString().split('T')[0])}</span><button class="delete-btn" onclick="removeHoliday(this)">×</button>`;
+        holidaysList.appendChild(item);
+      });
+
+      saveClassState();
+      generate();
+
+      if (addedCount > 0) {
+        showNotification(`Додано типових канікул: ${addedCount}`, "success");
+      } else {
+        showNotification("Типові канікули вже додані", "success");
+      }
     }
 
     function removeHoliday(btn) {
@@ -980,11 +1148,21 @@
       btn.parentElement.style.animation = 'slideOutToRight 0.2s ease-out';
       setTimeout(() => {
         btn.parentElement.remove();
-        saveSettings(); // Зберігаємо після видалення
+        saveClassState(); // Зберігаємо після видалення
         generate();
       }, 200);
       
       showNotification("Видалено!", "success");
+    }
+
+    // Перезапускає CSS-анімацію плавної появи (замість різкого стрибка контенту)
+    function playFadeIn(...elements) {
+      elements.forEach(el => {
+        if (!el) return;
+        el.style.animation = 'none';
+        void el.offsetWidth; // форсуємо reflow, щоб анімація перезапустилась
+        el.style.animation = 'resultFadeIn 0.4s ease-out';
+      });
     }
 
     function fmt(d) {
@@ -1018,11 +1196,13 @@
 
     document.getElementById('start-date').addEventListener('change', function() {
       updatePeriodButtonsByDate();
+      saveClassState();
       generate();
     });
     
     document.getElementById('end-date').addEventListener('change', function() {
       updatePeriodButtonsByDate();
+      saveClassState();
       generate();
     });
 
@@ -1060,6 +1240,7 @@
     const dayCheckboxes = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     dayCheckboxes.forEach(day => {
       document.getElementById(`cb-${day}`).addEventListener('change', function() {
+        saveClassState();
         generate();
       });
     });
@@ -1087,17 +1268,20 @@
         }
       });
 
+      if (Object.keys(selected).length > 0) {
+        document.getElementById("generated-dates-title").textContent = `Згенеровані дати в ${currentClass} класі`;
+      }
+
       if (Object.keys(selected).length === 0) {
+        document.getElementById("generated-dates-title").textContent = "Згенеровані дати";
         document.getElementById("result").innerHTML = `
           <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тиждень (за необхідності).</p>
           Група в Телеграм: <a href="https://t.me/ittchr  " target="_blank">https://t.me/ittchr  </a> 
           або шукайте в Телеграм @ittchr</p>
-          <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-          <a href="https://codenamexxv.github.io/tCalc/  " target="_blank">▶️ Калькулятор оцінок ◀️</a>
-          </p>
         `;
         document.getElementById("stats-container").style.display = "none";
         document.getElementById("action-buttons").style.display = "none";
+        playFadeIn(document.getElementById("result"));
         return;
       }
 
@@ -1142,12 +1326,10 @@
         document.getElementById("result").innerHTML = `
           <p>Не знайдено жодної дати для вибраних параметрів!</p>
           <p>Група в Телеграм: <a href="https://t.me/ittchr  " target="_blank">https://t.me/ittchr  </a> або шукайте в Телеграм @ittchr</p>
-          <p style="text-align: center; font-weight: bold;">Спробуйте зручний:
-          <a href="https://codenamexxv.github.io/tCalc/  " target="_blank">▶️ Калькулятор оцінок ◀️</a>
-          </p>
         `;
         document.getElementById("stats-container").style.display = "none";
         document.getElementById("action-buttons").style.display = "none";
+        playFadeIn(document.getElementById("result"));
         return;
       }
 
@@ -1177,6 +1359,11 @@
       document.getElementById("result").textContent = res.join("\n");
       document.getElementById("stats-container").style.display = "grid";
       document.getElementById("action-buttons").style.display = "flex";
+      playFadeIn(
+        document.getElementById("result"),
+        document.getElementById("stats-container"),
+        document.getElementById("action-buttons")
+      );
     }
 
     function copy() {
@@ -1231,10 +1418,13 @@
       showNotification("Файл завантажено!", "success");
     }
 
-    // Ініціалізація стану кнопок та завантаження налаштувань
+    // Ініціалізація: вкладки класів та завантаження налаштувань обраного класу
     window.onload = function() {
-      loadSettings(); // Завантажуємо збережені налаштування
-      updatePeriodButtonsByDate();
+      const savedActiveClass = parseInt(localStorage.getItem('teacherCalendarActiveClass'), 10);
+      currentClass = (savedActiveClass >= 1 && savedActiveClass <= 12) ? savedActiveClass : 1;
+      renderClassTabs();
+      loadClassState(currentClass);
+      generate();
     };
   </script>
 </body>
