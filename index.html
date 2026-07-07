@@ -522,6 +522,142 @@
       animation: resultFadeIn 0.4s ease-out;
     }
 
+    /* Перемикач вигляду результату: список / календар */
+    .view-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    /* Візуальний календар */
+    #calendar-view {
+      display: none;
+      margin-bottom: 10px;
+      animation: resultFadeIn 0.4s ease-out;
+    }
+
+    .calendar-legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      font-size: 0.82em;
+      color: #555;
+    }
+
+    .calendar-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .calendar-legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .calendar-legend-swatch.lesson { background: #43b581; }
+    .calendar-legend-swatch.holiday { background: #e0645f; }
+    .calendar-legend-swatch.weekend { background: #eef2f5; border: 1px solid #dfe6ea; }
+
+    .calendar-grid-wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 14px;
+    }
+
+    .calendar-month {
+      background: white;
+      border: 1px solid #e2edf0;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .calendar-month-title {
+      text-align: center;
+      font-weight: 700;
+      color: #00a8cc;
+      font-size: 0.9em;
+      margin-bottom: 8px;
+      text-transform: capitalize;
+    }
+
+    .calendar-days-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      margin-bottom: 4px;
+    }
+
+    .calendar-day-name {
+      text-align: center;
+      font-size: 0.68em;
+      font-weight: 700;
+      color: #90a4ae;
+    }
+
+    .calendar-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+
+    .calendar-day {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 0.72em;
+      color: #444;
+      background: #f8fdff;
+    }
+
+    .calendar-day.empty {
+      background: transparent;
+    }
+
+    .calendar-day.outside {
+      color: #ccc;
+      background: transparent;
+    }
+
+    .calendar-day.weekend-day {
+      background: #eef2f5;
+    }
+
+    .calendar-day.lesson-day {
+      background: #43b581;
+      color: white;
+      font-weight: 700;
+    }
+
+    .calendar-day.holiday-day {
+      background: #e0645f;
+      color: white;
+    }
+
+    .calendar-day .day-num {
+      line-height: 1.1;
+    }
+
+    .calendar-day .day-badge {
+      font-size: 0.78em;
+      font-weight: 600;
+      line-height: 1;
+      margin-top: 1px;
+    }
+
+    @media (max-width: 640px) {
+      .calendar-grid-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* Модальні вікна (перейменування/підтвердження) у стилі сайту */
     .modal-overlay {
       position: fixed;
@@ -1048,10 +1184,22 @@
               <span class="stat-label">Всього</span>
             </div>
           </div>
+          <div class="view-toggle" id="view-toggle" style="display: none;">
+            <button class="quick-btn active" id="btn-view-list" onclick="setViewMode('list')"><svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Список</button>
+            <button class="quick-btn inactive" id="btn-view-calendar" onclick="setViewMode('calendar')"><svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 9h18" stroke="currentColor" stroke-width="1.5"/><rect x="6" y="12" width="2.5" height="2.5" fill="currentColor"/><rect x="10.75" y="12" width="2.5" height="2.5" fill="currentColor"/><rect x="15.5" y="12" width="2.5" height="2.5" fill="currentColor"/></svg>Календар</button>
+          </div>
           <div id="result">
             <p>Оберіть потрібні дні тижня та кількість уроків на перший та другий тижень (за необхідності).</p>
             Група в Телеграм: <a href="https://t.me/ittchr  " target="_blank">https://t.me/ittchr  </a> 
 			або шукайте в Телеграм @ittchr</p>
+          </div>
+          <div id="calendar-view">
+            <div class="calendar-legend">
+              <span class="calendar-legend-item"><span class="calendar-legend-swatch lesson"></span>Дні уроків</span>
+              <span class="calendar-legend-item"><span class="calendar-legend-swatch holiday"></span>Канікули</span>
+              <span class="calendar-legend-item"><span class="calendar-legend-swatch weekend"></span>Вихідні</span>
+            </div>
+            <div id="calendar-grid-container" class="calendar-grid-wrapper"></div>
           </div>
           <div class="action-buttons" id="action-buttons" style="display: none;">
             <button class="btn copy-btn" onclick="copy()"><svg width="16" height="16" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="16" height="19" rx="2" fill="#fafafa" stroke="#90a4ae" stroke-width="1"/><rect x="8" y="1.5" width="8" height="4" rx="1.5" fill="#78909c"/><path d="M8 10h8M8 13h8M8 16h5" stroke="#00a8cc" stroke-width="1.5" stroke-linecap="round"/></svg>Копіювати</button>
@@ -1685,6 +1833,147 @@
       });
     });
 
+    // ==== Візуальний календар (сітка) ====
+
+    let viewMode = 'list'; // 'list' або 'calendar' — загальне налаштування вигляду
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      try { localStorage.setItem('teacherCalendarViewMode', mode); } catch (error) {}
+      applyViewMode();
+    }
+
+    function applyViewMode() {
+      const listBtn = document.getElementById('btn-view-list');
+      const calBtn = document.getElementById('btn-view-calendar');
+      const resultEl = document.getElementById('result');
+      const calendarEl = document.getElementById('calendar-view');
+
+      if (viewMode === 'calendar') {
+        listBtn.classList.remove('active'); listBtn.classList.add('inactive');
+        calBtn.classList.remove('inactive'); calBtn.classList.add('active');
+        resultEl.style.display = 'none';
+        calendarEl.style.display = 'block';
+      } else {
+        calBtn.classList.remove('active'); calBtn.classList.add('inactive');
+        listBtn.classList.remove('inactive'); listBtn.classList.add('active');
+        resultEl.style.display = 'block';
+        calendarEl.style.display = 'none';
+      }
+    }
+
+    function loadViewMode() {
+      try {
+        const saved = localStorage.getItem('teacherCalendarViewMode');
+        viewMode = saved === 'calendar' ? 'calendar' : 'list';
+      } catch (error) {
+        viewMode = 'list';
+      }
+      applyViewMode();
+    }
+
+    // Унікальний ключ дати (без часу) для мапи уроків/канікул
+    function dateKey(d) {
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    }
+
+    const MONTH_NAMES_UK = ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"];
+    const DAY_HEADERS_UK = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
+
+    // Малює класичну сітку календаря по місяцях між start і end,
+    // підсвічуючи дні уроків зеленим, а канікули червоним
+    function renderCalendarGrid(start, end, lessonMap) {
+      const container = document.getElementById('calendar-grid-container');
+      container.innerHTML = '';
+
+      let cur = new Date(start.getFullYear(), start.getMonth(), 1);
+      const last = new Date(end.getFullYear(), end.getMonth(), 1);
+
+      while (cur <= last) {
+        const year = cur.getFullYear();
+        const month = cur.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+
+        const monthEl = document.createElement('div');
+        monthEl.className = 'calendar-month';
+
+        const title = document.createElement('div');
+        title.className = 'calendar-month-title';
+        title.textContent = `${MONTH_NAMES_UK[month]} ${year}`;
+        monthEl.appendChild(title);
+
+        const headerEl = document.createElement('div');
+        headerEl.className = 'calendar-days-header';
+        DAY_HEADERS_UK.forEach(dn => {
+          const dEl = document.createElement('div');
+          dEl.className = 'calendar-day-name';
+          dEl.textContent = dn;
+          headerEl.appendChild(dEl);
+        });
+        monthEl.appendChild(headerEl);
+
+        const gridEl = document.createElement('div');
+        gridEl.className = 'calendar-days-grid';
+
+        for (let i = 0; i < firstWeekday; i++) {
+          const empty = document.createElement('div');
+          empty.className = 'calendar-day empty';
+          gridEl.appendChild(empty);
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dateObj = new Date(year, month, d);
+          dateObj.setHours(0, 0, 0, 0);
+          const inRange = dateObj >= start && dateObj <= end;
+          const weekdayIdx = (dateObj.getDay() + 6) % 7; // 0=Пн ... 6=Нд
+          const isWeekend = weekdayIdx >= 5;
+
+          const lessons = inRange ? (lessonMap[dateKey(dateObj)] || 0) : 0;
+          const isHoliday = inRange && holidays.some(h => {
+            const hs = new Date(h.s); hs.setHours(0, 0, 0, 0);
+            const he = new Date(h.e); he.setHours(0, 0, 0, 0);
+            return dateObj >= hs && dateObj <= he;
+          });
+
+          const dayEl = document.createElement('div');
+          let cls = 'calendar-day';
+          if (!inRange) {
+            cls += ' outside';
+          } else if (lessons > 0) {
+            cls += ' lesson-day';
+          } else if (isHoliday) {
+            cls += ' holiday-day';
+          } else if (isWeekend) {
+            cls += ' weekend-day';
+          }
+          dayEl.className = cls;
+
+          const numSpan = document.createElement('span');
+          numSpan.className = 'day-num';
+          numSpan.textContent = d;
+          dayEl.appendChild(numSpan);
+
+          if (lessons > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'day-badge';
+            badge.textContent = `${lessons}ур`;
+            dayEl.appendChild(badge);
+            dayEl.title = `${lessons} уроків`;
+          } else if (isHoliday) {
+            dayEl.title = 'Канікули';
+          }
+
+          gridEl.appendChild(dayEl);
+        }
+
+        monthEl.appendChild(gridEl);
+        container.appendChild(monthEl);
+
+        cur.setMonth(cur.getMonth() + 1);
+      }
+    }
+
     function generate() {
       const start = new Date(document.getElementById("start-date").value);
       const end = new Date(document.getElementById("end-date").value);
@@ -1723,11 +2012,15 @@
         `;
         document.getElementById("stats-container").style.display = "none";
         document.getElementById("action-buttons").style.display = "none";
+        document.getElementById("view-toggle").style.display = "none";
+        document.getElementById("result").style.display = "block";
+        document.getElementById("calendar-view").style.display = "none";
         playFadeIn(document.getElementById("result"));
         return;
       }
 
       const res = [];
+      const lessonMap = {}; // dateKey -> кількість уроків цього дня (для візуального календаря)
       let cur = new Date(start);
       cur.setHours(0, 0, 0, 0);
       const startWeek = getWeek(cur);
@@ -1758,6 +2051,7 @@
             for (let i = 0; i < lessons; i++) {
               res.push(dateStr);
             }
+            lessonMap[dateKey(cur)] = lessons;
           }
         }
         cur.setDate(cur.getDate() + 1);
@@ -1771,6 +2065,9 @@
         `;
         document.getElementById("stats-container").style.display = "none";
         document.getElementById("action-buttons").style.display = "none";
+        document.getElementById("view-toggle").style.display = "none";
+        document.getElementById("result").style.display = "block";
+        document.getElementById("calendar-view").style.display = "none";
         playFadeIn(document.getElementById("result"));
         return;
       }
@@ -1801,6 +2098,9 @@
       document.getElementById("result").textContent = res.join("\n");
       document.getElementById("stats-container").style.display = "grid";
       document.getElementById("action-buttons").style.display = "flex";
+      document.getElementById("view-toggle").style.display = "flex";
+      renderCalendarGrid(start, end, lessonMap);
+      applyViewMode();
       playFadeIn(
         document.getElementById("result"),
         document.getElementById("stats-container"),
@@ -1809,7 +2109,7 @@
     }
 
     function copy() {
-      const text = document.getElementById("result").innerText;
+      const text = document.getElementById("result").textContent;
       navigator.clipboard.writeText(text).then(() => {
         showNotification("Скопійовано!", "success");
       }).catch(() => {
@@ -1818,7 +2118,7 @@
     }
 
     function word() {
-      const text = document.getElementById("result").innerText;
+      const text = document.getElementById("result").textContent;
       const total = document.getElementById("total").textContent;
       const sem1 = document.getElementById("s1").textContent;
       const sem2 = document.getElementById("s2").textContent;
@@ -1868,6 +2168,7 @@
       currentClass = activeExists ? savedActiveClass : slots[0].id;
       renderClassTabs();
       loadPeriodState();
+      loadViewMode();
       loadClassState(currentClass);
       generate();
     };
