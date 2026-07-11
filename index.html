@@ -1,6 +1,38 @@
 <!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Календар для вчителя</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='4' width='18' height='17' rx='2' fill='%23fff' stroke='%2300a8cc' stroke-width='1.5'/%3E%3Crect x='3' y='4' width='18' height='5' rx='2' fill='%2300a8cc'/%3E%3C/svg%3E">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAuth, signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC5cXKIhMLN5oLjsFJKKA9PCt2U163bNtA",
+    authDomain: "tcalendar-725f2.firebaseapp.com",
+    projectId: "tcalendar-725f2",
+    storageBucket: "tcalendar-725f2.firebasestorage.app",
+    messagingSenderId: "899850397462",
+    appId: "1:899850397462:web:0956c591b053a9b0e69237"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  window._fbAuth = auth;
+  window._fbDb = db;
+  window._fbProvider = provider;
+  window._fbSignInWithPopup = signInWithPopup;
+  window._fbSignOut = signOut;
+  window._fbOnAuthStateChanged = onAuthStateChanged;
+  window._fbDoc = doc;
+  window._fbSetDoc = setDoc;
+  window._fbGetDoc = getDoc;
+
+  onAuthStateChanged(auth, (user) => {
+    if (window._fbAuthReady) window._fbAuthReady(user);
+  });
+</script>
 <style>
 :root{--blue:#1a73e8;--blue-light:#e8f0fe;--green:#34a853;--red:#ea4335;--orange:#fbbc04;--text:#202124;--text-secondary:#5f6368;--text-light:#70757a;--border:#dadce0;--border-light:#e8eaed;--bg-hover:#f1f3f4;--bg-surface:#fff;--bg-page:#f8f9fa;--shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.1);--shadow-lg:0 8px 30px rgba(0,0,0,.12);--radius:8px;--radius-lg:12px;--transition:.2s cubic-bezier(.4,0,.2,1);--sidebar-w:280px}
 [data-theme="dark"]{--blue:#8ab4f8;--blue-light:#1f2d3d;--green:#81c995;--red:#f28b82;--orange:#fdd663;--text:#e8eaed;--text-secondary:#9aa0a6;--text-light:#80868b;--border:#3c4043;--border-light:#2d2f31;--bg-hover:#35373a;--bg-surface:#202124;--bg-page:#171819;--shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 12px rgba(0,0,0,.4);--shadow-lg:0 8px 30px rgba(0,0,0,.5)}
@@ -285,6 +317,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 @keyframes syncPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
 .gdrive-sync-dot.syncing{background:var(--orange);animation:syncSpin 1s linear infinite}
 @keyframes syncSpin{0%{opacity:1}50%{opacity:.3}100%{opacity:1}}
+.fb-auth-loading{opacity:.6;pointer-events:none}
 .fab{position:fixed;bottom:22px;right:22px;width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;border:none;cursor:pointer;font-size:1.7em;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px color-mix(in srgb,var(--blue) 35%,transparent);transition:var(--transition);z-index:50}
 .fab:hover{transform:scale(1.1) rotate(90deg)}.fab:active{transform:scale(.95)}
 @media print{.sidebar,.gcal-header,.author-footer,.fab,.gcal-edit-btn{display:none!important}#home-view{height:auto;overflow:visible;flex-direction:column}.main-area{overflow:visible}.gcal-grid{overflow:visible}}
@@ -307,7 +340,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 <button class="sidebar-btn" onclick="toggleTheme()">&#9790; Тема</button>
 <button class="sidebar-btn" onclick="exportData()">&#8681; Експорт</button>
 <button class="sidebar-btn" onclick="importData()">&#8679; Імпорт</button>
-<button class="gdrive-btn" id="gdrive-btn" onclick="gdriveToggle()">&#9729; Диск</button>
+<button class="gdrive-btn" id="gdrive-btn" onclick="gdriveToggle()">&#9729; Хмара</button>
 </div></div>
 <div class="main-area">
 <div class="gcal-header">
@@ -931,30 +964,30 @@ document.addEventListener('touchstart',e=>{touchSX=e.touches[0].clientX;touchSY=
 document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-touchSX;const dy=e.changedTouches[0].clientY-touchSY;if(Math.abs(dx)>80&&Math.abs(dy)<50&&Date.now()-touchST<300){if(dx>0)navigatePrev();else navigateNext()}},{passive:true});
 window.onload=function(){loadTheme();loadNotes();loadLessonTypes();loadCustomTimes();loadDeletedLessons();loadHiddenClasses();loadSlots();loadBellSchedule();const sa=localStorage.getItem('teacherCalendarActiveClass');currentClass=slots.some(s=>s.id===sa)?sa:slots[0].id;renderClassTabs();loadPeriodState();loadViewMode();loadClassState(currentClass);loadDayOrder();loadWeekdayOrder();weekStartDate=getMonday(new Date());loadHomeView();renderSidebar();if(isMobile())closeSidebar();gdriveInit()};
 
-// ── Google Drive Sync ──────────────────────────────────────────────
-const GDRIVE_CLIENT_ID='444622918823-mscnohuekhlcsgu042cpi7thkve2lspu.apps.googleusercontent.com';
-const GDRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
-const GDRIVE_FILE_NAME='calendar_backup.json';
-let gdriveToken=null;
-let gdriveFileId=null;
-let gdriveSaveTimer=null;
-let gdriveUser=null;
+// ── Firebase Auth + Firestore Sync ────────────────────────────────
+let fbUser=null;
+let fbSaveTimer=null;
+const FB_DOC_NAME='calendarData';
+
+// Called by the Firebase module once auth state is known
+window._fbAuthReady=function(user){
+  fbUser=user;
+  if(user){
+    gdriveUser=user.displayName||user.email||'';
+    gdriveUpdateBtn(true);
+    gdriveLoad();
+  } else {
+    gdriveUpdateBtn(false);
+  }
+};
 
 function gdriveInit(){
-  try{
-    const saved=localStorage.getItem('gdriveToken');
-    const exp=localStorage.getItem('gdriveTokenExp');
-    if(saved&&exp&&Date.now()<parseInt(exp)){
-      gdriveToken=saved;
-      gdriveUser=localStorage.getItem('gdriveUser')||'';
-      gdriveUpdateBtn(true);
-      gdriveLoad();
-    }
-  }catch(e){}
+  // Auth state is handled via onAuthStateChanged in the module script above
+  // Nothing extra needed here
 }
 
 function gdriveToggle(){
-  if(gdriveToken){
+  if(fbUser){
     gdriveSignOut();
   } else {
     gdriveSignIn();
@@ -962,56 +995,42 @@ function gdriveToggle(){
 }
 
 function gdriveSignIn(){
-  if(!window.google){showNotification('Google API ще завантажується...','info');return;}
-  const client=google.accounts.oauth2.initTokenClient({
-    client_id:GDRIVE_CLIENT_ID,
-    scope:GDRIVE_SCOPE,
-    callback:(resp)=>{
-      if(resp.error){showNotification('Помилка входу: '+resp.error,'error');return;}
-      gdriveToken=resp.access_token;
-      const exp=Date.now()+(resp.expires_in||3600)*1000;
-      try{
-        localStorage.setItem('gdriveToken',gdriveToken);
-        localStorage.setItem('gdriveTokenExp',String(exp));
-      }catch(e){}
-      gdriveGetUserInfo();
-      gdriveUpdateBtn(true);
-      gdriveLoad();
-    }
+  const auth=window._fbAuth,provider=window._fbProvider,signIn=window._fbSignInWithPopup;
+  if(!auth){showNotification('Firebase ще завантажується...','info');return;}
+  const btn=document.getElementById('gdrive-btn');
+  if(btn)btn.classList.add('fb-auth-loading');
+  signIn(auth,provider).then(result=>{
+    // onAuthStateChanged will fire and call _fbAuthReady
+  }).catch(err=>{
+    showNotification('Помилка входу: '+err.message,'error');
+    if(btn)btn.classList.remove('fb-auth-loading');
   });
-  client.requestAccessToken({prompt:'consent'});
 }
 
 function gdriveSignOut(){
-  if(gdriveToken){
-    try{google.accounts.oauth2.revoke(gdriveToken,()=>{})}catch(e){}
-  }
-  gdriveToken=null;
-  gdriveFileId=null;
-  gdriveUser=null;
-  try{
-    localStorage.removeItem('gdriveToken');
-    localStorage.removeItem('gdriveTokenExp');
-    localStorage.removeItem('gdriveUser');
-    localStorage.removeItem('gdriveFileId');
-  }catch(e){}
-  gdriveUpdateBtn(false);
-  showNotification('Вийшли з Google Диску','info');
+  const auth=window._fbAuth,so=window._fbSignOut;
+  if(!auth)return;
+  so(auth).then(()=>{
+    fbUser=null;
+    gdriveUser=null;
+    gdriveUpdateBtn(false);
+    showNotification('Вийшли з Firebase','info');
+  }).catch(()=>{});
 }
 
 function gdriveUpdateBtn(signedIn){
   const btn=document.getElementById('gdrive-btn');
   if(!btn)return;
+  btn.classList.remove('fb-auth-loading');
   if(signedIn){
     const name=gdriveUser?gdriveUser.split(' ')[0]:'';
     btn.className='gdrive-btn signed-in';
-    btn.innerHTML='<span class="gdrive-sync-dot" id="gdrive-dot"></span>'+
-      (name?name:'Диск');
-    btn.title='Синхронізовано з Google Диском. Клік — вийти.';
+    btn.innerHTML='<span class="gdrive-sync-dot" id="gdrive-dot"></span>'+(name?name:'Хмара');
+    btn.title='Синхронізовано з Firebase. Клік — вийти.';
   } else {
     btn.className='gdrive-btn';
-    btn.innerHTML='&#9729; Диск';
-    btn.title='Увійти для синхронізації з Google Диском';
+    btn.innerHTML='&#9729; Хмара';
+    btn.title='Увійти через Google для синхронізації з Firebase';
   }
 }
 
@@ -1020,19 +1039,6 @@ function gdriveSetSyncing(on){
   if(!dot)return;
   if(on)dot.classList.add('syncing');
   else dot.classList.remove('syncing');
-}
-
-function gdriveGetUserInfo(){
-  if(!gdriveToken)return;
-  fetch('https://www.googleapis.com/oauth2/v3/userinfo',{
-    headers:{Authorization:'Bearer '+gdriveToken}
-  }).then(r=>r.json()).then(info=>{
-    if(info.name){
-      gdriveUser=info.name;
-      try{localStorage.setItem('gdriveUser',gdriveUser);}catch(e){}
-      gdriveUpdateBtn(true);
-    }
-  }).catch(()=>{});
 }
 
 function gdriveCollectData(){
@@ -1064,87 +1070,54 @@ function gdriveApplyData(d){
   if(homeView==='month')renderHomeCalendar();else renderWeekView();
 }
 
-async function gdriveFindFile(){
-  if(!gdriveToken)return null;
-  try{
-    const cached=localStorage.getItem('gdriveFileId');
-    if(cached){gdriveFileId=cached;return cached;}
-    const r=await fetch(
-      "https://www.googleapis.com/drive/v3/files?q=name%3D'"+GDRIVE_FILE_NAME+"'+and+trashed%3Dfalse&fields=files(id,name)&spaces=drive",
-      {headers:{Authorization:'Bearer '+gdriveToken}}
-    );
-    if(!r.ok)return null;
-    const data=await r.json();
-    if(data.files&&data.files.length>0){
-      gdriveFileId=data.files[0].id;
-      try{localStorage.setItem('gdriveFileId',gdriveFileId);}catch(e){}
-      return gdriveFileId;
-    }
-    return null;
-  }catch(e){return null;}
-}
-
+// Firestore helpers — wrap each key-value in a top-level field to avoid
+// Firestore's 1 MiB document limit issues with deeply nested data.
+// We store the whole payload as a single JSON string field.
 async function gdriveLoad(){
-  if(!gdriveToken)return;
+  if(!fbUser)return;
+  const db=window._fbDb,docFn=window._fbDoc,getDocFn=window._fbGetDoc;
+  if(!db)return;
   gdriveSetSyncing(true);
   try{
-    const fileId=await gdriveFindFile();
-    if(!fileId){
-      gdriveSetSyncing(false);
-      gdriveSave();
-      return;
+    const ref=docFn(db,'users',fbUser.uid,'data',FB_DOC_NAME);
+    const snap=await getDocFn(ref);
+    if(snap.exists()){
+      const raw=snap.data().payload;
+      if(raw){
+        const d=JSON.parse(raw);
+        gdriveApplyData(d);
+        showNotification('Дані завантажено з Firebase','success');
+      }
+    } else {
+      // First login — push current local data
+      await gdriveSave();
     }
-    const r=await fetch('https://www.googleapis.com/drive/v3/files/'+fileId+'?alt=media',{
-      headers:{Authorization:'Bearer '+gdriveToken}
-    });
-    if(!r.ok){gdriveSetSyncing(false);return;}
-    const d=await r.json();
-    gdriveApplyData(d);
-    showNotification('Дані завантажено з Google Диску','success');
   }catch(e){
-    showNotification('Помилка завантаження з Диску','error');
+    showNotification('Помилка завантаження з Firebase','error');
+    console.error(e);
   }
   gdriveSetSyncing(false);
 }
 
 async function gdriveSave(){
-  if(!gdriveToken)return;
+  if(!fbUser)return;
+  const db=window._fbDb,docFn=window._fbDoc,setDocFn=window._fbSetDoc;
+  if(!db)return;
   gdriveSetSyncing(true);
   try{
-    const body=JSON.stringify(gdriveCollectData(),null,2);
-    const blob=new Blob([body],{type:'application/json'});
-    const fileId=await gdriveFindFile();
-    let r;
-    if(fileId){
-      r=await fetch('https://www.googleapis.com/upload/drive/v3/files/'+fileId+'?uploadType=media',{
-        method:'PATCH',
-        headers:{Authorization:'Bearer '+gdriveToken,'Content-Type':'application/json'},
-        body:blob
-      });
-    } else {
-      const meta=new Blob([JSON.stringify({name:GDRIVE_FILE_NAME,mimeType:'application/json'})],{type:'application/json'});
-      const form=new FormData();
-      form.append('metadata',meta);
-      form.append('file',blob);
-      r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',{
-        method:'POST',
-        headers:{Authorization:'Bearer '+gdriveToken},
-        body:form
-      });
-      if(r.ok){
-        const res=await r.json();
-        gdriveFileId=res.id;
-        try{localStorage.setItem('gdriveFileId',gdriveFileId);}catch(e){}
-      }
-    }
-  }catch(e){}
+    const payload=JSON.stringify(gdriveCollectData());
+    const ref=docFn(db,'users',fbUser.uid,'data',FB_DOC_NAME);
+    await setDocFn(ref,{payload,updatedAt:Date.now()});
+  }catch(e){
+    console.error('Firebase save error',e);
+  }
   gdriveSetSyncing(false);
 }
 
 function gdriveScheduleSave(){
-  if(!gdriveToken)return;
-  clearTimeout(gdriveSaveTimer);
-  gdriveSaveTimer=setTimeout(gdriveSave,3000);
+  if(!fbUser)return;
+  clearTimeout(fbSaveTimer);
+  fbSaveTimer=setTimeout(gdriveSave,3000);
 }
 
 // Патчимо всі функції збереження щоб тригерити синк
