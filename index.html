@@ -320,7 +320,71 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .fb-auth-loading{opacity:.6;pointer-events:none}
 .fab{position:fixed;bottom:22px;right:22px;width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;border:none;cursor:pointer;font-size:1.7em;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px color-mix(in srgb,var(--blue) 35%,transparent);transition:var(--transition);z-index:50}
 .fab:hover{transform:scale(1.1) rotate(90deg)}.fab:active{transform:scale(.95)}
-@media print{.sidebar,.gcal-header,.author-footer,.fab,.gcal-edit-btn{display:none!important}#home-view{height:auto;overflow:visible;flex-direction:column}.main-area{overflow:visible}.gcal-grid{overflow:visible}}
+.gcal-print-btn{background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border);padding:7px 14px;border-radius:var(--radius);cursor:pointer;font-size:.85em;font-weight:500;font-family:inherit;transition:var(--transition);display:flex;align-items:center;gap:5px}
+.gcal-print-btn:hover{background:var(--bg-hover);color:var(--text)}
+.header-actions{display:flex;align-items:center;gap:7px}
+
+/* ── Print preview overlay ── */
+#print-overlay{display:none;position:fixed;inset:0;z-index:4000;background:var(--bg-page);overflow-y:auto;padding:24px}
+#print-overlay.visible{display:block}
+.print-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.print-toolbar-title{font-size:1.05em;font-weight:700;color:var(--text);flex:1}
+.print-toolbar-btn{padding:7px 18px;border-radius:var(--radius);border:none;cursor:pointer;font-size:.88em;font-weight:600;font-family:inherit;transition:var(--transition)}
+.print-toolbar-btn.primary{background:var(--blue);color:#fff;box-shadow:var(--shadow-sm)}
+.print-toolbar-btn.primary:hover{filter:brightness(.92)}
+.print-toolbar-btn.secondary{background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border)}
+.print-toolbar-btn.secondary:hover{background:var(--bg-hover)}
+.print-hint{font-size:.78em;color:var(--text-secondary);background:color-mix(in srgb,var(--orange) 12%,var(--bg-surface));border:1px solid color-mix(in srgb,var(--orange) 35%,transparent);border-radius:var(--radius);padding:5px 10px;line-height:1.4;flex:1}
+.print-mono-toggle{display:flex;align-items:center;gap:7px;font-size:.85em;color:var(--text-secondary);cursor:pointer;user-select:none;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-surface);transition:var(--transition)}
+.print-mono-toggle:hover{background:var(--bg-hover);color:var(--text)}
+.print-mono-toggle input{width:15px;height:15px;cursor:pointer;accent-color:var(--blue)}
+
+/* Монохромний режим */
+#print-doc.mono .print-doc-header{background:#fff!important;color:#111!important;border-bottom:2px solid #111!important}
+#print-doc.mono .print-cell-lesson{background:transparent!important;border:1.5px solid #333!important}
+#print-doc.mono .print-cell-name{color:#111!important}
+#print-doc.mono .print-cell-time{color:#444!important}
+#print-doc.mono td.weekend-col{background:#f5f5f5!important}
+#print-doc.mono td.today-col{background:#f0f0f0!important}
+#print-doc.mono .print-week-table th{background:#e8e8e8!important;color:#111!important}
+#print-doc.mono .print-holiday-cell{color:#333!important}
+#print-doc.mono span[style*="background:"]{background:transparent!important;border:1.5px solid #333!important}
+#print-doc.mono .print-legend{display:none!important}
+
+/* ── Print document ── */
+#print-doc{background:#fff;color:#111;max-width:900px;margin:0 auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+.print-doc-header{background:#1a73e8;color:#fff;padding:16px 22px;display:flex;align-items:center;justify-content:space-between}
+.print-doc-title{font-size:1.2em;font-weight:700;letter-spacing:.2px}
+.print-doc-subtitle{font-size:.85em;opacity:.85;margin-top:2px}
+.print-doc-meta{font-size:.78em;opacity:.75;text-align:right}
+.print-week-table{width:100%;border-collapse:collapse;font-family:'Segoe UI',Roboto,sans-serif;font-size:1em}
+.print-week-table th{background:#f1f3f4;color:#444;font-weight:700;padding:8px 10px;border:1px solid #ddd;text-align:center;font-size:.88em;text-transform:uppercase;letter-spacing:.5px}
+.print-week-table th.day-col{min-width:110px}
+.print-week-table td{border:1px solid #e8eaed;padding:6px 8px;vertical-align:top;min-height:36px}
+.print-week-table td.time-cell{background:#f8f9fa;color:#5f6368;font-weight:700;font-size:.88em;text-align:center;white-space:nowrap;padding:6px 6px;font-variant-numeric:tabular-nums;min-width:72px}
+.print-cell-lesson{display:flex;flex-direction:column;gap:1px;padding:3px 5px;border-radius:4px;margin-bottom:2px}
+.print-cell-lesson:last-child{margin-bottom:0}
+.print-cell-name{font-weight:700;font-size:1em;color:#fff;line-height:1.3}
+.print-cell-time{font-size:.85em;color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums}
+td.weekend-col{background:#fff8f8}
+td.today-col{background:#e8f0fe}
+.print-holiday-cell{font-size:.75em;color:#ea4335;font-style:italic;font-weight:600;text-align:center;padding:4px 0}
+.print-empty-cell{color:#bbb;font-size:.72em;text-align:center;font-style:italic}
+.print-footer{padding:10px 22px;font-size:.72em;color:#999;border-top:1px solid #eee;text-align:right}
+
+/* ── @media print: hide everything, show only #print-doc ── */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body>*:not(#print-overlay){display:none!important}
+  #print-overlay{display:block!important;position:static!important;padding:0!important;background:#fff!important;overflow:visible!important}
+  .print-toolbar{display:none!important}
+  #print-doc{border:none!important;box-shadow:none!important;border-radius:0!important;max-width:100%!important}
+  .print-doc-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#1a73e8!important;color:#fff!important}
+  #print-doc.mono .print-doc-header{background:#fff!important;color:#111!important;border-bottom:2px solid #111!important}
+  .print-cell-lesson{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #print-doc.mono .print-cell-lesson{background:transparent!important;border:1.5px solid #333!important}
+  @page{margin:10mm;size:A4 landscape}
+}
 @media(max-width:900px){.sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;box-shadow:var(--shadow-lg)}.sidebar.collapsed{transform:translateX(-100%);width:var(--sidebar-w)}.sidebar-overlay{display:block}.gcal-header{padding:7px 10px;gap:5px;flex-wrap:wrap}.gcal-title{font-size:1.05em}.gcal-today-btn{padding:5px 10px;font-size:.8em}.gcal-edit-btn{padding:6px 12px;font-size:.8em}.gcal-view-btn{padding:5px 10px;font-size:.78em}.gcal-cell-date{width:22px;height:22px;font-size:.76em}.gcal-event{font-size:.62em;padding:1px 3px}}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99;backdrop-filter:blur(2px);animation:fadeIn .2s}
 @media(max-width:640px){.gcal-header{padding:5px 7px}.gcal-title{font-size:.9em}.gcal-nav-btn{width:28px;height:28px;font-size:1em}.gcal-weekday{font-size:.6em;padding:3px 0}.gcal-cell-date{width:18px;height:18px;font-size:.68em}.gcal-event{font-size:.55em;padding:1px 2px;border-left-width:2px}.main-grid{grid-template-columns:1fr}.days-grid{grid-template-columns:repeat(3,1fr)}.period-holidays-grid{grid-template-columns:1fr}.fab{width:44px;height:44px;font-size:1.4em;bottom:14px;right:14px}}
@@ -346,7 +410,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 <div class="gcal-header">
 <div class="header-left"><button class="sidebar-toggle-btn" onclick="toggleSidebar()">&#9776;</button><div class="gcal-title"><span class="month-year" id="gcal-month-year"></span></div></div>
 <div class="gcal-controls"><button class="gcal-today-btn" onclick="goToToday()">Сьогодні</button><button class="gcal-nav-btn" onclick="navigatePrev()">&#8249;</button><button class="gcal-nav-btn" onclick="navigateNext()">&#8250;</button><div class="gcal-view-toggle"><button class="gcal-view-btn active" id="btn-view-month" onclick="setHomeView('month')">Місяць</button><button class="gcal-view-btn" id="btn-view-week" onclick="setHomeView('week')">Тиждень</button></div></div>
-<div class="header-actions"><button class="gcal-edit-btn" onclick="enterEditMode()">&#9998; Редагувати</button></div>
+<div class="header-actions"><button class="gcal-print-btn" id="gcal-print-btn" onclick="printWeekSchedule()" title="Роздрукувати розклад тижня">&#128438; Друк</button><button class="gcal-edit-btn" onclick="enterEditMode()">&#9998; Редагувати</button></div>
 </div>
 <div id="month-view"><div class="gcal-weekdays" id="gcal-weekdays"></div><div class="gcal-grid" id="gcal-grid"></div></div>
 <div class="week-view" id="week-view"><div class="week-header" id="week-header"></div><div class="week-body" id="week-body"><div class="week-grid" id="week-grid"></div></div></div>
@@ -363,6 +427,16 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 </div></div></div></div>
 <button class="fab" id="fab-edit" onclick="enterEditMode()" title="Редагувати">+</button>
 <input type="file" id="import-file-input" accept=".json" style="display:none">
+<div id="print-overlay">
+  <div class="print-toolbar">
+    <span class="print-toolbar-title" id="print-overlay-title">&#128438; Друк розкладу</span>
+    <span class="print-hint">&#9432; У діалозі друку: <b>Додаткові налаштування → вимкніть «Колонтитули»</b></span>
+    <label class="print-mono-toggle"><input type="checkbox" id="print-mono-cb" onchange="togglePrintMono(this.checked)"> Монохром</label>
+    <button class="print-toolbar-btn primary" onclick="window.print()">&#128438; Роздрукувати / PDF</button>
+    <button class="print-toolbar-btn secondary" onclick="closePrintOverlay()">&#10005; Закрити</button>
+  </div>
+  <div id="print-doc"></div>
+</div>
 <script>
 let holidays=[],currentPeriod='semester1',slots=[],currentClass=null,homeYear=new Date().getFullYear(),homeMonth=new Date().getMonth(),homeView='month',weekStartDate=null,cachedAllData=null,hiddenClasses=new Set(),dayNotes={},lessonTypes={},lessonDayOrder={},lessonWeekdayOrder={},customLessonTimes={},deletedLessons={};
 const CLASS_COLORS=['#1a73e8','#34a853','#fbbc04','#ea4335','#a142f4','#009688','#e8710a','#9334e6','#f538a0','#185abc'];
@@ -374,7 +448,7 @@ const MONTH_NAMES_UK_GEN=['\u0441\u0456\u0447\u043d\u044f','\u043b\u044e\u0442\u
 const DAY_HEADERS_UK=['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431','\u041d\u0434'];
 const dayNamesList=['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431'];
 const LESSON_TYPES=[{id:'lesson',label:'\u0423\u0440\u043e\u043a'},{id:'test',label:'\u0422\u0435\u0441\u0442'},{id:'lab',label:'\u041b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u043d\u0430'},{id:'control',label:'\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u044c\u043d\u0430'},{id:'reading',label:'\u0427\u0438\u0442\u0430\u043d\u043d\u044f'},{id:'listening',label:'\u0410\u0443\u0434\u0456\u044e\u0432\u0430\u043d\u043d\u044f'},{id:'writing',label:'\u041f\u0438\u0441\u044c\u043c\u043e'},{id:'speaking',label:'\u0413\u043e\u0432\u043e\u0440\u0456\u043d\u043d\u044f'},{id:'dictation',label:'\u0414\u0438\u043a\u0442\u0430\u043d\u0442'},{id:'independent',label:'\u0421\u0430\u043c\u043e\u0441\u0442\u0456\u0439\u043d\u0430'},{id:'practical',label:'\u041f\u0440\u0430\u043a\u0442\u0438\u0447\u043d\u0430'},{id:'creative',label:'\u0422\u0432\u043e\u0440\u0447\u0430'},{id:'diagnostic',label:'\u0414\u0456\u0430\u0433\u043d\u043e\u0441\u0442\u0443\u0432\u0430\u043b\u044c\u043d\u0430'},{id:'sync',label:'\u0421\u0438\u043d\u0445\u0440\u043e\u043d\u043d\u043e'},{id:'async',label:'\u0410\u0441\u0438\u043d\u0445\u0440\u043e\u043d\u043d\u043e'}];
-const currentYear=new Date().getFullYear(),HOUR_HEIGHT=60,DAY_START_HOUR=7,DAY_END_HOUR=19,dayCheckboxes=['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431'];
+const currentYear=new Date().getFullYear(),HOUR_HEIGHT=60,DAY_START_HOUR=6,DAY_END_HOUR=21,dayCheckboxes=['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431'];
 function dateKey(d){return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()}
 function getWeek(date){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()+4-(d.getDay()||7));const y=new Date(d.getFullYear(),0,1);return Math.ceil(((d-y)/864e5+1)/7)}
 function getMonday(d){const date=new Date(d);const day=date.getDay();date.setDate(date.getDate()-day+(day===0?-6:1));date.setHours(0,0,0,0);return date}
@@ -963,6 +1037,142 @@ let touchSX=0,touchSY=0,touchST=0;
 document.addEventListener('touchstart',e=>{touchSX=e.touches[0].clientX;touchSY=e.touches[0].clientY;touchST=Date.now()},{passive:true});
 document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-touchSX;const dy=e.changedTouches[0].clientY-touchSY;if(Math.abs(dx)>80&&Math.abs(dy)<50&&Date.now()-touchST<300){if(dx>0)navigatePrev();else navigateNext()}},{passive:true});
 window.onload=function(){loadTheme();loadNotes();loadLessonTypes();loadCustomTimes();loadDeletedLessons();loadHiddenClasses();loadSlots();loadBellSchedule();const sa=localStorage.getItem('teacherCalendarActiveClass');currentClass=slots.some(s=>s.id===sa)?sa:slots[0].id;renderClassTabs();loadPeriodState();loadViewMode();loadClassState(currentClass);loadDayOrder();loadWeekdayOrder();weekStartDate=getMonday(new Date());loadHomeView();renderSidebar();if(isMobile())closeSidebar();gdriveInit()};
+
+// ── Друк розкладу тижня ──────────────────────────────────────────
+function closePrintOverlay(){
+  const ov=document.getElementById('print-overlay');
+  if(ov)ov.classList.remove('visible');
+}
+
+function printWeekSchedule(){
+  // Визначаємо тиждень (використовуємо weekStartDate, або поточний якщо місячний вигляд)
+  const ws=weekStartDate||getMonday(new Date());
+  if(!cachedAllData)cachedAllData=buildAllClassesData();
+  const{period,allDayMap,classColorMap}=cachedAllData;
+
+  // Заголовок: діапазон дат тижня
+  const we=new Date(ws);we.setDate(we.getDate()+6);
+  const fmtD=d=>d.getDate()+' '+['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'][d.getMonth()];
+  const weekLabel=fmtD(ws)+' \u2013 '+fmtD(we)+' '+we.getFullYear();
+  const today=new Date();today.setHours(0,0,0,0);
+
+  // Збираємо дані по кожному дню (Пн-Нд)
+  const days=[];
+  for(let i=0;i<7;i++){
+    const dt=new Date(ws);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);
+    const dk=dateKey(dt);
+    const inRange=dt>=period.start&&dt<=period.end;
+    const dC=inRange?(allDayMap[dk]||[]):[];
+    const isHol=inRange&&isDateInHoliday(dt,period.holidays);
+    const isWE=(dt.getDay()+6)%7>=5;
+    const isToday=dt.getTime()===today.getTime();
+    const allL=dC.length>0?buildDayOrderList(dC):[];
+    const totalSlots=dC.length>0?Math.max(allL.length,bellSchedule.length):0;
+    const slotArr=dC.length>0?getSlotOrder(dk,allL,totalSlots):[];
+    days.push({dt,dk,dC,allL,totalSlots,slotArr,isHol,isWE,isToday,inRange});
+  }
+
+  // Прибираємо вихідні без уроків
+  const printDays=days.filter(d=>!(d.isWE&&d.dC.length===0));
+
+  // Максимальна кількість слотів — кількість рядків таблиці
+  const maxSlots=Math.max(bellSchedule.length,...printDays.map(d=>d.totalSlots),1);
+
+  const DAY_NAMES_FULL=['\u041f\u043e\u043d\u0435\u0434\u0456\u043b\u043e\u043a','\u0412\u0456\u0432\u0442\u043e\u0440\u043e\u043a','\u0421\u0435\u0440\u0435\u0434\u0430','\u0427\u0435\u0442\u0432\u0435\u0440','\u041f\u02bc\u044f\u0442\u043d\u0438\u0446\u044f','\u0421\u0443\u0431\u043e\u0442\u0430','\u041d\u0435\u0434\u0456\u043b\u044f'];
+
+  // ── Будуємо HTML таблиці ──
+  let thead='<tr><th style="min-width:72px">\u0423\u0440\u043e\u043a</th>';
+  printDays.forEach((d,i)=>{
+    const wi=(d.dt.getDay()+6)%7;
+    const dayName=DAY_NAMES_FULL[wi];
+    const dateStr=d.dt.getDate()+' '+['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'][d.dt.getMonth()];
+    const todayStar=d.isToday?' \u2605':'';
+    thead+='<th class="day-col'+(d.isWE?' weekend-col':'')+(d.isToday?' today-col':'')+'" style="min-width:110px">'+dayName+'<br><span style="font-weight:400;font-size:.88em;text-transform:none;letter-spacing:0">'+dateStr+todayStar+'</span></th>';
+  });
+  thead+='</tr>';
+
+  let tbody='';
+  for(let si=0;si<maxSlots;si++){
+    const bell=bellSchedule[si]||null;
+    const timeLabel=bell?(bell.start+'<br><span style="opacity:.7;font-size:.88em">\u2013'+bell.end+'</span>'):(si+1+'\u0443\u0440');
+    let row='<tr><td class="time-cell"><b>'+(si+1)+'</b><br>'+timeLabel+'</td>';
+    printDays.forEach(d=>{
+      const wi=(d.dt.getDay()+6)%7;
+      let cls='';
+      if(wi>=5)cls+=' weekend-col';
+      if(d.isToday)cls+=' today-col';
+      let cell='';
+      if(!d.inRange){
+        cell='<span class="print-empty-cell">\u2014</span>';
+      } else if(d.isHol&&d.dC.length===0){
+        if(si===0)cell='<span class="print-holiday-cell">\uD83C\uDFD6\uFE0F \u041A\u0430\u043D\u0456\u043A\u0443\u043B\u0438</span>';
+      } else {
+        const key=d.slotArr[si];
+        if(key){
+          const p=key.split(':');
+          const cid=p[0];
+          if(!isLessonDeletedFull(d.dk,cid)){
+            const les=d.allL.find(l=>l.classId===cid&&l.origIdx===parseInt(p[1],10));
+            if(les){
+              const color=classColorMap[cid]||'#1a73e8';
+              const b=getBellForSlot(d.dk,si);
+              const hasCustomT=!!getCustomTime(d.dk,si);
+              cell='<div class="print-cell-lesson" style="background:'+color+'">'+
+                '<span class="print-cell-name">'+escapeHtml(les.className)+'</span>'+
+                '<span class="print-cell-time">'+b.start+' \u2013 '+b.end+(hasCustomT?' \u23F0':'')+' </span>'+
+                '</div>';
+            }
+          }
+        }
+      }
+      if(!cell)cell='<span class="print-empty-cell"></span>';
+      row+='<td'+( cls?' class="'+cls.trim()+'"':'')+'>'+cell+'</td>';
+    });
+    row+='</tr>';
+    tbody+=row;
+  }
+
+  // Легенда класів
+  let legend='<div class="print-legend" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px 22px;border-top:1px solid #eee">';
+  slots.forEach((slot,idx)=>{
+    if(hiddenClasses.has(slot.id))return;
+    const color=classColorMap[slot.id]||CLASS_COLORS[idx%CLASS_COLORS.length];
+    legend+='<span style="display:inline-flex;align-items:center;gap:5px;font-size:.78em;color:#444">'+
+      '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+color+'"></span>'+
+      escapeHtml(slot.name)+'</span>';
+  });
+  legend+='</div>';
+
+  const printedAt=new Date().toLocaleString('uk',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  const doc=document.getElementById('print-doc');
+  // зберігаємо mono-стан якщо вже був відкритий
+  const wasMono=doc.classList.contains('mono');
+  doc.innerHTML=
+    '<div class="print-doc-header">'+
+      '<div>'+
+        '<div class="print-doc-title">\uD83D\uDCC5 \u0420\u043e\u0437\u043A\u043B\u0430\u0434 \u0442\u0438\u0436\u043D\u044F</div>'+
+      '</div>'+
+      '<div class="print-doc-meta">\u0420\u043e\u0437\u0434\u0440\u0443\u043A\u043E\u0432\u0430\u043D\u043E: '+printedAt+'</div>'+
+    '</div>'+
+    legend+
+    '<table class="print-week-table"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>'+
+    '<div class="print-footer">\u041A\u0430\u043B\u0435\u043D\u0434\u0430\u0440 \u0432\u0447\u0438\u0442\u0435\u043B\u044F \u2014 codenamexxv.github.io/teacher/</div>';
+
+  if(wasMono)doc.classList.add('mono');
+  document.getElementById('print-overlay-title').textContent='\uD83D\uDDA8 \u0420\u043e\u0437\u043A\u043B\u0430\u0434 \u0442\u0438\u0436\u043D\u044F';
+  const ov=document.getElementById('print-overlay');
+  ov.classList.add('visible');
+  ov.scrollTop=0;
+}
+
+function togglePrintMono(on){
+  const doc=document.getElementById('print-doc');
+  if(!doc)return;
+  if(on)doc.classList.add('mono');
+  else doc.classList.remove('mono');
+}
+// ── Кінець блоку друку ───────────────────────────────────────────
 
 // ── Firebase Auth + Firestore Sync ────────────────────────────────
 let fbUser=null;
