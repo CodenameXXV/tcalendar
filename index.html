@@ -1559,7 +1559,9 @@ function gdriveInit(){
 
 function gdriveToggle(){
   if(fbUser){
-    gdriveSignOut();
+    showConfirmModal({title:'Вийти з акаунту?', message:'Ви дійсно бажаєте вийти?', confirmText:'Вийти'}).then(ok=>{
+      if(ok) gdriveSignOut();
+    });
   } else {
     gdriveSignIn();
   }
@@ -1567,7 +1569,7 @@ function gdriveToggle(){
 
 function gdriveSignIn(){
   const auth=window._fbAuth,provider=window._fbProvider,signIn=window._fbSignInWithPopup;
-  if(!auth){showNotification('Firebase ще завантажується...','info');return;}
+  if(!auth){showNotification('Сервіс ще завантажується...','info');return;}
   const btn=document.getElementById('gdrive-btn');
   if(btn)btn.classList.add('fb-auth-loading');
   signIn(auth,provider).then(result=>{
@@ -1585,7 +1587,7 @@ function gdriveSignOut(){
     fbUser=null;
     gdriveUser=null;
     gdriveUpdateBtn(false);
-    showNotification('Вийшли з Firebase','info');
+    showNotification('Вийшли з акаунту','info');
   }).catch(()=>{});
 }
 
@@ -1597,7 +1599,7 @@ function gdriveUpdateBtn(signedIn){
     const name=gdriveUser?gdriveUser.split(' ')[0]:'';
     btn.className='gdrive-btn signed-in';
     btn.innerHTML='<span class="gdrive-sync-dot" id="gdrive-dot"></span>'+(name?name:'Онлайн');
-    btn.title='Синхронізовано з Firebase. Клік — вийти.';
+    btn.title='Синхронізовано з хмарою. Клік — вийти.';
   } else {
     btn.className='gdrive-btn';
     btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Увійти';
