@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Календар для вчителя</title>
+ <!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Календар для вчителя</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='4' width='18' height='17' rx='2' fill='%23fff' stroke='%2300a8cc' stroke-width='1.5'/%3E%3Crect x='3' y='4' width='18' height='5' rx='2' fill='%2300a8cc'/%3E%3C/svg%3E">
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
@@ -401,7 +401,6 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 #print-doc.mono .print-cell-name{color:#111!important}
 #print-doc.mono .print-cell-time{color:#444!important}
 #print-doc.mono td.weekend-col{background:#f5f5f5!important}
-#print-doc.mono td.today-col{background:#f0f0f0!important}
 #print-doc.mono .print-week-table th{background:#e8e8e8!important;color:#111!important}
 #print-doc.mono .print-holiday-cell{color:#333!important}
 #print-doc.mono span[style*="background:"]{background:transparent!important;border:1.5px solid #333!important}
@@ -423,7 +422,6 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .print-cell-name{font-weight:700;font-size:1em;color:#fff;line-height:1.3}
 .print-cell-time{font-size:.85em;color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums}
 td.weekend-col{background:#fff8f8}
-td.today-col{background:#e8f0fe}
 .print-holiday-cell{font-size:.75em;color:#ea4335;font-style:italic;font-weight:600;text-align:center;padding:4px 0}
 .print-empty-cell{color:#bbb;font-size:.72em;text-align:center;font-style:italic}
 .print-footer{padding:10px 22px;font-size:.72em;color:#999;border-top:1px solid #eee;text-align:right}
@@ -1418,7 +1416,6 @@ function printWeekSchedule(){
   const we=new Date(ws);we.setDate(we.getDate()+6);
   const fmtD=d=>d.getDate()+' '+['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'][d.getMonth()];
   const weekLabel=fmtD(ws)+' \u2013 '+fmtD(we)+' '+we.getFullYear();
-  const today=new Date();today.setHours(0,0,0,0);
 
   // Збираємо дані по кожному дню (Пн-Нд)
   const days=[];
@@ -1429,11 +1426,10 @@ function printWeekSchedule(){
     const dC=inRange?(allDayMap[dk]||[]):[];
     const isHol=inRange&&isDateInHoliday(dt,period.holidays);
     const isWE=(dt.getDay()+6)%7>=5;
-    const isToday=dt.getTime()===today.getTime();
     const allL=dC.length>0?buildDayOrderList(dC):[];
     const totalSlots=dC.length>0?Math.max(allL.length,bellSchedule.length):0;
     const slotArr=dC.length>0?getSlotOrder(dk,allL,totalSlots):[];
-    days.push({dt,dk,dC,allL,totalSlots,slotArr,isHol,isWE,isToday,inRange});
+    days.push({dt,dk,dC,allL,totalSlots,slotArr,isHol,isWE,inRange});
   }
 
   // Прибираємо вихідні без уроків
@@ -1450,8 +1446,7 @@ function printWeekSchedule(){
     const wi=(d.dt.getDay()+6)%7;
     const dayName=DAY_NAMES_FULL[wi];
     const dateStr=d.dt.getDate()+' '+['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'][d.dt.getMonth()];
-    const todayStar=d.isToday?' \u2605':'';
-    thead+='<th class="day-col'+(d.isWE?' weekend-col':'')+(d.isToday?' today-col':'')+'" style="min-width:110px">'+dayName+'<br><span style="font-weight:400;font-size:.88em;text-transform:none;letter-spacing:0">'+dateStr+todayStar+'</span></th>';
+    thead+='<th class="day-col'+(d.isWE?' weekend-col':'')+'" style="min-width:110px">'+dayName+'<br><span style="font-weight:400;font-size:.88em;text-transform:none;letter-spacing:0">'+dateStr+'</span></th>';
   });
   thead+='</tr>';
 
@@ -1461,10 +1456,8 @@ function printWeekSchedule(){
     const timeLabel=bell?(bell.start+'<br><span style="opacity:.7;font-size:.88em">\u2013'+bell.end+'</span>'):(si+1+'\u0443\u0440');
     let row='<tr><td class="time-cell"><b>'+(si+1)+'</b><br>'+timeLabel+'</td>';
     printDays.forEach(d=>{
-      const wi=(d.dt.getDay()+6)%7;
       let cls='';
-      if(wi>=5)cls+=' weekend-col';
-      if(d.isToday)cls+=' today-col';
+      if(d.isWE)cls+=' weekend-col';
       let cell='';
       if(!d.inRange){
         cell='<span class="print-empty-cell">\u2014</span>';
