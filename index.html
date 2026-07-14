@@ -371,8 +371,16 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .share-hint{font-size:.78em;color:var(--text-secondary);line-height:1.5;background:color-mix(in srgb,var(--green) 10%,var(--bg-surface));border:1px solid color-mix(in srgb,var(--green) 30%,transparent);border-radius:var(--radius);padding:8px 12px;margin-bottom:14px}
 .share-revoke-btn{display:block;width:100%;margin-top:8px;padding:7px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:var(--radius);cursor:pointer;font-size:.82em;font-weight:600;font-family:inherit;transition:var(--transition)}
 .share-revoke-btn:hover{background:color-mix(in srgb,var(--red) 10%,transparent)}
+/* QR code block */
+.share-qr-section{margin:14px 0 4px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.share-qr-label{font-size:.72em;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.6px}
+.share-qr-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:10px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm)}
+.share-qr-wrap canvas,.share-qr-wrap img{display:block}
+.share-qr-download{padding:5px 14px;background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:.78em;font-weight:600;font-family:inherit;transition:var(--transition);display:flex;align-items:center;gap:5px}
+.share-qr-download:hover{background:var(--bg-hover);color:var(--text)}
+.share-qr-spinner{width:120px;height:120px;display:flex;align-items:center;justify-content:center;color:var(--text-light);font-size:.8em}
 /* Read-only banner */
-#readonly-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:linear-gradient(90deg,var(--green),#1e8e3e);color:#fff;text-align:center;padding:7px 16px;font-size:.85em;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);letter-spacing:.2px}
+#readonly-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:linear-gradient(90deg,var(--blue),#1558d6);color:#fff;text-align:center;padding:7px 16px;font-size:.85em;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);letter-spacing:.2px}
 body.readonly-mode #readonly-banner{display:block}
 body.readonly-mode #home-view{padding-top:36px}
 body.readonly-mode .fab{display:none!important}
@@ -383,6 +391,10 @@ body.readonly-mode [data-edit-only]{display:none!important}
 body.readonly-mode #sound-btn{display:none!important}
 body.readonly-mode #theme-wrap{display:none!important}
 body.readonly-mode #import-export-wrap{display:none!important}
+body.readonly-mode .notes-section{display:none!important}
+body.readonly-mode .ln-btn{display:none!important}
+body.readonly-mode .week-lesson{cursor:default!important;user-select:none}
+body.readonly-mode .week-lesson:hover{transform:none!important;box-shadow:0 1px 3px rgba(0,0,0,.15)!important}
 .import-export-wrap{position:relative;flex:1}
 .import-export-wrap .sidebar-btn{width:100%}
 .ie-menu{display:none;position:absolute;bottom:calc(100% + 6px);left:0;right:0;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden;z-index:200;animation:fadeIn .12s}
@@ -683,6 +695,7 @@ function getBellForSlot(dk,si){
 }
 function showContextMenu(e,dk,si,lessonName,classId){
   e.preventDefault();
+  if(document.body.classList.contains('readonly-mode'))return;
   closeContextMenu();
   const menu=document.createElement('div');
   menu.id='ctx-menu';
@@ -1040,21 +1053,26 @@ function navigateNext(){if(homeView==='month'){homeMonth++;if(homeMonth>11){home
 function goToToday(){const n=new Date();homeYear=n.getFullYear();homeMonth=n.getMonth();weekStartDate=getMonday(n);cachedAllData=null;if(homeView==='month')renderHomeCalendar();else renderWeekView();updateTitle();renderSidebar()}
 function renderHomeCalendar(){if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;document.getElementById('gcal-month-year').textContent=MONTH_NAMES_UK[homeMonth]+' '+homeYear;const wd=document.getElementById('gcal-weekdays');wd.innerHTML='';wd.style.gridTemplateColumns='repeat(7,1fr)';DAY_HEADERS_UK.forEach((dn,i)=>{const d=document.createElement('div');d.className='gcal-weekday'+(i>=5?' weekend':'');d.textContent=dn;wd.appendChild(d)});const grid=document.getElementById('gcal-grid');grid.innerHTML='';grid.style.gridTemplateColumns='repeat(7,1fr)';const dim=new Date(homeYear,homeMonth+1,0).getDate();const fw=(new Date(homeYear,homeMonth,1).getDay()+6)%7;const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<fw;i++){const d=new Date(homeYear,homeMonth,0).getDate()-fw+1+i;const dt=new Date(homeYear,homeMonth-1,d);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,true,period,allDayMap,classColorMap,today))}for(let d=1;d<=dim;d++){const dt=new Date(homeYear,homeMonth,d);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,false,period,allDayMap,classColorMap,today))}const tc=fw+dim;const target=tc<=35?35:42;for(let i=1;i<=target-tc;i++){const dt=new Date(homeYear,homeMonth+1,i);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,true,period,allDayMap,classColorMap,today))}}
 function createGcalCell(dateObj,outside,period,allDayMap,classColorMap,today){const cell=document.createElement('div');const dk=dateKey(dateObj);const inRange=dateObj>=period.start&&dateObj<=period.end;const wi=(dateObj.getDay()+6)%7;const isWE=wi>=5;const dayC=inRange?(allDayMap[dk]||[]):[];const isHol=inRange&&isDateInHoliday(dateObj,period.holidays);const isT=dateObj.getTime()===today.getTime();let cls='gcal-cell';if(outside)cls+=' outside';else if(isHol&&dayC.length===0)cls+=' holiday';else if(isWE)cls+=' weekend';if(isT)cls+=' today';cell.className=cls;const hdr=document.createElement('div');hdr.className='gcal-cell-header';const ds=document.createElement('div');ds.className='gcal-cell-date';ds.textContent=dateObj.getDate();hdr.appendChild(ds);if(!outside){const wn=document.createElement('span');wn.className='gcal-wk-num';wn.textContent='W'+getWeek(dateObj);hdr.appendChild(wn)}cell.appendChild(hdr);if(!outside&&dayC.length>0){const lc=document.createElement('span');lc.className='gcal-lcount';lc.textContent=dayC.reduce((s,c)=>s+c.lessons,0)+'\u0443\u0440';hdr.insertBefore(lc,hdr.querySelector('.gcal-wk-num'))}if(Object.keys(weekdayNotes).some(function(k){return k.startsWith(wi+'|')&&weekdayNotes[k]})){const dot=document.createElement('span');dot.className='has-note-dot';cell.appendChild(dot)}if(!outside&&dayC.length>0){const evts=document.createElement('div');evts.className='gcal-events';const MAX=3;const allL=buildDayOrderList(dayC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);const classSlotMap={};slotArr.forEach(function(key,si){if(!key)return;const p=key.split(':');const cid=p[0];if(!classSlotMap[cid])classSlotMap[cid]={first:si,last:si};else classSlotMap[cid].last=si});const vis=dayC.slice(0,MAX);const hidden=dayC.length-MAX;vis.forEach(c=>{const ev=document.createElement('div');ev.className='gcal-event';ev.style.background=classColorMap[c.classId]||'#1a73e8';const sm=classSlotMap[c.classId];const b1=sm?getBellForSlot(dk,sm.first):null;const b2=sm?getBellForSlot(dk,sm.last):null;const ts=b1?b1.start:'';const te=b2?b2.end:'';const timeRange=(ts&&te)?ts+'\u2013'+te:ts;ev.innerHTML='<span class="ev-time">'+timeRange+'</span>'+escapeHtml(c.className)+' \u00b7 '+c.lessons+'\u0443\u0440';ev.addEventListener('click',e=>{e.stopPropagation();openDayModal(dk,dateObj)});ev.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();const si=classSlotMap[c.classId]?classSlotMap[c.classId].first:0;showContextMenu(e,dk,si,c.className,c.classId)});evts.appendChild(ev)});if(hidden>0){const m=document.createElement('div');m.className='gcal-more';m.textContent='+ \u0449\u0435 '+hidden;m.addEventListener('click',e=>{e.stopPropagation();openDayModal(dk,dateObj)});evts.appendChild(m)}cell.appendChild(evts);cell.addEventListener('click',()=>openDayModal(dk,dateObj))}else if(!outside&&isHol){const evts=document.createElement('div');evts.className='gcal-events';const ev=document.createElement('div');ev.className='gcal-event';ev.style.background='#ea4335';ev.textContent='\u{1f3d6}\ufe0f \u041a\u0430\u043d\u0456\u043a\u0443\u043b\u0438';evts.appendChild(ev);cell.appendChild(evts)}else if(!outside)cell.addEventListener('click',()=>openDayModal(dk,dateObj));return cell}
-function renderWeekView(){if(!weekStartDate)weekStartDate=getMonday(new Date());if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;updateTitle();const hEl=document.getElementById('week-header');hEl.innerHTML='';hEl.style.gridTemplateColumns='60px repeat(7,1fr)';const th=document.createElement('div');th.className='week-header-cell';hEl.appendChild(th);const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);const c=document.createElement('div');c.className='week-header-cell';const wi=(dt.getDay()+6)%7;if(wi>=5)c.classList.add('weekend');if(dt.getTime()===today.getTime())c.classList.add('today');c.innerHTML='<div class="week-header-day">'+DAY_HEADERS_UK[wi]+'</div><div class="week-header-date">'+dt.getDate()+'</div>';hEl.appendChild(c)}const gEl=document.getElementById('week-grid');gEl.innerHTML='';gEl.style.gridTemplateColumns='60px repeat(7,1fr)';const tCol=document.createElement('div');tCol.className='week-time-col';const tH=DAY_END_HOUR-DAY_START_HOUR;tCol.style.height=tH*HOUR_HEIGHT+'px';for(let h=DAY_START_HOUR;h<=DAY_END_HOUR;h++){const l=document.createElement('div');l.className='week-time-label';l.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+'px';l.textContent=String(h).padStart(2,'0')+':00';tCol.appendChild(l)}gEl.appendChild(tCol);for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);const dc=document.createElement('div');dc.className='week-day-col';const wi=(dt.getDay()+6)%7;if(wi>=5)dc.classList.add('weekend');dc.style.height=tH*HOUR_HEIGHT+'px';dc.dataset.dayIndex=i;dc.dataset.dateKey=dateKey(dt);for(let h=DAY_START_HOUR;h<=DAY_END_HOUR;h++){const ln=document.createElement('div');ln.className='week-hour-line';ln.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+'px';dc.appendChild(ln);if(h<DAY_END_HOUR){const hl=document.createElement('div');hl.className='week-half-line';hl.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+HOUR_HEIGHT/2+'px';dc.appendChild(hl)}}const dk=dateKey(dt);const inR=dt>=period.start&&dt<=period.end;const dC=inR?(allDayMap[dk]||[]):[];if(dC.length>0){const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);slotArr.forEach((key,si)=>{if(!key)return;const p=key.split(':');const cid=p[0],oi=parseInt(p[1],10);const lesson=allL.find(l=>l.classId===cid&&l.origIdx===oi);if(!lesson)return;if(isLessonDeletedFull(dk,cid))return;const color=classColorMap[lesson.classId]||'#1a73e8';const bell=getBellForSlot(dk,si);const hasCustomT=!!getCustomTime(dk,si);const sm=timeToMinutes(bell.start),em=timeToMinutes(bell.end);const top=((sm/60)-DAY_START_HOUR)*HOUR_HEIGHT;const height=Math.max(((em-sm)/60)*HOUR_HEIGHT,20);const les=document.createElement('div');les.className='week-lesson';les.style.background=color;les.style.top=top+'px';les.style.height=height+'px';les.innerHTML='<div class="lesson-title"><span class="lesson-name">'+escapeHtml(lesson.className)+(hasCustomT?' <span style="font-size:.8em;opacity:.7">⏰</span>':'')+'</span></div><div class="lesson-time-range">'+bell.start+' \u2013 '+bell.end+'</div>';les.dataset.classId=lesson.classId;les.dataset.className=lesson.className;les.dataset.lessonIdx=si;les.dataset.dateKey=dk;les.dataset.dayIndex=i;les.addEventListener('contextmenu',e=>{e.stopPropagation();showContextMenu(e,dk,si,lesson.className,lesson.classId)});makeDraggable(les,dk,si,totalSlots);dc.appendChild(les);
-// Week note button — inserted before the class name
-(function(){
-  const wNoteData=getLessonNote(dk,lesson.classId,si);
-  const wWd=(new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2])).getDay()+6)%7;
-  const wHasNote=!!(weekdayNotes[weekdayNoteKey(wWd,si)]||wNoteData.lessonNote);
-  const wBtn=document.createElement('button');
-  wBtn.className='ln-btn'+(wHasNote?' has-note':'');
-  wBtn.title='Нотатка до уроку';
-  wBtn.textContent='📝';
-  wBtn.addEventListener('mousedown',function(e){e.stopPropagation()});
-  wBtn.addEventListener('click',function(e){e.stopPropagation();showLessonNotePopup(dk,lesson.classId,si,lesson.className,wBtn)});
-  const titleEl=les.querySelector('.lesson-title');
-  titleEl.insertBefore(wBtn,titleEl.firstChild);
-})();
+function renderWeekView(){if(!weekStartDate)weekStartDate=getMonday(new Date());if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;updateTitle();const hEl=document.getElementById('week-header');hEl.innerHTML='';hEl.style.gridTemplateColumns='60px repeat(7,1fr)';const th=document.createElement('div');th.className='week-header-cell';hEl.appendChild(th);const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);const c=document.createElement('div');c.className='week-header-cell';const wi=(dt.getDay()+6)%7;if(wi>=5)c.classList.add('weekend');if(dt.getTime()===today.getTime())c.classList.add('today');c.innerHTML='<div class="week-header-day">'+DAY_HEADERS_UK[wi]+'</div><div class="week-header-date">'+dt.getDate()+'</div>';hEl.appendChild(c)}const gEl=document.getElementById('week-grid');gEl.innerHTML='';gEl.style.gridTemplateColumns='60px repeat(7,1fr)';const tCol=document.createElement('div');tCol.className='week-time-col';const tH=DAY_END_HOUR-DAY_START_HOUR;tCol.style.height=tH*HOUR_HEIGHT+'px';for(let h=DAY_START_HOUR;h<=DAY_END_HOUR;h++){const l=document.createElement('div');l.className='week-time-label';l.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+'px';l.textContent=String(h).padStart(2,'0')+':00';tCol.appendChild(l)}gEl.appendChild(tCol);for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);const dc=document.createElement('div');dc.className='week-day-col';const wi=(dt.getDay()+6)%7;if(wi>=5)dc.classList.add('weekend');dc.style.height=tH*HOUR_HEIGHT+'px';dc.dataset.dayIndex=i;dc.dataset.dateKey=dateKey(dt);for(let h=DAY_START_HOUR;h<=DAY_END_HOUR;h++){const ln=document.createElement('div');ln.className='week-hour-line';ln.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+'px';dc.appendChild(ln);if(h<DAY_END_HOUR){const hl=document.createElement('div');hl.className='week-half-line';hl.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+HOUR_HEIGHT/2+'px';dc.appendChild(hl)}}const dk=dateKey(dt);const inR=dt>=period.start&&dt<=period.end;const dC=inR?(allDayMap[dk]||[]):[];if(dC.length>0){const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);slotArr.forEach((key,si)=>{if(!key)return;const p=key.split(':');const cid=p[0],oi=parseInt(p[1],10);const lesson=allL.find(l=>l.classId===cid&&l.origIdx===oi);if(!lesson)return;if(isLessonDeletedFull(dk,cid))return;const color=classColorMap[lesson.classId]||'#1a73e8';const bell=getBellForSlot(dk,si);const hasCustomT=!!getCustomTime(dk,si);const sm=timeToMinutes(bell.start),em=timeToMinutes(bell.end);const top=((sm/60)-DAY_START_HOUR)*HOUR_HEIGHT;const height=Math.max(((em-sm)/60)*HOUR_HEIGHT,20);const les=document.createElement('div');les.className='week-lesson';les.style.background=color;les.style.top=top+'px';les.style.height=height+'px';les.innerHTML='<div class="lesson-title"><span class="lesson-name">'+escapeHtml(lesson.className)+(hasCustomT?' <span style="font-size:.8em;opacity:.7">⏰</span>':'')+'</span></div><div class="lesson-time-range">'+bell.start+' \u2013 '+bell.end+'</div>';les.dataset.classId=lesson.classId;les.dataset.className=lesson.className;les.dataset.lessonIdx=si;les.dataset.dateKey=dk;les.dataset.dayIndex=i;les.addEventListener('contextmenu',e=>{e.stopPropagation();showContextMenu(e,dk,si,lesson.className,lesson.classId)});
+if(!document.body.classList.contains('readonly-mode')){
+  makeDraggable(les,dk,si,totalSlots);
+  // Week note button — inserted before the class name
+  (function(){
+    const wNoteData=getLessonNote(dk,lesson.classId,si);
+    const wWd=(new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2])).getDay()+6)%7;
+    const wHasNote=!!(weekdayNotes[weekdayNoteKey(wWd,si)]||wNoteData.lessonNote);
+    const wBtn=document.createElement('button');
+    wBtn.className='ln-btn'+(wHasNote?' has-note':'');
+    wBtn.title='Нотатка до уроку';
+    wBtn.textContent='📝';
+    wBtn.addEventListener('mousedown',function(e){e.stopPropagation()});
+    wBtn.addEventListener('click',function(e){e.stopPropagation();showLessonNotePopup(dk,lesson.classId,si,lesson.className,wBtn)});
+    const titleEl=les.querySelector('.lesson-title');
+    titleEl.insertBefore(wBtn,titleEl.firstChild);
+  })();
+} else {
+  les.style.cursor='default';
+}
 })}if(dt.getTime()===today.getTime()){/* now-line rendered separately as overlay */}gEl.appendChild(dc)}
 // Draw full-width now-line overlay
 (function drawNowLine(){const existing=document.getElementById('week-now-line-el');if(existing)existing.remove();const now=new Date();const todayMidnight=new Date();todayMidnight.setHours(0,0,0,0);// Check if current week contains today
@@ -1137,6 +1155,7 @@ function showDayModalTimeEdit(dk,si,lessonName,cid,gridEl,dC,classColorMap){
 }
 function weekdayNoteKey(wd,si){return wd+'|'+si}
 function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
+  if(document.body.classList.contains('readonly-mode'))return;
   // Close any existing popup
   const existing=document.querySelector('.ln-popup-overlay');
   if(existing){existing.remove();return;}
@@ -1837,11 +1856,17 @@ async function openShareModal(){
   const box=document.createElement('div');box.className='share-modal-box';
   box.innerHTML=
     '<div class="share-modal-title">🔗 Публічне посилання</div>'+
-    '<div class="share-hint">📋 Скопіюйте посилання та надішліть учням або батькам. Вони зможуть <b>лише переглядати</b> розклад — редагування недоступне.</div>'+
+    '<div class="share-hint">📋 Скопіюйте посилання або відскануйте QR-код та надішліть учням або батькам. Вони зможуть <b>лише переглядати</b> розклад — редагування недоступне.</div>'+
     '<div class="share-link-row"><input class="share-link-input" id="share-link-input" readonly value="⏳ Зачекайте..."><button class="share-copy-btn" id="share-copy-btn" onclick="copyShareLink()">Копіювати</button></div>'+
+    '<div class="share-qr-section">'+
+      '<div class="share-qr-label">QR-код для сканування</div>'+
+      '<div class="share-qr-wrap" id="share-qr-wrap"><div class="share-qr-spinner">⏳ Генерація...</div></div>'+
+      '<button class="share-qr-download" id="share-qr-download-btn" onclick="downloadShareQR()" style="display:none">⬇ Завантажити QR</button>'+
+    '</div>'+
     '<button class="share-revoke-btn" id="share-revoke-btn" onclick="revokeShareLink()">🗑 Скасувати доступ</button>'+
     '<div class="modal-actions" style="margin-top:14px"><button class="modal-btn modal-btn-cancel" onclick="document.getElementById(\'share-modal-overlay\').remove()">Закрити</button></div>';
   ov.appendChild(box);document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove()});
 
   if(!token){
     token=generateShareToken();
@@ -1851,7 +1876,47 @@ async function openShareModal(){
   // Push public data
   await pushPublicData(token);
   const inp=document.getElementById('share-link-input');
-  if(inp)inp.value=getShareUrl(token);
+  const url=getShareUrl(token);
+  if(inp)inp.value=url;
+  // Generate QR code
+  generateShareQR(url);
+}
+
+function generateShareQR(url){
+  const wrap=document.getElementById('share-qr-wrap');
+  if(!wrap)return;
+  // Load qrcode lib dynamically if not present
+  function doGenerate(){
+    wrap.innerHTML='';
+    const canvas=document.createElement('canvas');
+    wrap.appendChild(canvas);
+    // Use QRCode library
+    QRCode.toCanvas(canvas,url,{width:160,margin:1,color:{dark:'#202124',light:'#ffffff'}},function(err){
+      if(err){wrap.innerHTML='<div class="share-qr-spinner" style="font-size:.75em;color:var(--red)">Помилка QR</div>';return;}
+      const btn=document.getElementById('share-qr-download-btn');
+      if(btn)btn.style.display='flex';
+    });
+  }
+  if(window.QRCode){
+    doGenerate();
+  } else {
+    const script=document.createElement('script');
+    script.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    script.onload=doGenerate;
+    script.onerror=()=>{wrap.innerHTML='<div class="share-qr-spinner" style="font-size:.75em;color:var(--red)">Не вдалося завантажити QR</div>';};
+    document.head.appendChild(script);
+  }
+}
+
+function downloadShareQR(){
+  const wrap=document.getElementById('share-qr-wrap');
+  if(!wrap)return;
+  const canvas=wrap.querySelector('canvas');
+  if(!canvas)return;
+  const a=document.createElement('a');
+  a.download='rozklad-qr.png';
+  a.href=canvas.toDataURL('image/png');
+  a.click();
 }
 
 async function pushPublicData(token){
