@@ -356,7 +356,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .abm-times{display:flex;align-items:center;gap:8px;flex:1}
 .abm-times input[type=time]{flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:.88em;background:var(--bg-surface);color:var(--text);font-family:inherit}
 .abm-dash{color:var(--text-light);font-size:.9em;flex-shrink:0}
-.notification{position:fixed;bottom:16px;left:16px;max-width:280px;padding:10px 16px;border-radius:var(--radius);color:#fff;font-weight:600;font-size:.9em;box-shadow:0 6px 20px rgba(0,0,0,.15);z-index:3000;animation:slideInLeft .3s;display:flex;align-items:center;gap:7px}
+.notification{position:fixed;bottom:16px;left:16px;max-width:280px;padding:10px 16px;border-radius:var(--radius);color:#fff;font-weight:600;font-size:.9em;box-shadow:0 6px 20px rgba(0,0,0,.15);z-index:9000;animation:slideInLeft .3s;display:flex;align-items:center;gap:7px}
 @keyframes slideInLeft{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:translateX(0)}}
 .author-footer{padding:6px 14px;font-size:.7em;color:var(--text-light);text-align:center;border-top:1px solid var(--border-light)}
 .author-footer a{color:var(--blue);text-decoration:none;font-weight:500}
@@ -374,6 +374,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 /* Read-only banner */
 #readonly-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:linear-gradient(90deg,var(--green),#1e8e3e);color:#fff;text-align:center;padding:7px 16px;font-size:.85em;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);letter-spacing:.2px}
 body.readonly-mode #readonly-banner{display:block}
+body.readonly-mode #home-view{padding-top:36px}
 body.readonly-mode .fab{display:none!important}
 body.readonly-mode #gdrive-btn{display:none!important}
 body.readonly-mode .sidebar-footer{display:none!important}
@@ -1226,7 +1227,7 @@ var key=slotArr[si];
 if(!key&&si<lastUsed)slot.classList.add('window');
 var numEl=document.createElement('span');numEl.className='dm-slot-num';numEl.textContent=si+1;slot.appendChild(numEl);
 var bell=bellSchedule[si];
-var timeEl=document.createElement('span');timeEl.className='dm-slot-time';var bellForSlot=getBellForSlot(dk,si);var hasCustomSlot=!!getCustomTime(dk,si);timeEl.innerHTML='<span class="dm-slot-time-text">'+bellForSlot.start+'\u2013'+bellForSlot.end+'</span>'+(hasCustomSlot?' \u23f0':'');timeEl.title='Клікніть щоб змінити час';timeEl.style.cursor='pointer';timeEl.addEventListener('click',function(e){e.stopPropagation();var les2=findLesson(slotArr[si]);if(les2)showDayModalTimeEdit(dk,si,les2.className,les2.classId,gridEl,dC,classColorMap);});slot.appendChild(timeEl);
+var timeEl=document.createElement('span');timeEl.className='dm-slot-time';var bellForSlot=getBellForSlot(dk,si);var hasCustomSlot=!!getCustomTime(dk,si);timeEl.innerHTML='<span class="dm-slot-time-text">'+bellForSlot.start+'\u2013'+bellForSlot.end+'</span>'+(hasCustomSlot?' \u23f0':'');if(!document.body.classList.contains('readonly-mode')){timeEl.title='Клікніть щоб змінити час';timeEl.style.cursor='pointer';timeEl.addEventListener('click',function(e){e.stopPropagation();var les2=findLesson(slotArr[si]);if(les2)showDayModalTimeEdit(dk,si,les2.className,les2.classId,gridEl,dC,classColorMap);});}else{timeEl.style.cursor='default';}slot.appendChild(timeEl);
 var les=findLesson(key);
 if(les){
 var color=classColorMap[les.classId]||'#1a73e8';
@@ -1240,8 +1241,9 @@ var sel=document.createElement('select');sel.className='lesson-type-select';sel.
 LESSON_TYPES.forEach(function(t){var o=document.createElement('option');o.value=t.id;o.textContent=t.label;if(t.id===type)o.selected=true;sel.appendChild(o)});
 sel.addEventListener('change',function(){setLessonType(this.dataset.dk,this.dataset.cid,+this.dataset.li,this.value)});
 sel.addEventListener('mousedown',function(e){e.stopPropagation()});sel.addEventListener('dragstart',function(e){e.preventDefault();e.stopPropagation()});
-card.appendChild(sel);
-card.addEventListener('dragstart',function(e){dragSrc=this;dragFromIdx=parseInt(this.dataset.slotIdx,10);this.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','')});
+if(!document.body.classList.contains('readonly-mode'))card.appendChild(sel);
+if(document.body.classList.contains('readonly-mode')){card.draggable=false;card.style.cursor='default';}
+card.addEventListener('dragstart',function(e){if(document.body.classList.contains('readonly-mode')){e.preventDefault();return;}dragSrc=this;dragFromIdx=parseInt(this.dataset.slotIdx,10);this.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','')});
 card.addEventListener('dragend',function(){this.classList.remove('dragging');gridEl.querySelectorAll('.dm-slot').forEach(function(s){s.classList.remove('drag-over')});dragSrc=null;dragFromIdx=null});
 card.addEventListener('touchstart',function(e){if(e.target.tagName==='SELECT')return;dragSrc=this;dragFromIdx=parseInt(this.dataset.slotIdx,10);this.classList.add('dragging');e.preventDefault()},{passive:false});
 card.addEventListener('touchmove',function(e){if(!dragSrc||dragSrc!==this)return;e.preventDefault();var t=e.touches[0];var el=document.elementFromPoint(t.clientX,t.clientY);var tSlot=el?el.closest('.dm-slot'):null;gridEl.querySelectorAll('.dm-slot').forEach(function(s){s.classList.remove('drag-over')});if(tSlot)tSlot.classList.add('drag-over')},{passive:false});
@@ -1257,7 +1259,7 @@ slot.appendChild(card);
   nBtn.title='Нотатка до уроку';
   nBtn.textContent='📝';
   nBtn.addEventListener('click',function(e){e.stopPropagation();showLessonNotePopup(dk,capturedLes.classId,capturedSi,capturedLes.className,nBtn)});
-  slot.appendChild(nBtn);
+  if(!document.body.classList.contains('readonly-mode'))slot.appendChild(nBtn);
 })(les,si);
 }else{
 var emp=document.createElement('span');emp.className='dm-slot-empty';emp.textContent=(si<lastUsed)?'\u0412\u0456\u043a\u043d\u043e':'\u0412\u0456\u043b\u044c\u043d\u043e';slot.appendChild(emp)}
@@ -1840,7 +1842,6 @@ async function openShareModal(){
     '<button class="share-revoke-btn" id="share-revoke-btn" onclick="revokeShareLink()">🗑 Скасувати доступ</button>'+
     '<div class="modal-actions" style="margin-top:14px"><button class="modal-btn modal-btn-cancel" onclick="document.getElementById(\'share-modal-overlay\').remove()">Закрити</button></div>';
   ov.appendChild(box);document.body.appendChild(ov);
-  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
 
   if(!token){
     token=generateShareToken();
