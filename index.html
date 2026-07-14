@@ -1073,6 +1073,7 @@ if(!document.body.classList.contains('readonly-mode')){
 } else {
   les.style.cursor='default';
 }
+dc.appendChild(les);
 })}if(dt.getTime()===today.getTime()){/* now-line rendered separately as overlay */}gEl.appendChild(dc)}
 // Draw full-width now-line overlay
 (function drawNowLine(){const existing=document.getElementById('week-now-line-el');if(existing)existing.remove();const now=new Date();const todayMidnight=new Date();todayMidnight.setHours(0,0,0,0);// Check if current week contains today
@@ -1885,17 +1886,20 @@ async function openShareModal(){
 function generateShareQR(url){
   const wrap=document.getElementById('share-qr-wrap');
   if(!wrap)return;
-  // Load qrcode lib dynamically if not present
   function doGenerate(){
     wrap.innerHTML='';
-    const canvas=document.createElement('canvas');
-    wrap.appendChild(canvas);
-    // Use QRCode library
-    QRCode.toCanvas(canvas,url,{width:160,margin:1,color:{dark:'#202124',light:'#ffffff'}},function(err){
-      if(err){wrap.innerHTML='<div class="share-qr-spinner" style="font-size:.75em;color:var(--red)">Помилка QR</div>';return;}
-      const btn=document.getElementById('share-qr-download-btn');
-      if(btn)btn.style.display='flex';
-    });
+    const container=document.createElement('div');
+    wrap.appendChild(container);
+    try{
+      new QRCode(container,{text:url,width:160,height:160,colorDark:'#202124',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+      // qrcodejs appends canvas or img — wait a tick then show download btn
+      setTimeout(function(){
+        const btn=document.getElementById('share-qr-download-btn');
+        if(btn)btn.style.display='flex';
+      },100);
+    }catch(e){
+      wrap.innerHTML='<div class="share-qr-spinner" style="font-size:.75em;color:var(--red)">Помилка QR</div>';
+    }
   }
   if(window.QRCode){
     doGenerate();
@@ -1912,10 +1916,14 @@ function downloadShareQR(){
   const wrap=document.getElementById('share-qr-wrap');
   if(!wrap)return;
   const canvas=wrap.querySelector('canvas');
-  if(!canvas)return;
+  const img=wrap.querySelector('img');
   const a=document.createElement('a');
   a.download='rozklad-qr.png';
-  a.href=canvas.toDataURL('image/png');
+  if(canvas){
+    a.href=canvas.toDataURL('image/png');
+  } else if(img){
+    a.href=img.src;
+  } else return;
   a.click();
 }
 
