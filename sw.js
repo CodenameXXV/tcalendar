@@ -1,150 +1,101 @@
-const CACHE_NAME = 'teacher-calendar-v1.0.0';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-72.png',
-  '/icons/icon-96.png',
-  '/icons/icon-128.png',
-  '/icons/icon-144.png',
-  '/icons/icon-152.png',
-  '/icons/icon-192.png',
-  '/icons/icon-384.png',
-  '/icons/icon-512.png',
-  '/favicon.ico',
-  '/favicon-32x32.png',
-  '/favicon-16x16.png',
-  '/apple-touch-icon.png'
+// ── Service Worker: Календар для вчителя ──
+const CACHE_NAME = 'teacher-calendar-v1';
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon.svg',
+  './icons/icon-512.jpg'
 ];
 
-// Встановлення Service Worker
-self.addEventListener('install', (event) => {
+// ── Install — кешуємо ресурси ──
+self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(ASSETS_TO_CACHE))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Активація Service Worker
-self.addEventListener('activate', (event) => {
+// ── Activate — чистимо старий кеш ──
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+// ── Fetch — Network-first з fallback на кеш ──
+self.addEventListener('fetch', event => {
+  // Ігноруємо non-GET та зовнішні запити до Firebase тощо
+  if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        // Кешуємо свіжу копію
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
+  );
+});
+
+// ── Notification scheduling via postMessage ──
+let _notifTimer = null;
+
+self.addEventListener('message', event => {
+  const data = event.data;
+  if (!data || data.type !== 'SCHEDULE_NOTIFICATION') return;
+
+  // Скасовуємо попередній таймер
+  if (_notifTimer) {
+    clearTimeout(_notifTimer);
+    _notifTimer = null;
+  }
+
+  const { delayMs, title, body, tag } = data;
+
+  if (delayMs <= 0) return;
+
+  _notifTimer = setTimeout(() => {
+    self.registration.showNotification(title, {
+      body: body,
+      icon: './icons/icon.svg',
+      badge: './icons/icon.svg',
+      tag: tag || 'lesson-reminder',
+      vibrate: [200, 100, 200],
+      requireInteraction: false,
+      data: { url: './' }
+    });
+    _notifTimer = null;
+
+    // Повідомляємо клієнта, що сповіщення показано — він запланує наступне
+    self.clients.matchAll({ type: 'window' }).then(clients => {
+      clients.forEach(client => {
+        client.postMessage({ type: 'NOTIFICATION_FIRED', tag: tag });
+      });
+    });
+  }, delayMs);
+});
+
+// ── Клік по сповіщенню — фокус на вкладку ──
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+      // Фокусуємо існуючу вкладку
+      for (const client of clients) {
+        if (client.url.includes('index.html') || client.url.endsWith('/')) {
+          return client.focus();
+        }
+      }
+      // Або відкриваємо нову
+      return self.clients.openWindow('./');
     })
   );
-});
-
-// Обробка запитів
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Повертаємо кешовану версію, якщо вона є
-        if (response) {
-          return response;
-        }
-        
-        // Клонуємо запит
-        const fetchRequest = event.request.clone();
-        
-        return fetch(fetchRequest).then((response) => {
-          // Перевіряємо чи отримали валідну відповідь
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          
-          // Клонуємо відповідь
-          const responseToCache = response.clone();
-          
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          
-          return response;
-        }).catch(() => {
-          // Офлайн fallback
-          if (event.request.destination === 'document') {
-            return caches.match('/index.html');
-          }
-        });
-      })
-  );
-});
-
-// Обробка повідомлень від клієнта
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-});
-
-// Фонова синхронізація (якщо потрібно)
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'background-sync') {
-    event.waitUntil(doBackgroundSync());
-  }
-});
-
-function doBackgroundSync() {
-  // Тут можна додати логіку для синхронізації даних
-  console.log('Background sync triggered');
-}
-
-// Push-повідомлення (якщо потрібно в майбутньому)
-self.addEventListener('push', (event) => {
-  const options = {
-    body: event.data ? event.data.text() : 'Нове повідомлення від Календаря вчителя',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-72.png',
-    vibrate: [100, 50, 100],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    },
-    actions: [
-      {
-        action: 'explore',
-        title: 'Відкрити',
-        icon: '/icons/icon-96.png'
-      },
-      {
-        action: 'close',
-        title: 'Закрити',
-        icon: '/icons/icon-96.png'
-      }
-    ]
-  };
-
-  event.waitUntil(
-    self.registration.showNotification('Календар вчителя', options)
-  );
-});
-
-// Обробка кліків по повідомленнях
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  if (event.action === 'explore') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
-  } else if (event.action === 'close') {
-    // Просто закриваємо повідомлення
-  } else {
-    // Дія за замовчуванням - відкрити додаток
-    event.waitUntil(
-      clients.openWindow('/')
-    );
-  }
 });

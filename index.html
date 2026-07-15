@@ -1,5 +1,11 @@
 <!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Календар для вчителя</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='4' width='18' height='17' rx='2' fill='%23fff' stroke='%2300a8cc' stroke-width='1.5'/%3E%3Crect x='3' y='4' width='18' height='5' rx='2' fill='%2300a8cc'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00a8cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Календар">
+<link rel="apple-touch-icon" href="icons/icon.svg">
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
@@ -2402,7 +2408,7 @@ window.onload=function(){
   const _isReadonly=new URLSearchParams(window.location.search).has('share');
   loadTheme();
   if(!_isReadonly){
-    loadNotes();loadWeekdayNotes();loadLessonNotes();loadLessonTypes();loadCustomTimes();loadDeletedLessons();loadHiddenClasses();loadSlots();loadBellSchedule();loadSoundState();loadCustomEvents();
+    loadNotes();loadWeekdayNotes();loadLessonNotes();loadLessonTypes();loadCustomTimes();loadDeletedLessons();loadHiddenClasses();loadSlots();loadBellSchedule();loadSoundState();loadCustomEvents();loadPushNotifState();
     const sa=localStorage.getItem('teacherCalendarActiveClass');
     currentClass=slots.some(s=>s.id===sa)?sa:slots[0].id;
     renderClassTabs();loadPeriodState();loadViewMode();loadClassState(currentClass);loadDayOrder();loadWeekdayOrder();
@@ -2421,6 +2427,12 @@ window.onload=function(){
   if(!_isReadonly)updateSoundBtn();
   if(isMobile())closeSidebar();
   if(!_isReadonly)gdriveInit();
+  // PWA: Register Service Worker & init push notifications
+  registerServiceWorker().then(()=>{
+    if(!_isReadonly&&pushNotifEnabled){
+      requestNotificationPermission().then(()=>scheduleNextLessonNotification());
+    }
+  });
 };
 
 // ── Друк розкладу тижня ──────────────────────────────────────────
@@ -3253,6 +3265,10 @@ function openSettingsModal(){
   if(tog)tog.checked=!!soundEnabled;
   const sel=document.getElementById('smod-sound-minutes');
   if(sel)sel.value=soundMinutesBefore;
+  // sync push notification toggle
+  const ptog=document.getElementById('smod-push-toggle');
+  if(ptog)ptog.checked=!!pushNotifEnabled;
+  updatePushNotifStatus();
   ov.classList.add('open');
   document.addEventListener('keydown',_settingsEsc);
 }
@@ -3282,6 +3298,145 @@ function setSoundMinutes(val){
   if(m>=1&&m<=15)soundMinutesBefore=m;
   try{localStorage.setItem('teacherCalendarSoundMinutes',soundMinutesBefore)}catch(e){}
   lastSoundPlayedFor=null;
+}
+
+// ── Push / Local Notifications (PWA) ─────────────────────────────
+let pushNotifEnabled=false;
+const PUSH_NOTIF_KEY='teacherCalendarPushNotif';
+let _swRegistration=null;
+let _lastScheduledNotifTag=null;
+
+function loadPushNotifState(){
+  try{pushNotifEnabled=localStorage.getItem(PUSH_NOTIF_KEY)==='true'}catch(e){}
+}
+function savePushNotifState(){
+  try{localStorage.setItem(PUSH_NOTIF_KEY,pushNotifEnabled)}catch(e){}
+}
+
+async function registerServiceWorker(){
+  if(!('serviceWorker' in navigator))return;
+  try{
+    _swRegistration=await navigator.serviceWorker.register('./sw.js');
+    // Слухаємо повідомлення від SW
+    navigator.serviceWorker.addEventListener('message',ev=>{
+      if(ev.data&&ev.data.type==='NOTIFICATION_FIRED'){
+        // SW показав сповіщення — плануємо наступне
+        scheduleNextLessonNotification();
+      }
+    });
+  }catch(e){console.warn('SW registration failed:',e)}
+}
+
+async function requestNotificationPermission(){
+  if(!('Notification' in window))return 'unsupported';
+  if(Notification.permission==='granted')return 'granted';
+  if(Notification.permission==='denied')return 'denied';
+  const result=await Notification.requestPermission();
+  return result;
+}
+
+async function togglePushNotifFromSettings(on){
+  if(on){
+    const perm=await requestNotificationPermission();
+    if(perm==='denied'){
+      showNotification('Сповіщення заблоковано в браузері. Дозвольте в налаштуваннях сайту.','error');
+      const tog=document.getElementById('smod-push-toggle');
+      if(tog)tog.checked=false;
+      return;
+    }
+    if(perm==='unsupported'){
+      showNotification('Ваш браузер не підтримує сповіщення','error');
+      const tog=document.getElementById('smod-push-toggle');
+      if(tog)tog.checked=false;
+      return;
+    }
+    pushNotifEnabled=true;
+    savePushNotifState();
+    scheduleNextLessonNotification();
+    updatePushNotifStatus();
+  }else{
+    pushNotifEnabled=false;
+    savePushNotifState();
+    // Скасовуємо заплановане сповіщення
+    if(_swRegistration&&_swRegistration.active){
+      _swRegistration.active.postMessage({type:'SCHEDULE_NOTIFICATION',delayMs:-1});
+    }
+    updatePushNotifStatus();
+  }
+}
+
+function updatePushNotifStatus(){
+  const el=document.getElementById('smod-push-status');
+  if(!el)return;
+  if(!('Notification' in window)){
+    el.textContent='Не підтримується';
+    el.style.color='var(--text-light)';
+  }else if(Notification.permission==='denied'){
+    el.textContent='Заблоковано браузером';
+    el.style.color='var(--red)';
+  }else if(pushNotifEnabled){
+    el.textContent='Увімкнено';
+    el.style.color='var(--green)';
+  }else{
+    el.textContent='Вимкнено';
+    el.style.color='var(--text-light)';
+  }
+}
+
+function scheduleNextLessonNotification(){
+  if(!pushNotifEnabled||!_swRegistration||!_swRegistration.active)return;
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+
+  const now=new Date();
+  const nm=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+  const todayDk=dateKey(now);
+
+  // Знаходимо найближчий урок
+  let bestDelay=Infinity,bestTitle='',bestTime='';
+
+  if(bellSchedule&&bellSchedule.length>0){
+    for(let si=0;si<bellSchedule.length;si++){
+      const bell=getBellForSlot(todayDk,si);
+      const startMin=timeToMinutes(bell.start);
+      const alertMin=startMin-soundMinutesBefore;
+      if(alertMin>nm){
+        const delay=(alertMin-nm)*60*1000;
+        if(delay<bestDelay){
+          // Знаходимо назву уроку
+          let lessonName='';
+          if(cachedAllData){
+            const dc=cachedAllData.allDayMap[todayDk]||[];
+            const allL=buildDayOrderList(dc);
+            const totalSlots=Math.max(allL.length,bellSchedule.length);
+            const slotArr=getSlotOrder(todayDk,allL,totalSlots);
+            const key=slotArr[si];
+            if(key){
+              const p=key.split(':');
+              const les=allL.find(l=>l.classId===p[0]&&l.origIdx===parseInt(p[1],10));
+              if(les)lessonName=les.className;
+            }
+          }
+          bestDelay=delay;
+          bestTitle=lessonName?('Урок: '+lessonName):('Урок '+(si+1));
+          bestTime=bell.start;
+        }
+        break; // беремо перший майбутній урок
+      }
+    }
+  }
+
+  if(bestDelay<Infinity){
+    const tag='lesson-'+todayDk+'-'+bestTime;
+    if(tag===_lastScheduledNotifTag)return; // вже заплановано
+    _lastScheduledNotifTag=tag;
+    _swRegistration.active.postMessage({
+      type:'SCHEDULE_NOTIFICATION',
+      delayMs:Math.max(100,Math.round(bestDelay)),
+      title:bestTitle,
+      body:'Початок о '+bestTime+' (через '+soundMinutesBefore+' хв)',
+      tag:tag
+    });
+  }
 }
 
 
@@ -3607,6 +3762,22 @@ function setSoundMinutes(val){
           </select>
         </div>
       </div>
+
+        <!-- Push-сповіщення -->
+        <div class="smod-sound-row" style="margin-top:8px">
+          <div class="smod-row-icon" style="background:color-mix(in srgb,var(--blue) 12%,var(--bg-surface));color:var(--blue)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div style="flex:1">
+            <div class="smod-row-label">Push-сповіщення</div>
+            <div class="smod-row-sub">Сповіщення навіть коли вкладка згорнута</div>
+            <div id="smod-push-status" style="font-size:.7em;margin-top:2px;font-weight:600"></div>
+          </div>
+          <label class="smod-toggle">
+            <input type="checkbox" id="smod-push-toggle" onchange="togglePushNotifFromSettings(this.checked)">
+            <span class="smod-toggle-slider"></span>
+          </label>
+        </div>
 
     </div>
   </div>
