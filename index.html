@@ -1672,11 +1672,30 @@ async function resetAllSettings(){
   closeSettingsModal();
   const ok=await showConfirmModal({
     title:'Скинути всі налаштування?',
-    message:'Усі дані буде видалено: розклад, класи, нотатки, дзвінки, кольори тощо. Цю дію неможливо скасувати.',
+    message:'Усі дані буде видалено: розклад, класи, нотатки, дзвінки, кольори тощо. Хмарні дані також будуть очищені. Цю дію неможливо скасувати.',
     confirmText:'Скинути',
     danger:true
   });
   if(!ok)return;
+
+  // 1. Видаляємо дані з Firestore (якщо користувач авторизований)
+  if(fbUser){
+    const db=window._fbDb,docFn=window._fbDoc,delFn=window._fbDeleteDoc;
+    if(db&&docFn&&delFn){
+      try{
+        // Видаляємо основний документ з даними
+        await delFn(docFn(db,'users',fbUser.uid,'data',FB_DOC_NAME));
+      }catch(e){console.warn('Firestore delete error',e);}
+      // Видаляємо публічний share-документ якщо є
+      let shareToken=null;
+      try{shareToken=localStorage.getItem('teacherCalendarShareToken');}catch(e){}
+      if(shareToken){
+        try{await delFn(docFn(db,'public',shareToken));}catch(e){}
+      }
+    }
+  }
+
+  // 2. Очищаємо localStorage
   const keysToRemove=[
     BELL_KEY,NOTES_KEY,LESSON_NOTES_KEY,TYPES_KEY,HIDDEN_KEY,THEME_KEY,
     DAY_ORDER_KEY,WEEKDAY_ORDER_KEY,CUSTOM_TIME_KEY,DELETED_KEY,WEEKDAY_NOTES_KEY,
@@ -1686,10 +1705,11 @@ async function resetAllSettings(){
     'teacherCalendarSolidColor','teacherCalendarDarkSolidColor'
   ];
   keysToRemove.forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  // Remove all class states
+  // Видаляємо стани всіх класів
   Object.keys(localStorage).filter(k=>k.startsWith('teacherCalendarClass_')).forEach(k=>{
     try{localStorage.removeItem(k)}catch(e){}
   });
+
   showNotification('Налаштування скинуто','success');
   setTimeout(()=>location.reload(),700);
 }
