@@ -139,7 +139,7 @@ body.readonly-mode .fab-add-event{display:none!important}
 .solid-picker-btns .btn-apply:hover{opacity:.88}
 .solid-picker-btns button:not(.btn-apply):hover{background:var(--bg-hover)}
 *{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;font-family:'Segoe UI',Roboto,sans-serif;background:var(--bg-page);color:var(--text);overflow:hidden}
-#home-view{display:flex;height:100vh;width:100vw}
+#home-view{display:flex;height:100vh;width:100vw;overflow:hidden}
 .sidebar{width:var(--sidebar-w);background:var(--bg-surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .3s ease,transform .3s ease;z-index:20}.sidebar-scroll-area{flex:1;overflow-y:auto;min-height:0;display:flex;flex-direction:column}.sidebar-scroll-area::-webkit-scrollbar{width:3px}.sidebar-scroll-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 .sidebar.collapsed{width:0;border-right:none}
 .sidebar-header{padding:10px 14px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:8px}
@@ -553,9 +553,482 @@ td.weekend-col{background:#fff8f8}
   #print-doc.mono .print-cell-lesson{background:transparent!important;border:1.5px solid #333!important}
   @page{margin:10mm;size:A4 landscape}
 }
-@media(max-width:900px){.sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;box-shadow:var(--shadow-lg)}.sidebar.collapsed{transform:translateX(-100%);width:var(--sidebar-w)}.sidebar-overlay{display:block}.gcal-header{padding:7px 10px;gap:5px;flex-wrap:wrap}.gcal-title{font-size:1.05em}.gcal-today-btn{padding:5px 10px;font-size:.8em}.gcal-edit-btn{padding:6px 12px;font-size:.8em}.gcal-view-btn{padding:5px 10px;font-size:.78em}.gcal-cell-date{width:22px;height:22px;font-size:.76em}.gcal-event{font-size:.62em;padding:1px 3px}}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99;backdrop-filter:blur(2px);animation:fadeIn .2s}
-@media(max-width:640px){.gcal-header{padding:5px 7px}.gcal-title{font-size:.9em}.gcal-nav-btn{width:28px;height:28px;font-size:1em}.gcal-weekday{font-size:.6em;padding:3px 0}.gcal-cell-date{width:18px;height:18px;font-size:.68em}.gcal-event{font-size:.55em;padding:1px 2px;border-left-width:2px}.main-grid{grid-template-columns:1fr}.days-grid{grid-template-columns:repeat(3,1fr)}.period-holidays-grid{grid-template-columns:1fr}.fab{width:44px;height:44px;font-size:1.4em}}
+/* ─────────────────────────────────────────────────────────────────
+   МОБІЛЬНА АДАПТАЦІЯ — повністю переписана
+   ───────────────────────────────────────────────────────────────── */
+
+/* Планшет ≤900px */
+@media(max-width:900px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;box-shadow:var(--shadow-lg)}
+  .sidebar.collapsed{transform:translateX(-100%);width:var(--sidebar-w)}
+  .sidebar-overlay{display:block}
+  .gcal-header{padding:7px 10px;gap:6px}
+  .gcal-title{font-size:1.05em}
+  .gcal-today-btn{padding:5px 10px;font-size:.8em}
+  .gcal-edit-btn{padding:6px 12px;font-size:.8em}
+  .gcal-view-btn{padding:5px 10px;font-size:.78em}
+  .gcal-cell-date{width:22px;height:22px;font-size:.76em}
+  .gcal-event{font-size:.62em;padding:1px 3px}
+}
+
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.35);z-index:99;
+  backdrop-filter:blur(2px);animation:fadeIn .2s
+}
+
+/* ── Мобільний ≤640px ───────────────────────────────────────────── */
+@media(max-width:640px){
+
+  /* === ЗАГОЛОВОК КАЛЕНДАРЯ === */
+  .gcal-header{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    grid-template-rows:auto auto;
+    align-items:center;
+    padding:6px 10px;
+    gap:0;
+    background:var(--bg-surface);
+    border-bottom:1px solid var(--border);
+  }
+
+  /* Рядок 1: бургер | назва місяця | [порожньо] */
+  .header-left{
+    grid-column:1/2; grid-row:1;
+    display:flex;align-items:center;gap:6px;
+    min-width:0;
+  }
+  .gcal-title{
+    grid-column:2/3; grid-row:1;
+    font-size:1.05em;font-weight:700;
+    text-align:center;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    padding:4px 0;
+    /* Назва місяця — добре видна, нікуди не зникає */
+  }
+  /* Рядок 2: кнопки керування — повна ширина, по центру */
+  .header-actions{
+    grid-column:1/4; grid-row:2;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:4px;padding:4px 0 2px;
+    border-top:1px solid var(--border-light);
+    margin-top:4px;
+  }
+  .gcal-controls{display:flex;align-items:center;gap:4px;flex-shrink:0}
+  .gcal-today-btn{
+    padding:6px 10px;font-size:.78em;
+    border-radius:var(--radius);white-space:nowrap;
+  }
+  .gcal-nav-btn{width:32px;height:32px;font-size:1.2em;flex-shrink:0}
+  .gcal-view-toggle{display:flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .gcal-view-btn{padding:6px 10px;font-size:.78em}
+
+  /* Кнопка Друк — прихована на мобільному */
+  #gcal-print-btn{ display:none !important }
+
+  /* Кнопка Поділитись — тільки іконка */
+  #share-btn{
+    padding:6px 8px;font-size:0;
+    width:32px;height:32px;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;position:relative;flex-shrink:0;
+  }
+  #share-btn::after{
+    content:'\1F517';font-size:16px;position:absolute;
+    top:50%;left:50%;transform:translate(-50%,-50%);
+  }
+
+  /* Sidebar toggle — крупніша зона кліку */
+  .sidebar-toggle-btn{
+    width:38px;height:38px;font-size:1.3em;
+    border-radius:var(--radius);flex-shrink:0;
+    background:var(--blue-light);color:var(--blue);
+  }
+
+  /* === САЙДБАР === */
+  .sidebar{
+    width:min(88vw,290px) !important;
+    max-width:290px;
+  }
+  .sidebar.collapsed{
+    transform:translateX(-100%);
+    width:min(88vw,290px) !important;
+  }
+  .sidebar-header{padding:10px 12px}
+  .sidebar-section{padding:8px 12px}
+  .now-lesson-panel{margin:8px 12px}
+  .next-lesson-panel{margin:0 12px 8px}
+  .sidebar-footer{padding:8px 12px;gap:4px}
+  .sidebar-btn{font-size:.69em;padding:7px 3px}
+  .author-footer{font-size:.68em;padding:5px 12px;text-align:center}
+
+  /* === МІСЯЧНИЙ ВИГЛЯД === */
+  .gcal-weekday{font-size:.6em;padding:4px 0;letter-spacing:0}
+  .gcal-cell-header{padding:2px 3px}
+  .gcal-cell-date{width:20px;height:20px;font-size:.72em}
+  .gcal-event{font-size:.56em;padding:1px 3px;border-left-width:2px}
+  .gcal-wk-num{display:none}
+  .gcal-lcount{font-size:.52em}
+
+  /* === ТИЖНЕВИЙ ВИГЛЯД === */
+  .week-header-day{font-size:.63em}
+  .week-header-date{font-size:1.05em}
+  .week-header-cell.today .week-header-date{width:30px;height:30px;font-size:.95em}
+  .week-lesson{font-size:.65em;padding:2px 3px}
+  .week-time-label{font-size:.58em;right:2px}
+
+  /* === FAB КНОПКИ === */
+  .fab{width:48px;height:48px;font-size:1.55em}
+  .fab-group{bottom:18px;right:14px;gap:8px}
+  .fab-add-event{width:36px;height:36px;font-size:1.2em}
+  .fab-settings{width:36px;height:36px}
+
+  /* === МОДАЛЬНІ ВІКНА — BOTTOM SHEET СТИЛЬ === */
+  .day-modal-overlay{
+    align-items:flex-end;
+    padding:0;
+  }
+  .day-modal{
+    width:100%;max-width:100%;
+    max-height:90vh;
+    border-radius:16px 16px 0 0;
+    margin:0;
+    animation:mobileSheetUp .28s cubic-bezier(.4,0,.2,1);
+  }
+  .day-modal-header{
+    padding:14px 16px 10px;
+    border-radius:16px 16px 0 0;
+    /* "ручка" зверху */
+    background:var(--bg-surface);
+    border-bottom:1px solid var(--border-light);
+    position:relative;
+  }
+  .day-modal-header::before{
+    content:'';display:block;
+    width:40px;height:4px;
+    background:var(--border);border-radius:2px;
+    margin:0 auto 10px;
+  }
+  .day-modal-body{padding:10px 14px 24px}
+  .day-modal-class{padding:8px 10px;margin-bottom:8px}
+  .day-modal-lesson{font-size:.82em}
+  .dm-slot-time{min-width:72px;font-size:.72em}
+
+  /* Звичайні modal-box → теж bottom sheet */
+  .modal-overlay{
+    align-items:flex-end;
+    padding:0;
+  }
+  .modal-box{
+    width:100%;max-width:100%;
+    border-radius:16px 16px 0 0;
+    border-top-width:3px;
+    padding:20px 16px 28px;
+    animation:mobileSheetUp .28s cubic-bezier(.4,0,.2,1);
+  }
+  .modal-box::before{
+    content:'';display:block;
+    width:40px;height:4px;
+    background:var(--border);border-radius:2px;
+    margin:0 auto 14px;
+  }
+  .modal-title{font-size:1em}
+  .modal-input{font-size:.92em;padding:11px 12px}
+  .modal-btn{padding:11px 18px;font-size:.88em}
+  .modal-actions{gap:8px}
+
+  /* === НАЛАШТУВАННЯ — BOTTOM SHEET === */
+  #settings-overlay{
+    padding:0 !important;
+    align-items:flex-end;
+    justify-content:stretch;
+  }
+  #settings-modal{
+    width:100%;
+    max-width:100%;
+    border-radius:16px 16px 0 0;
+    max-height:90vh;
+    animation:mobileSheetUp .28s cubic-bezier(.4,0,.2,1);
+  }
+  .smod-head{
+    padding:14px 14px 10px;
+    position:relative;
+  }
+  /* Ручка */
+  .smod-head::before{
+    content:'';display:block;
+    width:40px;height:4px;
+    background:var(--border);border-radius:2px;
+    position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  }
+  .smod-body{padding:8px 12px 28px}
+  .smod-theme-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .smod-theme-card{padding:8px 10px}
+  .smod-action-btn{padding:10px 10px}
+  .smod-sound-row{padding:8px 10px}
+  .smod-sound-minutes-row{padding:8px 10px}
+
+  /* === ПОВІДОМЛЕННЯ (toast) === */
+  .notification{
+    bottom:82px;left:10px;right:10px;
+    max-width:none;font-size:.86em;
+    border-radius:var(--radius-lg);
+  }
+
+  /* === РЕДАКТОР РОЗКЛАДУ (#edit-view) === */
+  #edit-view{
+    padding:0 !important;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  #edit-view .container{
+    border-radius:0;
+    padding:0 0 80px;
+    margin:0;
+    max-width:100%;
+    box-shadow:none;
+  }
+  .edit-top-bar{
+    position:sticky;top:0;z-index:50;
+    padding:10px 14px;
+    background:var(--bg-surface);
+    border-bottom:2px solid var(--border);
+    margin-bottom:0;
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .edit-top-bar h1{
+    font-size:1em;text-align:left;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    flex:1;min-width:0;
+  }
+  .done-btn{
+    padding:9px 16px;font-size:.86em;
+    white-space:nowrap;flex-shrink:0;margin-left:10px;
+  }
+
+  /* Двоколонний main-grid → одноколонний */
+  .main-grid{
+    display:flex;flex-direction:column;gap:0;
+    padding:0 10px;
+  }
+  .left-panel,.right-panel{
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .right-panel{margin-top:10px}
+
+  .section{
+    padding:12px 12px;
+    border-radius:var(--radius);
+    border-left-width:3px;
+  }
+  .section h3{font-size:.92em;margin-bottom:8px}
+
+  /* Вкладки класів — горизонтальний скрол */
+  .class-tabs{
+    display:flex;flex-wrap:nowrap;
+    overflow-x:auto;gap:6px;padding-bottom:6px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .class-tabs::-webkit-scrollbar{display:none}
+  .class-tab{flex-shrink:0;padding:7px 12px;font-size:.8em}
+  .selected-class-bar{flex-wrap:wrap;gap:6px}
+
+  /* Дні тижня: 3 стовпці замість 6 */
+  .days-grid{grid-template-columns:repeat(3,1fr);gap:6px}
+  .day-card{padding:8px 6px}
+  .day-label{font-size:.85em;margin-bottom:5px}
+  .lesson-toggle{font-size:.85em;padding:4px 4px;height:26px}
+  .lesson-toggle .label{font-size:.68em;min-width:44px}
+  .day-preview{font-size:.65em}
+
+  /* Розклад дзвінків — таблиця з відповідними розмірами */
+  .bell-schedule-grid{gap:6px}
+  .bell-row{
+    grid-template-columns:22px 1fr 1fr 28px;
+    gap:5px;align-items:center;
+  }
+  .bell-row label{font-size:.8em}
+  .bell-row input[type="time"]{
+    font-size:.82em;padding:6px 4px;
+    min-width:0;width:100%;
+  }
+  .bell-row-remove{width:28px;height:28px;flex-shrink:0}
+  .bell-add-btn{padding:8px;font-size:.82em}
+
+  /* Період і канікули — одна колонка */
+  .period-holidays-grid{grid-template-columns:1fr}
+  .date-inputs{grid-template-columns:1fr 1fr;gap:6px}
+  .date-group label{font-size:.82em}
+  input[type="date"],input[type="time"]{
+    font-size:.85em;padding:8px 6px;min-width:0;width:100%;
+    box-sizing:border-box;
+  }
+  /* Канікули — поля дат у стовпець */
+  .holiday-inputs{
+    grid-template-columns:1fr 1fr auto;
+    gap:5px;
+  }
+  .btn{padding:8px 10px;font-size:.85em;white-space:nowrap}
+
+  /* Швидкі кнопки — горизонтальний скрол */
+  .quick-buttons{gap:6px;margin-bottom:8px}
+  .quick-btn{padding:7px 10px;font-size:.8em}
+
+  /* Статистика */
+  .stats{grid-template-columns:repeat(3,1fr);gap:5px}
+  .stat-card{padding:8px 4px;font-size:.78em}
+  .stat-number{font-size:1.3em}
+
+  /* Result textarea */
+  #result{font-size:.8em;padding:10px;max-height:220px}
+  .action-buttons{gap:7px}
+  .action-buttons .btn{flex:1;text-align:center}
+
+  /* Сітка місяців у редакторі */
+  .calendar-grid-wrapper{
+    grid-template-columns:repeat(2,1fr);
+    gap:6px;
+  }
+  .calendar-month{padding:6px}
+  .calendar-month-title{font-size:.78em}
+
+  /* === PRINT OVERLAY === */
+  #print-overlay{padding:10px}
+  .print-toolbar{
+    flex-wrap:wrap;gap:6px;
+    padding-bottom:10px;margin-bottom:10px;
+  }
+  .print-toolbar-title{width:100%;font-size:.95em;flex:none}
+  .print-hint{width:100%;font-size:.72em;flex:none}
+  .print-mono-toggle{font-size:.8em;padding:5px 8px}
+  .print-toolbar-btn{padding:8px 12px;font-size:.82em}
+}/* end 640px */
+
+/* ── Дуже малі екрани ≤400px ─────────────────────────────────── */
+@media(max-width:400px){
+  .gcal-title{font-size:.95em}
+  .gcal-today-btn{padding:5px 7px;font-size:.74em}
+  .gcal-view-btn{padding:5px 7px;font-size:.72em}
+  .gcal-cell-date{width:18px;height:18px;font-size:.66em}
+  .gcal-event{font-size:.52em}
+  .sidebar{width:92vw !important}
+  .bell-row input[type="time"]{font-size:.78em;padding:5px 3px}
+  .days-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+@keyframes mobileSheetUp{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
+}
+
+/* ─── Мобільний тижневий вигляд: бар днів ─────────────── */
+@media(max-width:640px){
+  /* Бар з вкладками днів */
+  #mob-day-bar{
+    display:flex;align-items:center;
+    background:var(--bg-surface);
+    border-bottom:1px solid var(--border);
+    flex-shrink:0;gap:0;
+    position:sticky;top:0;z-index:30;
+  }
+  #mob-prev-day,#mob-next-day{
+    width:36px;height:48px;flex-shrink:0;
+    background:none;border:none;cursor:pointer;
+    font-size:1.4em;color:var(--text-secondary);
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s;
+  }
+  #mob-prev-day:hover,#mob-next-day:hover{background:var(--bg-hover)}
+  #mob-day-tabs{
+    flex:1;display:flex;overflow-x:auto;
+    scrollbar-width:none;gap:0;
+  }
+  #mob-day-tabs::-webkit-scrollbar{display:none}
+  .mob-day-tab{
+    flex:1;min-width:36px;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:1px;padding:5px 2px;
+    background:none;border:none;cursor:pointer;
+    border-bottom:2px solid transparent;
+    transition:border-color .15s,background .15s;
+    font-family:inherit;
+  }
+  .mob-day-tab:hover{background:var(--bg-hover)}
+  .mob-day-tab.active{border-bottom-color:var(--blue);background:var(--blue-light)}
+  .mob-day-tab.today .mob-tab-date{
+    background:var(--blue);color:#fff;
+    border-radius:50%;width:24px;height:24px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .mob-day-tab.active.today .mob-tab-date{
+    box-shadow:0 0 0 2px var(--bg-surface),0 0 0 4px var(--blue);
+  }
+  .mob-tab-name{font-size:.65em;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}
+  .mob-tab-date{font-size:.9em;font-weight:600;color:var(--text)}
+  .mob-day-tab.active .mob-tab-name{color:var(--blue)}
+  .mob-day-tab.active .mob-tab-date{color:var(--blue)}
+
+  /* Тижневий вигляд — збільшені розміри для 1 колонки */
+  .week-view.active{flex-direction:column}
+  #week-header{min-height:0}
+  .week-header-cell{padding:8px 4px}
+  .week-header-day{font-size:.72em;color:var(--text-light)}
+  .week-header-date{font-size:1.4em;font-weight:500}
+  .week-header-cell.today .week-header-date{
+    width:38px;height:38px;font-size:1.2em;
+  }
+
+  /* Часовий стовпець — компактний */
+  .week-time-col{min-width:46px;max-width:46px}
+  .week-time-label{font-size:.72em;right:4px;color:var(--text-secondary)}
+
+  /* Блок уроку — крупний, зручний */
+  .week-lesson{
+    left:3px;right:3px;
+    border-radius:8px;
+    padding:6px 8px;
+    font-size:.82em;
+    box-shadow:0 2px 6px rgba(0,0,0,.18);
+  }
+  .week-lesson .lesson-title{
+    font-size:1em;font-weight:700;
+    white-space:normal;line-height:1.3;
+    margin-bottom:3px;
+  }
+  .week-lesson .lesson-name{
+    white-space:normal;
+    display:block;font-size:1em;
+  }
+  .week-lesson .lesson-time-range{
+    font-size:.92em;opacity:.95;
+    font-weight:600;
+    background:rgba(0,0,0,.15);
+    display:inline-block;
+    padding:1px 5px;border-radius:4px;
+    margin-top:2px;
+  }
+
+  /* Лінія поточного часу */
+  .week-now-label{font-size:.72em;padding:2px 6px}
+  .week-now-dot{width:9px;height:9px}
+
+  /* Часові позначки — кожну годину чіткіша лінія */
+  .week-hour-line{border-top:1px solid var(--border)}
+  .week-half-line{border-top:1px dashed var(--border-light)}
+
+  /* Власні події */
+  .custom-event-block{
+    left:3px;right:3px;
+    border-radius:7px;
+    padding:5px 7px;
+    font-size:.8em;
+  }
+  .custom-event-block .cev-time{font-size:.9em;font-weight:700}
+}
 </style></head><body>
 <div id="readonly-banner">👁 Режим перегляду — редагування недоступне. <a href="https://codenamexxv.github.io/tcalendar/" style="color:#fff;text-decoration:underline;margin-left:8px">Відкрити повну версію</a></div>
 <div id="drag-slot-badge"></div>
@@ -612,7 +1085,7 @@ td.weekend-col{background:#fff8f8}
 <div class="main-area">
 <div class="gcal-header">
 <div class="header-left"><button class="sidebar-toggle-btn" onclick="toggleSidebar()">&#9776;</button><div class="gcal-title"><span class="month-year" id="gcal-month-year"></span></div></div>
-<div class="header-actions" style="display:flex; align-items:center; gap:24px;">
+<div class="header-actions" style="display:flex; align-items:center; gap:6px;">
 <div class="gcal-controls"><button class="gcal-today-btn" onclick="goToToday()">Сьогодні</button><button class="gcal-nav-btn" onclick="navigatePrev()">&#8249;</button><button class="gcal-nav-btn" onclick="navigateNext()">&#8250;</button><div class="gcal-view-toggle"><button class="gcal-view-btn active" id="btn-view-month" onclick="setHomeView('month')">Місяць</button><button class="gcal-view-btn" id="btn-view-week" onclick="setHomeView('week')">Тиждень</button></div></div>
 <div style="display:flex;align-items:center;gap:6px">
 <button class="gcal-print-btn" id="gcal-print-btn" onclick="printWeekSchedule()" title="Роздрукувати розклад тижня">&#128438; Друк</button>
@@ -2783,6 +3256,220 @@ function setSoundMinutes(val){
   try{localStorage.setItem('teacherCalendarSoundMinutes',soundMinutesBefore)}catch(e){}
   lastSoundPlayedFor=null;
 }
+
+
+/* ─────────────────────────────────────────────────────────
+   МОБІЛЬНИЙ ТИЖНЕВИЙ ВИГЛЯД — показує 1 день з перемикачем
+   ───────────────────────────────────────────────────────── */
+(function(){
+  var MOBILE_BP = 640;
+  var _mobileDayIdx = null; // 0=Пн … 6=Нд, null=авто (сьогодні або Пн)
+
+  function isMobile(){ return window.innerWidth <= MOBILE_BP; }
+
+  // Повертає індекс сьогоднішнього дня у тижні (0=Пн)
+  function todayWeekIdx(){
+    return (new Date().getDay() + 6) % 7;
+  }
+
+  // Ін'єкція мобільного бару з днями тижня
+  function injectMobileDayBar(){
+    if(document.getElementById('mob-day-bar')) return;
+    var wv = document.getElementById('week-view');
+    if(!wv) return;
+    var bar = document.createElement('div');
+    bar.id = 'mob-day-bar';
+    bar.innerHTML =
+      '<button id="mob-prev-day" onclick="mobPrevDay()">&#8249;</button>' +
+      '<div id="mob-day-tabs"></div>' +
+      '<button id="mob-next-day" onclick="mobNextDay()">&#8250;</button>';
+    wv.insertBefore(bar, wv.firstChild);
+  }
+
+  // Оновлює вкладки днів
+  function updateMobileDayTabs(){
+    var tabs = document.getElementById('mob-day-tabs');
+    if(!tabs || !weekStartDate) return;
+    var DAY_SHORT = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+    tabs.innerHTML = '';
+    var today = new Date(); today.setHours(0,0,0,0);
+    for(var i=0;i<7;i++){
+      var dt = new Date(weekStartDate);
+      dt.setDate(dt.getDate()+i);
+      dt.setHours(0,0,0,0);
+      var btn = document.createElement('button');
+      var isToday = dt.getTime()===today.getTime();
+      var isActive = i === _mobileDayIdx;
+      btn.className = 'mob-day-tab' + (isActive?' active':'') + (isToday?' today':'');
+      btn.innerHTML = '<span class="mob-tab-name">'+DAY_SHORT[i]+'</span>' +
+                      '<span class="mob-tab-date">'+dt.getDate()+'</span>';
+      btn.dataset.idx = i;
+      btn.onclick = (function(idx){ return function(){ mobGoDay(idx); }; })(i);
+      tabs.appendChild(btn);
+    }
+  }
+
+  // Показати тільки колонку вибраного дня
+  function applyMobileDayFilter(){
+    if(!isMobile()) return;
+    var idx = _mobileDayIdx !== null ? _mobileDayIdx : 0;
+
+    // Шапка тижня: сховати всі крім idx+1 (0 — стовпець часу)
+    var hEl = document.getElementById('week-header');
+    if(hEl){
+      var cells = hEl.children;
+      for(var i=0;i<cells.length;i++){
+        cells[i].style.display = (i===0 || i===idx+1) ? '' : 'none';
+      }
+      hEl.style.gridTemplateColumns = '46px 1fr';
+    }
+
+    // Тіло тижня: сховати всі day-col крім потрібного
+    var gEl = document.getElementById('week-grid');
+    if(gEl){
+      var cols = gEl.querySelectorAll('.week-day-col');
+      cols.forEach(function(col, i){
+        col.style.display = (i===idx) ? '' : 'none';
+      });
+      gEl.style.gridTemplateColumns = '46px 1fr';
+      // Часовий стовпець — завжди видимий
+      var tCol = gEl.querySelector('.week-time-col');
+      if(tCol) tCol.style.display = '';
+    }
+
+    updateMobileDayTabs();
+
+    // Оновити заголовок — показати конкретну дату
+    if(weekStartDate){
+      var dt = new Date(weekStartDate);
+      dt.setDate(dt.getDate()+idx);
+      var DAY_FULL = ['Понеділок','Вівторок','Середа','Четвер','П\'ятниця','Субота','Неділя'];
+      var MONTH_G = ['січня','лютого','березня','квітня','травня','червня',
+                     'липня','серпня','вересня','жовтня','листопада','грудня'];
+      var titleEl = document.getElementById('gcal-month-year');
+      if(titleEl) titleEl.textContent = DAY_FULL[idx] + ', ' + dt.getDate() + ' ' + MONTH_G[dt.getMonth()];
+    }
+  }
+
+  // Публічні функції навігації по днях
+  window.mobGoDay = function(idx){
+    _mobileDayIdx = idx;
+    applyMobileDayFilter();
+  };
+  window.mobPrevDay = function(){
+    var idx = (_mobileDayIdx !== null ? _mobileDayIdx : 0);
+    if(idx > 0){
+      _mobileDayIdx = idx - 1;
+      applyMobileDayFilter();
+    } else {
+      // Перейти на попередній тиждень, останній день
+      _mobileDayIdx = 6;
+      if(typeof navigatePrev === 'function') navigatePrev();
+    }
+  };
+  window.mobNextDay = function(){
+    var idx = (_mobileDayIdx !== null ? _mobileDayIdx : 0);
+    if(idx < 6){
+      _mobileDayIdx = idx + 1;
+      applyMobileDayFilter();
+    } else {
+      // Перейти на наступний тиждень, перший день
+      _mobileDayIdx = 0;
+      if(typeof navigateNext === 'function') navigateNext();
+    }
+  };
+
+  // Перехоплюємо renderWeekView
+  var _origRenderWeekView = null;
+  function patchRenderWeekView(){
+    if(typeof renderWeekView !== 'function') return;
+    if(_origRenderWeekView) return; // вже пропатчено
+    _origRenderWeekView = renderWeekView;
+    window.renderWeekView = function(){
+      _origRenderWeekView.apply(this, arguments);
+      if(!isMobile()) return;
+      // Вибрати поточний день якщо не встановлено
+      if(_mobileDayIdx === null){
+        _mobileDayIdx = todayWeekIdx();
+      }
+      injectMobileDayBar();
+      applyMobileDayFilter();
+    };
+  }
+
+  // Патчимо navigatePrev/Next щоб скидати день
+  function patchNavigation(){
+    if(typeof navigatePrev === 'function' && !navigatePrev._mobPatched){
+      var op = navigatePrev;
+      window.navigatePrev = function(){
+        op.apply(this, arguments);
+        if(isMobile() && homeView==='week'){
+          if(_mobileDayIdx === null) _mobileDayIdx = 0;
+          injectMobileDayBar();
+          applyMobileDayFilter();
+        }
+      };
+      window.navigatePrev._mobPatched = true;
+    }
+    if(typeof navigateNext === 'function' && !navigateNext._mobPatched){
+      var on = navigateNext;
+      window.navigateNext = function(){
+        on.apply(this, arguments);
+        if(isMobile() && homeView==='week'){
+          if(_mobileDayIdx === null) _mobileDayIdx = 0;
+          injectMobileDayBar();
+          applyMobileDayFilter();
+        }
+      };
+      window.navigateNext._mobPatched = true;
+    }
+    if(typeof goToToday === 'function' && !goToToday._mobPatched){
+      var og = goToToday;
+      window.goToToday = function(){
+        og.apply(this, arguments);
+        if(isMobile() && homeView==='week'){
+          // Завжди скидаємо на сьогоднішній день
+          _mobileDayIdx = todayWeekIdx();
+          injectMobileDayBar();
+          applyMobileDayFilter();
+        }
+      };
+      window.goToToday._mobPatched = true;
+    }
+  }
+
+  // При зміні розміру — перемалювати
+  window.addEventListener('resize', function(){
+    if(!isMobile()){
+      // Відновити десктоп-вигляд
+      var hEl=document.getElementById('week-header');
+      var gEl=document.getElementById('week-grid');
+      if(hEl){ Array.from(hEl.children).forEach(function(c){c.style.display='';}); hEl.style.gridTemplateColumns=''; }
+      if(gEl){ gEl.querySelectorAll('.week-day-col').forEach(function(c){c.style.display='';}); gEl.style.gridTemplateColumns=''; }
+      var bar=document.getElementById('mob-day-bar');
+      if(bar) bar.style.display='none';
+    } else {
+      var bar=document.getElementById('mob-day-bar');
+      if(bar) bar.style.display='';
+      if(homeView==='week') applyMobileDayFilter();
+    }
+  });
+
+  // Запуск після завантаження сторінки
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      patchRenderWeekView();
+      patchNavigation();
+    }, 100);
+  });
+  // Якщо DOMContentLoaded вже пройшов
+  if(document.readyState !== 'loading'){
+    setTimeout(function(){
+      patchRenderWeekView();
+      patchNavigation();
+    }, 100);
+  }
+})();
 
 </script>
 
