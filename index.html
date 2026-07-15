@@ -1677,6 +1677,16 @@ async function resetAllSettings(){
     danger:true
   });
   if(!ok)return;
+  if(typeof fbUser!=='undefined'&&fbUser){
+    const db=window._fbDb, docFn=window._fbDoc, delFn=window._fbDeleteDoc;
+    if(db && docFn && delFn){
+      try{
+        await delFn(docFn(db,'users',fbUser.uid,'data',FB_DOC_NAME));
+      }catch(e){
+        console.error('Failed to delete cloud data', e);
+      }
+    }
+  }
   const keysToRemove=[
     BELL_KEY,NOTES_KEY,LESSON_NOTES_KEY,TYPES_KEY,HIDDEN_KEY,THEME_KEY,
     DAY_ORDER_KEY,WEEKDAY_ORDER_KEY,CUSTOM_TIME_KEY,DELETED_KEY,WEEKDAY_NOTES_KEY,
