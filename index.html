@@ -1869,8 +1869,11 @@ if(ws){if(slots.length>0&&totalWeeklyHrs>0){ws.style.display='block';ws.innerHTM
 function setHomeView(v){if(v!==homeView){if(v==='week'){const now=new Date();if(homeYear===now.getFullYear()&&homeMonth===now.getMonth()){weekStartDate=getMonday(now)}else{weekStartDate=getMonday(new Date(homeYear,homeMonth,1))}}else{const ref=new Date(weekStartDate);ref.setDate(ref.getDate()+3);homeYear=ref.getFullYear();homeMonth=ref.getMonth()}}homeView=v;try{localStorage.setItem('teacherCalendarHomeView',v)}catch(e){}document.getElementById('btn-view-month').classList.toggle('active',v==='month');document.getElementById('btn-view-week').classList.toggle('active',v==='week');document.getElementById('month-view').style.display=v==='month'?'flex':'none';document.getElementById('week-view').classList.toggle('active',v==='week');if(v==='month')renderHomeCalendar();else renderWeekView();updateTitle();renderSidebar()}
 function loadHomeView(){try{const s=localStorage.getItem('teacherCalendarHomeView');if(s==='week')setHomeView('week');else setHomeView('month')}catch(e){setHomeView('month')}}
 function updateTitle(){if(homeView==='month')document.getElementById('gcal-month-year').textContent=MONTH_NAMES_UK[homeMonth]+' '+homeYear;else{if(!weekStartDate)weekStartDate=getMonday(new Date());const e=new Date(weekStartDate);e.setDate(e.getDate()+6);document.getElementById('gcal-month-year').textContent=e.getMonth()===weekStartDate.getMonth()?weekStartDate.getDate()+' \u2013 '+e.getDate()+' '+MONTH_NAMES_UK_GEN[e.getMonth()]+' '+e.getFullYear():weekStartDate.getDate()+' '+MONTH_NAMES_UK_GEN[weekStartDate.getMonth()]+' \u2013 '+e.getDate()+' '+MONTH_NAMES_UK_GEN[e.getMonth()]+' '+e.getFullYear()}}
-function navigatePrev(){if(homeView==='month'){homeMonth--;if(homeMonth<0){homeMonth=11;homeYear--}renderHomeCalendar()}else{weekStartDate.setDate(weekStartDate.getDate()-7);renderWeekView()}updateTitle();renderSidebar()}
-function navigateNext(){if(homeView==='month'){homeMonth++;if(homeMonth>11){homeMonth=0;homeYear++}renderHomeCalendar()}else{weekStartDate.setDate(weekStartDate.getDate()+7);renderWeekView()}updateTitle();renderSidebar()}
+function _navigatePrevCore(){if(homeView==='month'){homeMonth--;if(homeMonth<0){homeMonth=11;homeYear--}renderHomeCalendar()}else{weekStartDate.setDate(weekStartDate.getDate()-7);renderWeekView()}updateTitle();renderSidebar()}
+function _navigateNextCore(){if(homeView==='month'){homeMonth++;if(homeMonth>11){homeMonth=0;homeYear++}renderHomeCalendar()}else{weekStartDate.setDate(weekStartDate.getDate()+7);renderWeekView()}updateTitle();renderSidebar()}
+function animateNavigation(dir, cb){const c=document.getElementById(homeView==='month'?'month-view':'week-view');if(c&&c.animate){const w=Math.min(c.clientWidth, window.innerWidth);const soX=dir==='prev'?w:-w;const siX=dir==='prev'?-w:w;c.animate([{transform:'translateX(0)',opacity:1},{transform:`translateX(${soX}px)`,opacity:0}],{duration:150,easing:'ease-in'}).onfinish=()=>{cb();c.animate([{transform:`translateX(${siX}px)`,opacity:0},{transform:'translateX(0)',opacity:1}],{duration:150,easing:'ease-out'})}}else cb()}
+function navigatePrev(){animateNavigation('prev',_navigatePrevCore)}
+function navigateNext(){animateNavigation('next',_navigateNextCore)}
 function goToToday(){const n=new Date();homeYear=n.getFullYear();homeMonth=n.getMonth();weekStartDate=getMonday(n);cachedAllData=null;if(homeView==='month')renderHomeCalendar();else renderWeekView();updateTitle();renderSidebar()}
 function renderHomeCalendar(){if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;document.getElementById('gcal-month-year').textContent=MONTH_NAMES_UK[homeMonth]+' '+homeYear;const wd=document.getElementById('gcal-weekdays');wd.innerHTML='';wd.style.gridTemplateColumns='repeat(7,1fr)';DAY_HEADERS_UK.forEach((dn,i)=>{const d=document.createElement('div');d.className='gcal-weekday'+(i>=5?' weekend':'');d.textContent=dn;wd.appendChild(d)});const grid=document.getElementById('gcal-grid');grid.innerHTML='';grid.style.gridTemplateColumns='repeat(7,1fr)';const dim=new Date(homeYear,homeMonth+1,0).getDate();const fw=(new Date(homeYear,homeMonth,1).getDay()+6)%7;const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<fw;i++){const d=new Date(homeYear,homeMonth,0).getDate()-fw+1+i;const dt=new Date(homeYear,homeMonth-1,d);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,true,period,allDayMap,classColorMap,today))}for(let d=1;d<=dim;d++){const dt=new Date(homeYear,homeMonth,d);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,false,period,allDayMap,classColorMap,today))}const tc=fw+dim;const target=tc<=35?35:42;for(let i=1;i<=target-tc;i++){const dt=new Date(homeYear,homeMonth+1,i);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,true,period,allDayMap,classColorMap,today))}}
 function createGcalCell(dateObj,outside,period,allDayMap,classColorMap,today){const cell=document.createElement('div');const dk=dateKey(dateObj);const inRange=dateObj>=period.start&&dateObj<=period.end;const wi=(dateObj.getDay()+6)%7;const isWE=wi>=5;const dayC=inRange?(allDayMap[dk]||[]):[];const visibleDayC=dayC.filter(c=>!hiddenClasses.has(c.classId));const isHol=inRange&&isDateInHoliday(dateObj,period.holidays);const isT=dateObj.getTime()===today.getTime();let cls='gcal-cell';if(outside)cls+=' outside';else if(isHol&&visibleDayC.length===0)cls+=' holiday';else if(isWE)cls+=' weekend';if(isT)cls+=' today';cell.className=cls;const hdr=document.createElement('div');hdr.className='gcal-cell-header';const ds=document.createElement('div');ds.className='gcal-cell-date';ds.textContent=dateObj.getDate();hdr.appendChild(ds);if(!outside){const wn=document.createElement('span');wn.className='gcal-wk-num';wn.textContent='W'+getWeek(dateObj);hdr.appendChild(wn)}cell.appendChild(hdr);if(!outside&&visibleDayC.length>0){const lc=document.createElement('span');lc.className='gcal-lcount';lc.textContent=visibleDayC.reduce((s,c)=>s+c.lessons,0)+'\u0443\u0440';hdr.insertBefore(lc,hdr.querySelector('.gcal-wk-num'))}if(Object.keys(weekdayNotes).some(function(k){return k.startsWith(wi+'|')&&weekdayNotes[k]})){const dot=document.createElement('span');dot.className='has-note-dot';cell.appendChild(dot)}if(!outside&&visibleDayC.length>0){const evts=document.createElement('div');evts.className='gcal-events';const MAX=3;const allL=buildDayOrderList(dayC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);const classSlotMap={};slotArr.forEach(function(key,si){if(!key)return;const p=key.split(':');const cid=p[0];if(!classSlotMap[cid])classSlotMap[cid]={first:si,last:si};else classSlotMap[cid].last=si});const vis=visibleDayC.slice(0,MAX);const hidden=visibleDayC.length-MAX;vis.forEach(c=>{const ev=document.createElement('div');ev.className='gcal-event';ev.style.background=classColorMap[c.classId]||'#1a73e8';const sm=classSlotMap[c.classId];const b1=sm?getBellForSlot(dk,sm.first):null;const b2=sm?getBellForSlot(dk,sm.last):null;const ts=b1?b1.start:'';const te=b2?b2.end:'';const timeRange=(ts&&te)?ts+'\u2013'+te:ts;ev.innerHTML='<span class="ev-time">'+timeRange+'</span>'+escapeHtml(c.className)+' \u00b7 '+c.lessons+'\u0443\u0440';ev.addEventListener('click',e=>{e.stopPropagation();openDayModal(dk,dateObj)});ev.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();const si=classSlotMap[c.classId]?classSlotMap[c.classId].first:0;showContextMenu(e,dk,si,c.className,c.classId)});evts.appendChild(ev)});if(hidden>0){const m=document.createElement('div');m.className='gcal-more';m.textContent='+ \u0449\u0435 '+hidden;m.addEventListener('click',e=>{e.stopPropagation();openDayModal(dk,dateObj)});evts.appendChild(m)}cell.appendChild(evts);cell.addEventListener('click',()=>openDayModal(dk,dateObj))}else if(!outside&&isHol){const evts=document.createElement('div');evts.className='gcal-events';const ev=document.createElement('div');ev.className='gcal-event';ev.style.background='#ea4335';ev.textContent='\u{1f3d6}\ufe0f \u041a\u0430\u043d\u0456\u043a\u0443\u043b\u0438';evts.appendChild(ev);cell.appendChild(evts)}else if(!outside)cell.addEventListener('click',()=>openDayModal(dk,dateObj));
@@ -2363,7 +2366,7 @@ function word(){const t=document.getElementById('result').textContent;const html
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;if(e.key==='ArrowLeft'){navigatePrev();e.preventDefault()}if(e.key==='ArrowRight'){navigateNext();e.preventDefault()}if(e.key==='t'||e.key==='T'){goToToday();e.preventDefault()}if(e.key==='m'||e.key==='M'){setHomeView('month');e.preventDefault()}if(e.key==='w'||e.key==='W'){setHomeView('week');e.preventDefault()}if(e.key==='e'||e.key==='E'){enterEditMode();e.preventDefault()}if(e.key==='Escape'){const ev=document.getElementById('edit-view');if(ev.style.display==='block'&&!ev.classList.contains('closing'))cancelEditMode()}});
 let touchSX=0,touchSY=0,touchST=0;
 document.addEventListener('touchstart',e=>{touchSX=e.touches[0].clientX;touchSY=e.touches[0].clientY;touchST=Date.now()},{passive:true});
-document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-touchSX;const dy=e.changedTouches[0].clientY-touchSY;if(Math.abs(dx)>80&&Math.abs(dy)<50&&Date.now()-touchST<300){const container=document.getElementById(homeView==='month'?'month-view':'week-view');if(container&&container.animate){const w=window.innerWidth;const slideOutX=dx>0?w:-w;const slideInX=dx>0?-w:w;container.animate([{transform:'translateX(0)',opacity:1},{transform:`translateX(${slideOutX}px)`,opacity:0}],{duration:150,easing:'ease-in'}).onfinish=()=>{if(dx>0)navigatePrev();else navigateNext();container.animate([{transform:`translateX(${slideInX}px)`,opacity:0},{transform:'translateX(0)',opacity:1}],{duration:150,easing:'ease-out'})}}else{if(dx>0)navigatePrev();else navigateNext()}}},{passive:true});
+document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-touchSX;const dy=e.changedTouches[0].clientY-touchSY;if(Math.abs(dx)>80&&Math.abs(dy)<50&&Date.now()-touchST<300){if(dx>0)navigatePrev();else navigateNext()}},{passive:true});
 function initClassSearch(){
   const inp=document.getElementById('class-search-input');
   if(!inp)return;
@@ -3542,16 +3545,29 @@ function scheduleNextLessonNotification(){
     }
   }
 
+  function animateMobDayChange(){
+    var gEl = document.getElementById('week-grid');
+    if(gEl && gEl.animate){
+      gEl.animate([
+        { opacity: 0, transform: 'translateY(8px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], { duration: 150, easing: 'ease-out' });
+    }
+  }
+
   // Публічні функції навігації по днях
   window.mobGoDay = function(idx){
+    if(_mobileDayIdx === idx) return;
     _mobileDayIdx = idx;
     applyMobileDayFilter();
+    animateMobDayChange();
   };
   window.mobPrevDay = function(){
     var idx = (_mobileDayIdx !== null ? _mobileDayIdx : 0);
     if(idx > 0){
       _mobileDayIdx = idx - 1;
       applyMobileDayFilter();
+      animateMobDayChange();
     } else {
       // Перейти на попередній тиждень, останній день
       _mobileDayIdx = 6;
@@ -3563,6 +3579,7 @@ function scheduleNextLessonNotification(){
     if(idx < 6){
       _mobileDayIdx = idx + 1;
       applyMobileDayFilter();
+      animateMobDayChange();
     } else {
       // Перейти на наступний тиждень, перший день
       _mobileDayIdx = 0;
@@ -3588,11 +3605,11 @@ function scheduleNextLessonNotification(){
     };
   }
 
-  // Патчимо navigatePrev/Next щоб скидати день
+  // Патчимо _navigatePrevCore/_navigateNextCore щоб скидати день
   function patchNavigation(){
-    if(typeof navigatePrev === 'function' && !navigatePrev._mobPatched){
-      var op = navigatePrev;
-      window.navigatePrev = function(){
+    if(typeof _navigatePrevCore === 'function' && !_navigatePrevCore._mobPatched){
+      var op = _navigatePrevCore;
+      window._navigatePrevCore = function(){
         op.apply(this, arguments);
         if(isMobile() && homeView==='week'){
           if(_mobileDayIdx === null) _mobileDayIdx = 0;
@@ -3600,11 +3617,11 @@ function scheduleNextLessonNotification(){
           applyMobileDayFilter();
         }
       };
-      window.navigatePrev._mobPatched = true;
+      window._navigatePrevCore._mobPatched = true;
     }
-    if(typeof navigateNext === 'function' && !navigateNext._mobPatched){
-      var on = navigateNext;
-      window.navigateNext = function(){
+    if(typeof _navigateNextCore === 'function' && !_navigateNextCore._mobPatched){
+      var on = _navigateNextCore;
+      window._navigateNextCore = function(){
         on.apply(this, arguments);
         if(isMobile() && homeView==='week'){
           if(_mobileDayIdx === null) _mobileDayIdx = 0;
@@ -3612,7 +3629,7 @@ function scheduleNextLessonNotification(){
           applyMobileDayFilter();
         }
       };
-      window.navigateNext._mobPatched = true;
+      window._navigateNextCore._mobPatched = true;
     }
     if(typeof goToToday === 'function' && !goToToday._mobPatched){
       var og = goToToday;
