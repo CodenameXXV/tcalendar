@@ -9,7 +9,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
   import { getAuth, signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getCountFromServer, serverTimestamp, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyC5cXKIhMLN5oLjsFJKKA9PCt2U163bNtA",
@@ -35,6 +35,12 @@
   window._fbSetDoc = setDoc;
   window._fbGetDoc = getDoc;
   window._fbDeleteDoc = deleteDoc;
+  window._fbCollection = collection;
+  window._fbGetCountFromServer = getCountFromServer;
+  window._fbServerTimestamp = serverTimestamp;
+  window._fbOnSnapshot = onSnapshot;
+  window._fbQuery = query;
+  window._fbWhere = where;
 
   onAuthStateChanged(auth, (user) => {
     if (window._fbAuthReady) window._fbAuthReady(user);
@@ -2590,10 +2596,79 @@ window._fbAuthReady=function(user){
     gdriveUser=user.displayName||user.email||'';
     gdriveUpdateBtn(true);
     gdriveLoad();
+    _setPresence(user.uid,true);
   } else {
     gdriveUpdateBtn(false);
   }
 };
+
+// ── Presence (online tracking) ────────────────────────────────────
+let _presenceUid=null;
+let _presenceUnsubscribe=null;
+function _setPresence(uid,online){
+  const db=window._fbDb;
+  const setDocFn=window._fbSetDoc;
+  const docFn=window._fbDoc;
+  const serverTs=window._fbServerTimestamp;
+  if(!db||!setDocFn||!docFn)return;
+  _presenceUid=uid;
+  if(online){
+    const ref=docFn(db,'presence',uid);
+    setDocFn(ref,{uid,lastSeen:serverTs(),online:true}).catch(()=>{});
+    // Refresh every 60s so stale entries can be detected
+    if(window._presenceInterval)clearInterval(window._presenceInterval);
+    window._presenceInterval=setInterval(()=>{
+      if(_presenceUid){
+        const r=docFn(db,'presence',_presenceUid);
+        setDocFn(r,{uid:_presenceUid,lastSeen:serverTs(),online:true}).catch(()=>{});
+      }
+    },60000);
+  }
+}
+function _clearPresence(){
+  const db=window._fbDb;
+  const delFn=window._fbDeleteDoc;
+  const docFn=window._fbDoc;
+  if(db&&delFn&&docFn&&_presenceUid){
+    delFn(docFn(db,'presence',_presenceUid)).catch(()=>{});
+  }
+  if(window._presenceInterval)clearInterval(window._presenceInterval);
+  _presenceUid=null;
+}
+window.addEventListener('beforeunload',()=>_clearPresence());
+
+// ── Site stats ────────────────────────────────────────────────────
+async function loadSiteStats(){
+  const db=window._fbDb;
+  const colFn=window._fbCollection;
+  const countFn=window._fbGetCountFromServer;
+  const docFn=window._fbDoc;
+  const getDocFn=window._fbGetDoc;
+  if(!db||!colFn||!countFn)return;
+
+  const usersEl=document.getElementById('stats-users');
+  const onlineEl=document.getElementById('stats-online');
+  if(!usersEl&&!onlineEl)return;
+
+  if(usersEl)usersEl.textContent='...';
+  if(onlineEl)onlineEl.textContent='...';
+
+  try{
+    // Total registered users
+    const usersSnap=await countFn(colFn(db,'users'));
+    if(usersEl)usersEl.textContent=usersSnap.data().count;
+  }catch(e){
+    if(usersEl)usersEl.textContent='—';
+  }
+
+  try{
+    // Online = presence docs updated in last 90s
+    const presSnap=await countFn(colFn(db,'presence'));
+    if(onlineEl)onlineEl.textContent=presSnap.data().count;
+  }catch(e){
+    if(onlineEl)onlineEl.textContent='—';
+  }
+}
 
 function gdriveInit(){
   // Auth state is handled via onAuthStateChanged in the module script above
@@ -2626,6 +2701,7 @@ function gdriveSignIn(){
 function gdriveSignOut(){
   const auth=window._fbAuth,so=window._fbSignOut;
   if(!auth)return;
+  _clearPresence();
   so(auth).then(()=>{
     fbUser=null;
     gdriveUser=null;
@@ -3283,6 +3359,7 @@ function openSettingsModal(){
   updatePushNotifStatus();
   ov.classList.add('open');
   document.addEventListener('keydown',_settingsEsc);
+  loadSiteStats();
 }
 function closeSettingsModal(){
   const ov=document.getElementById('settings-overlay');
@@ -3726,6 +3803,26 @@ function scheduleNextLessonNotification(){
         <div class="smod-section-title">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
           Дані
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <div style="flex:1;display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--border-light);border-radius:var(--radius);background:var(--bg-page)">
+            <div style="width:30px;height:30px;border-radius:8px;background:color-mix(in srgb,var(--blue) 12%,var(--bg-surface));color:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <div style="font-size:1.2em;font-weight:700;color:var(--text);line-height:1" id="stats-users">—</div>
+              <div style="font-size:.7em;color:var(--text-secondary);margin-top:2px">Користувачів</div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--border-light);border-radius:var(--radius);background:var(--bg-page)">
+            <div style="width:30px;height:30px;border-radius:8px;background:color-mix(in srgb,var(--green) 12%,var(--bg-surface));color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/></svg>
+            </div>
+            <div>
+              <div style="font-size:1.2em;font-weight:700;color:var(--text);line-height:1" id="stats-online">—</div>
+              <div style="font-size:.7em;color:var(--text-secondary);margin-top:2px">Онлайн зараз</div>
+            </div>
+          </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:7px">
           <button class="smod-action-btn" onclick="exportData();closeSettingsModal()">
