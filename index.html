@@ -2613,9 +2613,13 @@ function _setPresence(uid,online){
   if(!db||!setDocFn||!docFn)return;
   _presenceUid=uid;
   if(online){
-    const ref=docFn(db,'presence',uid);
-    setDocFn(ref,{uid,lastSeen:serverTs(),online:true}).catch(()=>{});
-    // Refresh every 60s so stale entries can be detected
+    // Маркер присутності (онлайн)
+    const presRef=docFn(db,'presence',uid);
+    setDocFn(presRef,{uid,lastSeen:serverTs(),online:true}).catch(()=>{});
+    // Маркер реєстрації — пишемо один раз у users/{uid} щоб рахувати загальну кількість
+    const userRef=docFn(db,'users',uid);
+    setDocFn(userRef,{uid,registeredAt:serverTs()},{merge:true}).catch(()=>{});
+    // Оновлюємо presence кожні 60с
     if(window._presenceInterval)clearInterval(window._presenceInterval);
     window._presenceInterval=setInterval(()=>{
       if(_presenceUid){
