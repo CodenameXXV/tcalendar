@@ -2615,7 +2615,7 @@ function _setPresence(uid,online){
   if(online){
     // Маркер присутності (онлайн)
     const presRef=docFn(db,'presence',uid);
-    setDocFn(presRef,{uid,lastSeen:serverTs(),online:true}).catch(()=>{});
+    setDocFn(presRef,{uid,lastSeen:serverTs(),lastSeenMs:Date.now(),online:true}).catch(()=>{});
     // Маркер реєстрації — пишемо один раз у users/{uid} щоб рахувати загальну кількість
     const userRef=docFn(db,'users',uid);
     setDocFn(userRef,{uid,registeredAt:serverTs()},{merge:true}).catch(()=>{});
@@ -2624,7 +2624,7 @@ function _setPresence(uid,online){
     window._presenceInterval=setInterval(()=>{
       if(_presenceUid){
         const r=docFn(db,'presence',_presenceUid);
-        setDocFn(r,{uid:_presenceUid,lastSeen:serverTs(),online:true}).catch(()=>{});
+        setDocFn(r,{uid:_presenceUid,lastSeen:serverTs(),lastSeenMs:Date.now(),online:true}).catch(()=>{});
       }
     },60000);
   }
@@ -2666,8 +2666,12 @@ async function loadSiteStats(){
   }
 
   try{
-    // Online = presence docs updated in last 90s
-    const presSnap=await countFn(colFn(db,'presence'));
+    // Online = presence docs updated in last 90s (filter by lastSeenMs numeric field)
+    const queryFn=window._fbQuery;
+    const whereFn=window._fbWhere;
+    const cutoff=Date.now()-90000;
+    const presQuery=queryFn(colFn(db,'presence'),whereFn('lastSeenMs','>',cutoff));
+    const presSnap=await countFn(presQuery);
     if(onlineEl)onlineEl.textContent=presSnap.data().count;
   }catch(e){
     if(onlineEl)onlineEl.textContent='—';
