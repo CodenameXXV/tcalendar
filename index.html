@@ -1730,6 +1730,7 @@ function showDeleteLessonModal(dk,si,lessonName,cid){
     // Mark this specific date as deleted for this class
     deletedLessons[dk+'|'+cid]=true;
     saveDeletedLessons();
+    gdriveSave();
     ov.remove();
     cachedAllData=null;
     renderWeekView();
@@ -1746,6 +1747,7 @@ function showDeleteLessonModal(dk,si,lessonName,cid){
     if(stored&&stored.days&&stored.days[dayName]){
       stored.days[dayName].checked=false;
       try{localStorage.setItem(classKey(cid),JSON.stringify(stored))}catch(e){}
+      gdriveSave();
     }
     // If this is the currently edited class and edit mode is open, update UI checkboxes
     if(cid===currentClass){
