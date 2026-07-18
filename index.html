@@ -1874,13 +1874,9 @@ async function resetAllSettings(){
   });
   if(!ok)return;
   if(typeof fbUser!=='undefined'&&fbUser){
-    const db=window._fbDb, docFn=window._fbDoc, delFn=window._fbDeleteDoc;
-    if(db && docFn && delFn){
-      try{
-        await delFn(docFn(db,'users',fbUser.uid,'data',FB_DOC_NAME));
-      }catch(e){
-        console.error('Failed to delete cloud data', e);
-      }
+    const db=window._fbDb,docFn=window._fbDoc,delFn=window._fbDeleteDoc;
+    if(db&&docFn&&delFn){
+      try{await delFn(docFn(db,'users',fbUser.uid,'data',FB_DOC_NAME));}catch(e){console.error('Failed to delete cloud data',e);}
     }
   }
   const keysToRemove=[
@@ -1898,6 +1894,9 @@ async function resetAllSettings(){
     try{localStorage.removeItem(k)}catch(e){}
   });
   showNotification('Налаштування скинуто','success');
+  if(typeof fbUser!=='undefined'&&fbUser){
+    try{sessionStorage.setItem('teacherCalendarJustReset','1')}catch(e){}
+  }
   setTimeout(()=>location.reload(),700);
 }
 function loadBellSchedule(){try{const s=localStorage.getItem(BELL_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length>0){bellSchedule=p;return}}}catch(e){}bellSchedule=DEFAULT_BELL.map(b=>({...b}))}
@@ -3092,7 +3091,7 @@ function gdriveApplyData(d){
   if(d.deletedLessons){deletedLessons=d.deletedLessons;saveDeletedLessons();}
   if(d.customEvents){customEvents=d.customEvents;saveCustomEvents();}
   if(d.eventNotes){eventNotes=d.eventNotes;saveEventNotes();}
-  if(d.holidays)applyPeriodState(d.holidays);
+  if(d.holidays){applyPeriodState(d.holidays);savePeriodState();}
   if(d.classStates)Object.keys(d.classStates).forEach(id=>{
     try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]));}catch(e){}
   });
@@ -3127,8 +3126,10 @@ async function gdriveLoad(){
         gdriveApplyData(d);
       }
     } else {
-      // First login — push current local data
-      await gdriveSave();
+      // First login — push current local data (but not right after a reset)
+      const justReset=sessionStorage.getItem('teacherCalendarJustReset');
+      if(justReset){sessionStorage.removeItem('teacherCalendarJustReset')}
+      else{await gdriveSave()}
     }
   }catch(e){
     showNotification('Помилка завантаження з хмари','error');
