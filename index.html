@@ -2653,8 +2653,10 @@ function togglePrintMono(on){
 let fbUser=null;
 let fbSaveTimer=null;
 const FB_DOC_NAME='calendarData';
+const FB_TODO_DOC='todoData';
 const FB_DEVICE_ID=(()=>{let id;try{id=sessionStorage.getItem('tcDeviceId');}catch(e){}if(!id){id=Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem('tcDeviceId',id);}catch(e){}}return id;})();
 let fbRealtimeUnsubscribe=null;
+let fbTodoUnsubscribe=null;
 let fbLastSaveTime=0; // timestamp останнього власного збереження
 
 // Called by the Firebase module once auth state is known
@@ -2786,6 +2788,7 @@ function gdriveSignOut(){
   if(!auth)return;
   _clearPresence();
   if(fbRealtimeUnsubscribe){try{fbRealtimeUnsubscribe();}catch(e){}fbRealtimeUnsubscribe=null;}
+  if(fbTodoUnsubscribe){try{fbTodoUnsubscribe();}catch(e){}fbTodoUnsubscribe=null;}
   so(auth).then(()=>{
     fbUser=null;
     gdriveUser=null;
@@ -2822,8 +2825,6 @@ function gdriveCollectData(){
   slots.forEach(s=>{
     try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v);}catch(e){}
   });
-  // Todos
-  try{data.todos=JSON.parse(localStorage.getItem('teacherCalendarTodos')||'[]')}catch(e){data.todos=[];}
   return data;
 }
 
@@ -2844,12 +2845,7 @@ function gdriveApplyData(d){
   if(d.classStates)Object.keys(d.classStates).forEach(id=>{
     try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]));}catch(e){}
   });
-  // Todos
-  if(d.todos){
-    try{localStorage.setItem('teacherCalendarTodos',JSON.stringify(d.todos));}catch(e){}
-    if(window._todoSetItems)window._todoSetItems(d.todos);
-    else if(window.reloadTodosFromStorage)window.reloadTodosFromStorage();
-  }
+  // Todos синхронізуються окремо через FB_TODO_DOC
   cachedAllData=null;
   const sa=localStorage.getItem('teacherCalendarActiveClass');
   currentClass=slots.some(s=>s.id===sa)?sa:slots[0]?.id;
@@ -2885,6 +2881,7 @@ async function gdriveLoad(){
   gdriveSetSyncing(false);
   appReady();
   _startRealtimeListener();
+  _startTodoListener();
 }
 
 function _startRealtimeListener(){
@@ -2908,6 +2905,33 @@ function _startRealtimeListener(){
       showNotification('📱 Синхронізовано з іншого пристрою','info');
     }catch(e){console.error('Realtime sync parse error',e);}
   },err=>{console.error('Realtime listener error',err);});
+}
+
+async function todoSaveToFirebase(){
+  if(!fbUser)return;
+  const db=window._fbDb,docFn=window._fbDoc,setDocFn=window._fbSetDoc;
+  if(!db)return;
+  let todos=[];
+  try{todos=JSON.parse(localStorage.getItem('teacherCalendarTodos')||'[]');}catch(e){}
+  const ref=docFn(db,'users',fbUser.uid,'data',FB_TODO_DOC);
+  await setDocFn(ref,{todos:JSON.stringify(todos),updatedAt:Date.now(),deviceId:FB_DEVICE_ID}).catch(e=>console.error('Todo save error',e));
+}
+
+function _startTodoListener(){
+  if(!fbUser)return;
+  const db=window._fbDb,docFn=window._fbDoc,onSnap=window._fbOnSnapshot;
+  if(!db||!onSnap)return;
+  if(fbTodoUnsubscribe){try{fbTodoUnsubscribe();}catch(e){}fbTodoUnsubscribe=null;}
+  const ref=docFn(db,'users',fbUser.uid,'data',FB_TODO_DOC);
+  fbTodoUnsubscribe=onSnap(ref,snap=>{
+    if(!snap.exists())return;
+    const sdata=snap.data();
+    if(sdata.deviceId===FB_DEVICE_ID)return; // власна зміна — ігноруємо
+    try{
+      const items=JSON.parse(sdata.todos||'[]');
+      if(window._todoSetItems)window._todoSetItems(items);
+    }catch(e){console.error('Todo sync error',e);}
+  },err=>console.error('Todo listener error',err));
 }
 
 async function gdriveSave(){
@@ -2961,7 +2985,7 @@ saveLessonNotes=function(){_origSaveLessonNotes();gdriveScheduleSave();};
 const _origSavePeriodState=savePeriodState;
 savePeriodState=function(){_origSavePeriodState();gdriveScheduleSave();};
 // Патч ToDo: хукаємо Firebase-збереження через window._todoFirebaseSave
-window._todoFirebaseSave=function(){gdriveScheduleSave();};
+window._todoFirebaseSave=function(){todoSaveToFirebase();};
 function toggleIEMenu(e){e.stopPropagation();const m=document.getElementById('ie-menu');m.classList.toggle('open');if(m.classList.contains('open')){const close=()=>{m.classList.remove('open');document.removeEventListener('click',close)};setTimeout(()=>document.addEventListener('click',close),0)}}
 function closeIEMenu(){document.getElementById('ie-menu').classList.remove('open')}
 function toggleThemeMenu(e){e.stopPropagation();const m=document.getElementById('theme-menu');m.classList.toggle('open');if(m.classList.contains('open')){const close=()=>{m.classList.remove('open');document.removeEventListener('click',close)};setTimeout(()=>document.addEventListener('click',close),0)}}
