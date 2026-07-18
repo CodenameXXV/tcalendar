@@ -93,12 +93,16 @@
 .custom-event-block.dragging{cursor:grabbing;box-shadow:0 8px 24px rgba(227,116,0,.45);z-index:100;opacity:.93;transform:scale(1.04);transition:none}
 .custom-event-block .cev-title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .custom-event-block .cev-time{font-size:.88em;opacity:.9;white-space:nowrap}
+.custom-event-block .ln-btn{position:absolute;top:1px;right:2px;font-size:.8em;padding:0;opacity:.6;filter:grayscale(1) brightness(5);z-index:5}
+.custom-event-block .ln-btn:hover{opacity:1}
+.custom-event-block .ln-btn.has-note{opacity:1;filter:brightness(5)}
 .day-modal-add-event-btn{width:100%;margin-top:10px;padding:9px 0;border:2px dashed var(--border);border-radius:var(--radius);background:transparent;color:var(--text-secondary);font-size:.85em;font-weight:600;font-family:inherit;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px}
 .day-modal-add-event-btn:hover{border-color:#e37400;color:#e37400;background:rgba(227,116,0,.05)}
-.day-modal-custom-event{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius);background:rgba(227,116,0,.1);border-left:3px solid #e37400;margin-bottom:5px;font-size:.83em;cursor:pointer}
+.day-modal-custom-event{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius);background:rgba(227,116,0,.1);border-left:3px solid #e37400;margin-bottom:5px;font-size:.83em;cursor:pointer}
 .day-modal-custom-event .cev-dm-time{font-weight:700;color:#e37400;font-variant-numeric:tabular-nums;min-width:85px}
 .day-modal-custom-event .cev-dm-title{flex:1;font-weight:600;color:var(--text)}
 .day-modal-custom-event .cev-dm-badge{font-size:.72em;background:#e37400;color:#fff;border-radius:8px;padding:1px 6px;flex-shrink:0}
+.day-modal-custom-event .cev-dm-notepreview{width:100%;font-size:.85em;color:var(--text-light);font-style:italic;margin-top:1px}
 .fab-group{position:fixed;bottom:22px;right:22px;z-index:50;display:flex;flex-direction:row;align-items:center;gap:10px}
 .fab-edit-wrap{position:relative;display:flex;align-items:center;justify-content:center}
 .fab-edit-wrap::before{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:52px;height:20px}
@@ -243,6 +247,13 @@ body.readonly-mode .fab-add-event{display:none!important}
 .today-lesson-name{font-size:.82em;color:var(--text-secondary);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .today-lesson-num{font-size:.68em;color:var(--text-light);font-style:italic}
 .today-no-lessons{font-size:.83em;color:var(--text-light);font-style:italic}
+.today-event-item{display:flex;align-items:center;gap:6px;padding:5px 6px;margin-top:4px;font-size:.8em;color:var(--text-secondary);background:rgba(227,116,0,.08);border-left:3px solid #e37400;border-radius:6px}
+.today-event-dot{flex-shrink:0;font-size:.85em;line-height:1}
+.today-event-time{font-variant-numeric:tabular-nums;font-weight:700;color:#e37400;min-width:40px}
+.today-event-info{display:flex;flex-direction:column;gap:0;min-width:0;flex:1}
+.today-event-name{font-size:.85em;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.today-event-badge{font-size:.72em;flex-shrink:0}
+.today-event-item .today-event-notebtn{flex-shrink:0;font-size:.95em}
 .class-list{display:flex;flex-direction:column;gap:1px}
 .class-list-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:var(--radius);cursor:pointer;transition:var(--transition);font-size:.83em;user-select:none}
 .class-list-item:hover{background:var(--bg-hover)}
@@ -1275,11 +1286,25 @@ const dayNamesList=['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442',
 
 // ── Custom Events ────────────────────────────────────────────────
 const CUSTOM_EVENTS_KEY='teacherCalendarCustomEvents';
+const EVENT_NOTES_KEY='teacherCalendarEventNotes';
 const CUSTOM_EVENT_COLOR='#e37400';
 let customEvents=[];
 
 function loadCustomEvents(){try{const s=localStorage.getItem(CUSTOM_EVENTS_KEY);if(s)customEvents=JSON.parse(s)}catch(e){customEvents=[]}}
 function saveCustomEvents(){try{localStorage.setItem(CUSTOM_EVENTS_KEY,JSON.stringify(customEvents))}catch(e){}}
+
+// ── Нотатки до подій ────────────────────────────────────────────
+// eventNotes зберігає нотатку, прив'язану до КОНКРЕТНОЇ дати повторюваної події
+// (аналог lessonNotes). Загальна нотатка "на кожне повторення" зберігається
+// прямо в полі ev.note і синхронізується разом з самою подією.
+let eventNotes={};
+function loadEventNotes(){try{const s=localStorage.getItem(EVENT_NOTES_KEY);if(s)eventNotes=JSON.parse(s)}catch(e){eventNotes={}}}
+function saveEventNotes(){try{localStorage.setItem(EVENT_NOTES_KEY,JSON.stringify(eventNotes))}catch(e){}}
+function eventNoteKey(evId,dk){return evId+'|'+dk}
+function getEventOccurrenceNote(evId,dk){return eventNotes[eventNoteKey(evId,dk)]||''}
+function setEventOccurrenceNote(evId,dk,text){const k=eventNoteKey(evId,dk);if(!text)delete eventNotes[k];else eventNotes[k]=text;saveEventNotes()}
+function getEventNoteForDisplay(ev,dk){return getEventOccurrenceNote(ev.id,dk)||ev.note||''}
+function eventHasNote(ev,dk){return !!(getEventOccurrenceNote(ev.id,dk)||ev.note)}
 
 function getEventsForDate(dk){
   // Parse dateKey "YYYY-M-D"
@@ -1484,6 +1509,7 @@ function getActiveEventsForDate(dk){
 function _refreshAfterEventChange(){
   if(homeView==='month')renderHomeCalendar();
   else renderWeekView();
+  if(typeof renderSidebar==='function')renderSidebar();
   // Refresh open day modal if present
   const existingModal=document.querySelector('.day-modal');
   if(existingModal){
@@ -1954,7 +1980,7 @@ function updateNowLessonPanel(){
 clearInterval(window._nowPanelTimer);
 window._nowPanelTimer=setInterval(updateNowLessonPanel,1000);
 
-function renderSidebar(){const today=new Date();today.setHours(0,0,0,0);const dk=dateKey(today);if(!cachedAllData)cachedAllData=buildAllClassesData();const dc=(cachedAllData.allDayMap[dk]||[]);const visibleDc=dc.filter(c=>!hiddenClasses.has(c.classId));const el=document.getElementById('today-summary');const dayStr=today.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});const total=visibleDc.length>0?visibleDc.reduce((s,c)=>s+c.lessons,0):0;let h='<div class="today-summary-date">'+dayStr+'</div><div class="today-summary-title">'+(visibleDc.length>0?pluralLesson(total):'\u0412\u0456\u043b\u044c\u043d\u0438\u0439 \u0434\u0435\u043d\u044c')+'</div>';if(dc.length>0){const allL2=buildDayOrderList(dc);const totalSlots2=Math.max(allL2.length,bellSchedule.length);const slotArr2=getSlotOrder(dk,allL2,totalSlots2);for(let si2=0;si2<totalSlots2;si2++){const key2=slotArr2[si2];if(!key2)continue;const p2=key2.split(':');const cid2=p2[0];const les2=allL2.find(l=>l.classId===cid2&&l.origIdx===parseInt(p2[1],10));if(!les2)continue;if(isLessonDeletedFull(dk,cid2))continue;if(hiddenClasses.has(cid2))continue;const color=cachedAllData.classColorMap[cid2]||'#1a73e8';const bell=getBellForSlot(dk,si2);const wd=(today.getDay()+6)%7;const nd=getLessonNote(dk,cid2,si2);let ntxt=nd.lessonNote||nd.dayNote||(weekdayNotes[weekdayNoteKey(wd,si2)]||'');let nhtm='';if(ntxt){if(ntxt.length>25)ntxt=ntxt.substring(0,25)+'...';nhtm='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;">\ud83d\udcdd '+escapeHtml(ntxt)+'</span>'}h+='<div class="today-lesson-item"><span class="today-lesson-dot" style="background:'+color+'"></span><span class="today-lesson-time">'+bell.start+'</span><span class="today-lesson-info"><span class="today-lesson-name">'+escapeHtml(les2.className)+'</span><span class="today-lesson-num">Урок '+(si2+1)+'</span>'+nhtm+'</span></div>'}}else h+='<div class="today-no-lessons">\u041d\u0435\u043c\u0430\u0454 \u0443\u0440\u043e\u043a\u0456\u0432</div>';el.innerHTML=h;updateNowLessonPanel();const cl=document.getElementById('sidebar-class-list');cl.innerHTML='';// Calculate per-class weekly hours
+function renderSidebar(){const today=new Date();today.setHours(0,0,0,0);const dk=dateKey(today);if(!cachedAllData)cachedAllData=buildAllClassesData();const dc=(cachedAllData.allDayMap[dk]||[]);const visibleDc=dc.filter(c=>!hiddenClasses.has(c.classId));const el=document.getElementById('today-summary');const dayStr=today.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});const total=visibleDc.length>0?visibleDc.reduce((s,c)=>s+c.lessons,0):0;let h='<div class="today-summary-date">'+dayStr+'</div><div class="today-summary-title">'+(visibleDc.length>0?pluralLesson(total):'\u0412\u0456\u043b\u044c\u043d\u0438\u0439 \u0434\u0435\u043d\u044c')+'</div>';const evsToday2=(typeof getActiveEventsForDate==='function'?getActiveEventsForDate(dk):[]).slice().sort((a,b)=>a.startTime.localeCompare(b.startTime));if(dc.length>0){const allL2=buildDayOrderList(dc);const totalSlots2=Math.max(allL2.length,bellSchedule.length);const slotArr2=getSlotOrder(dk,allL2,totalSlots2);for(let si2=0;si2<totalSlots2;si2++){const key2=slotArr2[si2];if(!key2)continue;const p2=key2.split(':');const cid2=p2[0];const les2=allL2.find(l=>l.classId===cid2&&l.origIdx===parseInt(p2[1],10));if(!les2)continue;if(isLessonDeletedFull(dk,cid2))continue;if(hiddenClasses.has(cid2))continue;const color=cachedAllData.classColorMap[cid2]||'#1a73e8';const bell=getBellForSlot(dk,si2);const wd=(today.getDay()+6)%7;const nd=getLessonNote(dk,cid2,si2);let ntxt=nd.lessonNote||nd.dayNote||(weekdayNotes[weekdayNoteKey(wd,si2)]||'');let nhtm='';if(ntxt){if(ntxt.length>25)ntxt=ntxt.substring(0,25)+'...';nhtm='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;">\ud83d\udcdd '+escapeHtml(ntxt)+'</span>'}h+='<div class="today-lesson-item"><span class="today-lesson-dot" style="background:'+color+'"></span><span class="today-lesson-time">'+bell.start+'</span><span class="today-lesson-info"><span class="today-lesson-name">'+escapeHtml(les2.className)+'</span><span class="today-lesson-num">Урок '+(si2+1)+'</span>'+nhtm+'</span></div>'}}else if(evsToday2.length===0)h+='<div class="today-no-lessons">\u041d\u0435\u043c\u0430\u0454 \u0443\u0440\u043e\u043a\u0456\u0432</div>';evsToday2.forEach(function(ev2){const noteTxt2=getEventNoteForDisplay(ev2,dk);let noteHtm2='';if(noteTxt2){let nt2=noteTxt2;if(nt2.length>25)nt2=nt2.substring(0,25)+'...';noteHtm2='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;">📝 '+escapeHtml(nt2)+'</span>'}h+='<div class="today-event-item" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Правий клік для редагування / видалення"><span class="today-event-dot">📌</span><span class="today-event-time">'+ev2.startTime+'</span><span class="today-event-info"><span class="today-event-name">'+escapeHtml(ev2.title)+'</span>'+noteHtm2+'</span>'+(ev2.recurring?'<span class="today-event-badge">🔁</span>':'')+'<button class="ln-btn today-event-notebtn'+(noteTxt2?' has-note':'')+'" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Нотатка до події">📝</button></div>'});el.innerHTML=h;el.querySelectorAll('.today-event-item').forEach(function(row){row.addEventListener('contextmenu',function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)})});el.querySelectorAll('.today-event-notebtn').forEach(function(btn){btn.addEventListener('mousedown',function(e){e.stopPropagation()});btn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(btn.dataset.evId,btn.dataset.evDk,btn)})});updateNowLessonPanel();const cl=document.getElementById('sidebar-class-list');cl.innerHTML='';// Calculate per-class weekly hours
 const classHrsMap={};
 let totalWeeklyHrs=0;
 slots.forEach(function(s){
@@ -2035,10 +2061,20 @@ dc.appendChild(les);
     el.className='custom-event-block';
     el.style.top=top+'px';
     el.style.height=height+'px';
+    const noteTxt=getEventNoteForDisplay(ev,dk);
     el.innerHTML='<div class="cev-title">📌 '+escapeHtml(ev.title)+'</div><div class="cev-time">'+ev.startTime+' – '+ev.endTime+'</div>';
-    el.title=ev.title+'\n'+ev.startTime+' – '+ev.endTime+(ev.recurring?' (щотижня)':'');
+    el.title=ev.title+'\n'+ev.startTime+' – '+ev.endTime+(ev.recurring?' (щотижня)':'')+(noteTxt?'\n📝 '+noteTxt:'');
     el.addEventListener('contextmenu',function(e){e.stopPropagation();showEventContextMenu(e,ev.id,dk)});
     makeEventDraggable(el,ev,dk);
+    if(!document.body.classList.contains('readonly-mode')){
+      const nBtn=document.createElement('button');
+      nBtn.className='ln-btn'+(noteTxt?' has-note':'');
+      nBtn.title='Нотатка до події';
+      nBtn.textContent='📝';
+      nBtn.addEventListener('mousedown',function(e){e.stopPropagation()});
+      nBtn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(ev.id,dk,nBtn)});
+      el.appendChild(nBtn);
+    }
     dc.appendChild(el);
   });
 })();
@@ -2276,6 +2312,69 @@ function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
   lnCloseBtn.addEventListener('click',()=>{save();ov.remove()});
   ov.addEventListener('keydown',e=>{if(e.key==='Escape'){save();ov.remove()}});
 }
+// ── Нотатки до подій (аналог showLessonNotePopup, але для customEvents) ──
+function showEventNotePopup(evId,dk,btnEl){
+  if(document.body.classList.contains('readonly-mode'))return;
+  const existing=document.querySelector('.ln-popup-overlay');
+  if(existing){existing.remove();return;}
+  const ev=customEvents.find(e=>e.id===evId);
+  if(!ev)return;
+  const ov=document.createElement('div');ov.className='ln-popup-overlay';
+  const popup=document.createElement('div');popup.className='ln-popup';
+  let bodyHtml='';
+  if(ev.recurring){
+    bodyHtml=
+      '<div class="ln-field"><label>Запис на кожне повторення події</label><textarea id="ln-ev-every" placeholder="Нотатка до кожного повторення..."></textarea></div>'+
+      '<div class="ln-field"><label>Запис лише про цю дату</label><textarea id="ln-ev-once" placeholder="Нотатка тільки до цієї конкретної дати..."></textarea></div>';
+  } else {
+    bodyHtml='<div class="ln-field"><label>Нотатка до події</label><textarea id="ln-ev-once" placeholder="Нотатка до події..."></textarea></div>';
+  }
+  popup.innerHTML=
+    '<div class="ln-popup-header">'+
+      '<div class="ln-popup-title">📌 '+escapeHtml(ev.title)+'</div>'+
+      '<button class="ln-popup-close" id="ln-close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="2,7 5.5,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+    '</div>'+
+    '<div class="ln-popup-body">'+bodyHtml+'</div>';
+  ov.appendChild(popup);document.body.appendChild(ov);
+  const everyTA=popup.querySelector('#ln-ev-every');
+  const onceTA=popup.querySelector('#ln-ev-once');
+  if(everyTA)everyTA.value=ev.note||'';
+  onceTA.value=getEventOccurrenceNote(evId,dk);
+  (everyTA||onceTA).focus();
+  function autoResize(ta){ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,400)+'px'}
+  function shrinkTA(ta){
+    ta.classList.remove('expanded');
+    if(ta.value.trim()){ta.style.height=Math.min(ta.scrollHeight,72)+'px';ta.style.overflowY='auto';}
+    else{ta.style.height='44px';ta.style.overflowY='hidden';}
+  }
+  function initTA(ta){
+    if(!ta)return;
+    if(ta.value.trim())ta.classList.add('expanded');
+    autoResize(ta);
+    ta.addEventListener('focus',()=>{ta.classList.add('expanded');autoResize(ta);ta.style.overflowY='auto'});
+    ta.addEventListener('input',()=>{autoResize(ta)});
+    ta.addEventListener('blur',()=>shrinkTA(ta));
+  }
+  initTA(everyTA);initTA(onceTA);
+  function save(){
+    if(everyTA){
+      const ev2=customEvents.find(e=>e.id===evId);
+      if(ev2){ev2.note=everyTA.value.trim();saveCustomEvents();}
+    }
+    setEventOccurrenceNote(evId,dk,onceTA.value.trim());
+    const hasNote=eventHasNote(ev,dk);
+    if(btnEl)btnEl.classList.toggle('has-note',hasNote);
+    gdriveScheduleSave();
+    renderSidebar();
+  }
+  let saveTO2;
+  if(everyTA)everyTA.addEventListener('input',()=>{clearTimeout(saveTO2);saveTO2=setTimeout(save,400)});
+  onceTA.addEventListener('input',()=>{clearTimeout(saveTO2);saveTO2=setTimeout(save,400)});
+  const lnCloseBtn2=popup.querySelector('#ln-close');
+  lnCloseBtn2.addEventListener('mousedown',e=>e.preventDefault());
+  lnCloseBtn2.addEventListener('click',()=>{save();ov.remove();_refreshAfterEventChange()});
+  ov.addEventListener('keydown',e=>{if(e.key==='Escape'){save();ov.remove();_refreshAfterEventChange()}});
+}
 function renderDayModalLessons(gridEl,dk,dC,classColorMap){
 var allL=buildDayOrderList(dC);
 var totalSlots=Math.max(allL.length,bellSchedule.length);
@@ -2345,12 +2444,23 @@ function _renderDayModalEvents(body,dk){
 
   evs.forEach(function(ev){
     const row=document.createElement('div');row.className='day-modal-custom-event';
+    const noteTxt=getEventNoteForDisplay(ev,dk);
     row.innerHTML=
       '<span class="cev-dm-time">📌 '+ev.startTime+' – '+ev.endTime+'</span>'+
       '<span class="cev-dm-title">'+escapeHtml(ev.title)+'</span>'+
-      (ev.recurring?'<span class="cev-dm-badge">🔁</span>':'');
+      (ev.recurring?'<span class="cev-dm-badge">🔁</span>':'')+
+      (noteTxt?'<div class="cev-dm-notepreview">📝 '+escapeHtml(noteTxt.length>60?noteTxt.slice(0,60)+'…':noteTxt)+'</div>':'');
     row.addEventListener('contextmenu',function(e){showEventContextMenu(e,ev.id,dk)});
     row.title='Правий клік для редагування / видалення';
+    if(!document.body.classList.contains('readonly-mode')){
+      const nBtn=document.createElement('button');
+      nBtn.className='ln-btn'+(noteTxt?' has-note':'');
+      nBtn.title='Нотатка до події';
+      nBtn.textContent='📝';
+      nBtn.addEventListener('mousedown',function(e){e.stopPropagation()});
+      nBtn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(ev.id,dk,nBtn)});
+      row.appendChild(nBtn);
+    }
     section.appendChild(row);
   });
 
@@ -2528,7 +2638,7 @@ window.onload=function(){
   loadTheme();
   if(window.applySolidVars)window.applySolidVars();
   if(!_isReadonly){
-    loadNotes();loadWeekdayNotes();loadLessonNotes();loadLessonTypes();loadCustomTimes();loadDeletedLessons();loadHiddenClasses();loadSlots();loadBellSchedule();loadSoundState();loadCustomEvents();loadPushNotifState();
+    loadNotes();loadWeekdayNotes();loadLessonNotes();loadLessonTypes();loadCustomTimes();loadDeletedLessons();loadHiddenClasses();loadSlots();loadBellSchedule();loadSoundState();loadCustomEvents();loadEventNotes();loadPushNotifState();
     const sa=localStorage.getItem('teacherCalendarActiveClass');
     currentClass=slots.some(s=>s.id===sa)?sa:slots[0].id;
     renderClassTabs();loadPeriodState();loadViewMode();loadClassState(currentClass);loadDayOrder();loadWeekdayOrder();
@@ -2873,7 +2983,7 @@ function gdriveSetSyncing(on){
 }
 
 function gdriveCollectData(){
-  const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,lessonTypes,lessonDayOrder,lessonWeekdayOrder,customLessonTimes,deletedLessons,customEvents:[...customEvents],classStates:{}};
+  const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,lessonTypes,lessonDayOrder,lessonWeekdayOrder,customLessonTimes,deletedLessons,customEvents:[...customEvents],eventNotes,classStates:{}};
   slots.forEach(s=>{
     try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v);}catch(e){}
   });
@@ -2895,6 +3005,7 @@ function gdriveApplyData(d){
   if(d.customLessonTimes){customLessonTimes=d.customLessonTimes;saveCustomTimes();}
   if(d.deletedLessons){deletedLessons=d.deletedLessons;saveDeletedLessons();}
   if(d.customEvents){customEvents=d.customEvents;saveCustomEvents();}
+  if(d.eventNotes){eventNotes=d.eventNotes;saveEventNotes();}
   if(d.holidays)applyPeriodState(d.holidays);
   if(d.classStates)Object.keys(d.classStates).forEach(id=>{
     try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]));}catch(e){}
@@ -3022,6 +3133,8 @@ const _origSaveWeekdayOrder=saveWeekdayOrder;
 saveWeekdayOrder=function(){_origSaveWeekdayOrder();gdriveScheduleSave();};
 const _origSaveCustomEvents=saveCustomEvents;
 saveCustomEvents=function(){_origSaveCustomEvents();gdriveScheduleSave();};
+const _origSaveEventNotes=saveEventNotes;
+saveEventNotes=function(){_origSaveEventNotes();gdriveScheduleSave();};
 const _origSaveCustomTimes=saveCustomTimes;
 saveCustomTimes=function(){_origSaveCustomTimes();gdriveScheduleSave();};
 const _origSaveDeletedLessons=saveDeletedLessons;
