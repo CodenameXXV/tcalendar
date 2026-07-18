@@ -50,6 +50,8 @@
 :root{--blue:#1a73e8;--blue-light:#e8f0fe;--green:#34a853;--red:#ea4335;--orange:#fbbc04;--text:#202124;--text-secondary:#5f6368;--text-light:#70757a;--border:#dadce0;--border-light:#e8eaed;--bg-hover:#f1f3f4;--bg-surface:#fff;--bg-page:#f8f9fa;--shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.1);--shadow-lg:0 8px 30px rgba(0,0,0,.12);--radius:8px;--radius-lg:12px;--transition:.2s cubic-bezier(.4,0,.2,1);--sidebar-w:280px}
 [data-theme="dark"]{--blue:#8ab4f8;--blue-light:#1f2d3d;--green:#81c995;--red:#f28b82;--orange:#fdd663;--text:#e8eaed;--text-secondary:#9aa0a6;--text-light:#80868b;--border:#3c4043;--border-light:#2d2f31;--bg-hover:#35373a;--bg-surface:#202124;--bg-page:#171819;--shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 12px rgba(0,0,0,.4);--shadow-lg:0 8px 30px rgba(0,0,0,.5)}
 [data-theme="dark-solid"]{--blue:#8ab4f8;--blue-light:#1f2d3d;--green:#81c995;--red:#f28b82;--orange:#fdd663;--text:#e8eaed;--text-secondary:#9aa0a6;--text-light:#80868b;--border:#3c4043;--border-light:#2d2f31;--bg-hover:#35373a;--bg-surface:#202124;--bg-page:#171819;--shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 12px rgba(0,0,0,.4);--shadow-lg:0 8px 30px rgba(0,0,0,.5)}
+[data-theme="solid"]{--blue-light:rgba(0,0,0,.07);--bg-hover:rgba(0,0,0,.06)}
+[data-theme="dark-solid"]{--blue-light:rgba(255,255,255,.07);--bg-hover:rgba(255,255,255,.07)}
 /* ── Custom Events ─────────────────────────────────────────────── */
 .custom-event-block{position:absolute;left:2px;right:2px;border-radius:5px;padding:3px 6px;color:#fff;font-size:.73em;cursor:grab;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:box-shadow .2s,transform .15s;user-select:none;z-index:12;background:#e37400}
 .custom-event-block:hover{box-shadow:0 4px 12px rgba(0,0,0,.22);z-index:22;transform:scale(1.02)}
@@ -187,6 +189,14 @@ body.readonly-mode .fab-add-event{display:none!important}
 .next-lesson-name{padding:0 12px 2px;font-size:.85em;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .next-lesson-subject{padding:0 12px 7px;font-size:.7em;color:var(--text-secondary);font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-section-title{font-size:.7em;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.sidebar-section-toggle{display:flex;align-items:center;width:100%;background:none;border:none;cursor:pointer;font-family:inherit;font-size:.7em;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.8px;padding:0;margin-bottom:6px;text-align:left;transition:color .15s}
+.sidebar-section-toggle:hover{color:var(--text)}
+.sidebar-section-toggle[aria-expanded="false"] #sidebar-classes-chevron{transform:rotate(180deg)}
+#sidebar-classes-body{overflow:hidden;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .22s ease}
+#sidebar-classes-body.collapsed{max-height:0!important;opacity:0;pointer-events:none}
+.sidebar-section-toggle[aria-expanded="false"] #sidebar-todo-chevron{transform:rotate(180deg)}
+#sidebar-todo-body{overflow:hidden;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .22s ease}
+#sidebar-todo-body.collapsed{max-height:0!important;opacity:0;pointer-events:none}
 .today-summary{background:linear-gradient(135deg,var(--blue-light),var(--bg-surface));padding:12px 14px;border-bottom:1px solid var(--border-light)}
 .today-summary-date{font-size:.76em;color:var(--text-secondary);margin-bottom:3px;font-weight:500}
 .today-summary-title{font-size:1.1em;font-weight:700;color:var(--text);margin-bottom:6px}
@@ -211,6 +221,27 @@ body.readonly-mode .fab-add-event{display:none!important}
 .class-list-item.hidden-class .c-hrs{opacity:.4}
 .workload-summary{margin-top:8px;padding:7px 10px;border-radius:var(--radius);background:var(--blue-light);border:1px solid color-mix(in srgb,var(--blue) 20%,transparent);font-size:.75em;color:var(--text-secondary);line-height:1.4}
 .workload-summary strong{color:var(--blue);font-weight:700}
+.todo-count-badge{margin-left:auto;margin-right:6px;background:var(--blue);color:#fff;border-radius:8px;padding:1px 7px;font-size:.85em;font-weight:700;display:none;text-transform:none;letter-spacing:0}
+.todo-count-badge.show{display:inline-block}
+.todo-add-row{display:flex;gap:6px;margin-bottom:8px}
+.todo-add-row .modal-input{margin-bottom:0;padding:6px 10px;font-size:.83em;flex:1}
+.todo-add-btn{width:30px;height:30px;border-radius:var(--radius);border:none;background:var(--blue);color:#fff;font-size:1.25em;font-weight:300;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--transition);line-height:1}
+.todo-add-btn:hover{filter:brightness(1.08)}
+.todo-add-btn:active{transform:scale(.94)}
+.todo-list{display:flex;flex-direction:column;gap:1px}
+.todo-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:var(--radius);transition:var(--transition);font-size:.83em}
+.todo-item:hover{background:var(--bg-hover)}
+.todo-item.done .todo-text{text-decoration:line-through;color:var(--text-light)}
+.todo-checkbox{width:16px;height:16px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);background:var(--bg-surface)}
+.todo-checkbox:hover{border-color:var(--blue)}
+.todo-checkbox.checked{background:var(--green);border-color:var(--green)}
+.todo-checkbox svg{display:none;width:11px;height:11px;stroke:#fff}
+.todo-checkbox.checked svg{display:block}
+.todo-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;font-weight:500;color:var(--text)}
+.todo-del-btn{width:20px;height:20px;border:none;background:none;cursor:pointer;font-size:.85em;opacity:0;transition:var(--transition);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);flex-shrink:0}
+.todo-item:hover .todo-del-btn{opacity:.6}
+.todo-del-btn:hover{opacity:1!important;color:var(--red)}
+.todo-empty{font-size:.78em;color:var(--text-light);text-align:center;padding:10px 0;font-style:italic}
 .sidebar-footer{padding:10px 14px;border-top:1px solid var(--border-light);display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0}
 .sidebar-btn{flex:1;padding:7px 4px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-surface);color:var(--text-secondary);cursor:pointer;font-size:.7em;font-weight:600;font-family:inherit;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap}
 .sidebar-btn:hover{background:var(--bg-hover);color:var(--text)}
@@ -244,7 +275,7 @@ body.readonly-mode .fab-add-event{display:none!important}
 .gcal-cell-header{display:flex;align-items:center;justify-content:space-between;padding:2px 5px;flex-shrink:0}
 .gcal-cell-date{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:.83em;font-weight:500;color:var(--text)}
 .gcal-cell.outside .gcal-cell-date{color:var(--text-light)}.gcal-cell.weekend .gcal-cell-date{color:var(--red);font-weight:600}
-.gcal-cell.today .gcal-cell-date{background:var(--blue);color:#fff;font-weight:700;box-shadow:0 2px 6px color-mix(in srgb,var(--blue) 40%,transparent)}
+.gcal-cell.today .gcal-cell-date{background:var(--blue);color:#fff;font-weight:700;box-shadow:none}
 .gcal-wk-num{font-size:.6em;color:var(--text-light);font-weight:600}
 .gcal-lcount{font-size:.56em;font-weight:700;color:var(--blue);background:var(--blue-light);padding:0 4px;border-radius:8px;opacity:.8;margin-left:auto;margin-right:2px}
 .has-note-dot{position:absolute;bottom:3px;right:5px;width:5px;height:5px;border-radius:50%;background:var(--orange)}
@@ -261,7 +292,7 @@ body.readonly-mode .fab-add-event{display:none!important}
 .week-header-cell:last-child{border-right:none}
 .week-header-day{font-size:.73em;font-weight:600;color:var(--text-light);text-transform:uppercase}
 .week-header-date{font-size:1.35em;font-weight:400;color:var(--text);margin-top:1px}
-.week-header-cell.today .week-header-date{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;font-weight:600;box-shadow:0 2px 8px color-mix(in srgb,var(--blue) 40%,transparent)}
+.week-header-cell.today .week-header-date{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;font-weight:600;box-shadow:none}
 .week-header-cell.weekend .week-header-day{color:var(--red)}.week-header-cell.today .week-header-day{color:var(--blue);font-weight:700}
 .week-body{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;scroll-behavior:smooth}
 .week-body::-webkit-scrollbar{width:5px}.week-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -504,6 +535,12 @@ body.readonly-mode .week-lesson:hover{transform:none!important;box-shadow:0 1px 
 .fb-auth-loading{opacity:.6;pointer-events:none}
 .fab{width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;border:none;cursor:pointer;font-size:1.7em;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px color-mix(in srgb,var(--blue) 35%,transparent);transition:var(--transition);flex-shrink:0}
 .fab:hover{transform:scale(1.1)}.fab:active{transform:scale(.95)}
+[data-theme="dark"] .fab,[data-theme="dark-solid"] .fab{box-shadow:0 4px 14px rgba(0,0,0,.45)}
+[data-theme="dark"] .fab:hover,[data-theme="dark-solid"] .fab:hover{box-shadow:0 6px 18px rgba(0,0,0,.55)}
+[data-theme="dark"] .fab-settings,[data-theme="dark-solid"] .fab-settings{box-shadow:0 3px 10px rgba(0,0,0,.4)}
+[data-theme="dark"] .fab-settings:hover,[data-theme="dark-solid"] .fab-settings:hover{box-shadow:0 5px 16px rgba(0,0,0,.5)}
+[data-theme="dark"] .fab-add-event,[data-theme="dark-solid"] .fab-add-event{box-shadow:0 3px 10px rgba(0,0,0,.4)}
+[data-theme="dark"] .fab-add-event:hover,[data-theme="dark-solid"] .fab-add-event:hover{box-shadow:0 5px 16px rgba(0,0,0,.5)}
 .gcal-print-btn{background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border);padding:7px 14px;border-radius:var(--radius);cursor:pointer;font-size:.85em;font-weight:500;font-family:inherit;transition:var(--transition);display:flex;align-items:center;gap:5px}
 .gcal-print-btn:hover{background:var(--bg-hover);color:var(--text)}
 .header-actions{display:flex;align-items:center;gap:7px}
@@ -1043,23 +1080,48 @@ td.weekend-col{background:#fff8f8}
   }
   .custom-event-block .cev-time{font-size:.9em;font-weight:700}
 }
+
+/* ── Page load blur overlay ─────────────────────────────── */
+#app-loading-overlay{
+  position:fixed;inset:0;z-index:99999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:var(--bg-page);
+  transition:opacity .45s cubic-bezier(.4,0,.2,1),backdrop-filter .45s ease;
+  pointer-events:all;
+}
+#app-loading-overlay.fading{
+  opacity:0;pointer-events:none;
+}
+.app-loading-spinner{
+  width:44px;height:44px;
+  border:3.5px solid var(--border);
+  border-top-color:var(--blue);
+  border-radius:50%;
+  animation:app-spin .8s linear infinite;
+}
+@keyframes app-spin{to{transform:rotate(360deg)}}
+.app-loading-label{
+  font-size:.82em;color:var(--text-secondary);font-family:'Segoe UI',Roboto,sans-serif;
+  letter-spacing:.01em;
+}
+body.app-loaded #app-loading-overlay{display:none}
 </style></head><body>
 <div id="readonly-banner">👁 Режим перегляду — редагування недоступне. <a href="https://codenamexxv.github.io/tcalendar/" style="color:#fff;text-decoration:underline;margin-left:8px">Відкрити повну версію</a></div>
 <div id="drag-slot-badge"></div>
 <div id="home-view">
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<div id="app-loading-overlay">
+  <div class="app-loading-spinner"></div>
+  <div class="app-loading-label">Завантаження...</div>
+</div>
 <div class="sidebar" id="sidebar">
 <div class="sidebar-header"><div class="logo"><svg width="100%" height="100%" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2" fill="#fff" stroke="#1a73e8" stroke-width="1.5"/><rect x="3" y="4" width="18" height="5" rx="2" fill="#1a73e8"/><rect x="6" y="1.5" width="2" height="4" rx="1" fill="#1a73e8"/><rect x="16" y="1.5" width="2" height="4" rx="1" fill="#1a73e8"/></svg></div><span class="app-name">Календар вчителя</span><button class="gdrive-btn" id="gdrive-btn" onclick="gdriveToggle()" title="Увійдіть, щоб зберегти дані онлайн"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Увійти</button></div>
 <div class="sidebar-scroll-area">
 <div class="today-summary" id="today-summary"></div>
 <div id="now-lesson-panel"></div>
 <div id="next-lesson-panel"></div>
-<div class="sidebar-section">
-<div class="sidebar-section-title">Пошук по класу / урокам</div>
-<input type="text" id="class-search-input" class="modal-input" style="padding:6px 10px; margin-bottom:0; font-size:.85em;" placeholder="Пошук уроку (напр. 10-А)...">
-<div id="class-search-results" style="display:none; flex-direction:column; gap:4px; margin-top:8px; max-height:150px; overflow-y:auto;"></div>
-</div>
-<div class="sidebar-section scrollable"><div class="sidebar-section-title">Класи / Предмети</div><div class="class-list" id="sidebar-class-list"></div><div class="workload-summary" id="workload-summary"></div></div>
+<div class="sidebar-section scrollable" id="sidebar-todo-section"><button class="sidebar-section-title sidebar-section-toggle" id="sidebar-todo-toggle" onclick="toggleTodoSection()" aria-expanded="true" title="Згорнути / Розгорнути">Список справ<span class="todo-count-badge" id="todo-count-badge"></span><svg id="sidebar-todo-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .25s cubic-bezier(.4,0,.2,1)"><polyline points="18 15 12 9 6 15"/></svg></button><div id="sidebar-todo-body"><div class="todo-add-row"><input type="text" id="todo-new-input" class="modal-input" placeholder="Нова справа..." onkeydown="if(event.key==='Enter'){event.preventDefault();addTodoItem()}"><button class="todo-add-btn" onclick="addTodoItem()" title="Додати справу">+</button></div><div class="todo-list" id="todo-list"></div></div></div>
+<div class="sidebar-section scrollable" id="sidebar-classes-section"><button class="sidebar-section-title sidebar-section-toggle" id="sidebar-classes-toggle" onclick="toggleClassesSection()" aria-expanded="true" title="Згорнути / Розгорнути">Класи / Предмети<svg id="sidebar-classes-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto;flex-shrink:0;transition:transform .25s cubic-bezier(.4,0,.2,1)"><polyline points="18 15 12 9 6 15"/></svg></button><div id="sidebar-classes-body"><input type="text" id="class-search-input" class="modal-input" style="padding:5px 10px;margin-bottom:6px;font-size:.83em;width:100%;box-sizing:border-box;" placeholder="Пошук класу / уроку..."><div id="class-search-results" style="display:none;flex-direction:column;gap:4px;margin-bottom:6px;max-height:140px;overflow-y:auto;"></div><div class="class-list" id="sidebar-class-list"></div><div class="workload-summary" id="workload-summary"></div></div></div>
 </div>
 </div>
 
@@ -1612,7 +1674,7 @@ function setWeekdayOrder(wi,order){if(!order||order.length===0||!order.some(func
 function isMobile(){return window.innerWidth<=900}
 function closeSidebar(){document.getElementById('sidebar').classList.add('collapsed');document.getElementById('sidebar-overlay').style.display='none'}
 function toggleSidebar(){const sb=document.getElementById('sidebar');const ov=document.getElementById('sidebar-overlay');const isCollapsed=sb.classList.toggle('collapsed');if(isMobile()){ov.style.display=isCollapsed?'none':'block'}}
-function exportData(){const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,lessonTypes,lessonDayOrder,lessonWeekdayOrder,classStates:{}};slots.forEach(s=>{try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v)}catch(e){}});const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='calendar_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);showNotification('Експортовано!','success')}
+function exportData(){const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,lessonTypes,lessonDayOrder,lessonWeekdayOrder,classStates:{}};try{data.todos=JSON.parse(localStorage.getItem('teacherCalendarTodos')||'[]')}catch(e){data.todos=[]}slots.forEach(s=>{try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v)}catch(e){}});const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='calendar_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);showNotification('Експортовано!','success')}
 
 function exportToGoogleCalendar(){
   if(!cachedAllData)cachedAllData=buildAllClassesData();
@@ -1673,7 +1735,7 @@ function exportToGoogleCalendar(){
   },400);
   showNotification('Файл .ics готовий!','success');
 }
-function importData(){const inp=document.getElementById('import-file-input');inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.slots){slots=d.slots;saveSlots()}if(d.bellSchedule){bellSchedule=d.bellSchedule;saveBellSchedule()}if(d.hiddenClasses){hiddenClasses=new Set(d.hiddenClasses);saveHiddenClasses()}if(d.dayNotes){dayNotes=d.dayNotes;saveNotes()}if(d.weekdayNotes){weekdayNotes=d.weekdayNotes;saveWeekdayNotes()}if(d.lessonNotes){lessonNotes=d.lessonNotes;saveLessonNotes()}if(d.lessonTypes){lessonTypes=d.lessonTypes;saveLessonTypes()}if(d.lessonDayOrder){lessonDayOrder=d.lessonDayOrder;saveDayOrder()}if(d.lessonWeekdayOrder){lessonWeekdayOrder=d.lessonWeekdayOrder;saveWeekdayOrder()}if(d.holidays)applyPeriodState(d.holidays);if(d.classStates)Object.keys(d.classStates).forEach(id=>{try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]))}catch(e){}});cachedAllData=null;renderSidebar();if(homeView==='month')renderHomeCalendar();else renderWeekView();showNotification('\u0406\u043c\u043f\u043e\u0440\u0442\u043e\u0432\u0430\u043d\u043e!','success')}catch(err){showNotification('\u041f\u043e\u043c\u0438\u043b\u043a\u0430!','error')}};r.readAsText(f);inp.value=''};inp.click()}
+function importData(){const inp=document.getElementById('import-file-input');inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.slots){slots=d.slots;saveSlots()}if(d.bellSchedule){bellSchedule=d.bellSchedule;saveBellSchedule()}if(d.hiddenClasses){hiddenClasses=new Set(d.hiddenClasses);saveHiddenClasses()}if(d.dayNotes){dayNotes=d.dayNotes;saveNotes()}if(d.weekdayNotes){weekdayNotes=d.weekdayNotes;saveWeekdayNotes()}if(d.lessonNotes){lessonNotes=d.lessonNotes;saveLessonNotes()}if(d.lessonTypes){lessonTypes=d.lessonTypes;saveLessonTypes()}if(d.lessonDayOrder){lessonDayOrder=d.lessonDayOrder;saveDayOrder()}if(d.lessonWeekdayOrder){lessonWeekdayOrder=d.lessonWeekdayOrder;saveWeekdayOrder()}if(d.holidays)applyPeriodState(d.holidays);if(d.classStates)Object.keys(d.classStates).forEach(id=>{try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]))}catch(e){}});if(d.todos){try{localStorage.setItem('teacherCalendarTodos',JSON.stringify(d.todos))}catch(e){}if(window.reloadTodosFromStorage)window.reloadTodosFromStorage()}cachedAllData=null;renderSidebar();if(homeView==='month')renderHomeCalendar();else renderWeekView();showNotification('\u0406\u043c\u043f\u043e\u0440\u0442\u043e\u0432\u0430\u043d\u043e!','success')}catch(err){showNotification('\u041f\u043e\u043c\u0438\u043b\u043a\u0430!','error')}};r.readAsText(f);inp.value=''};inp.click()}
 async function resetAllSettings(){
   closeSettingsModal();
   const ok=await showConfirmModal({
@@ -1699,7 +1761,8 @@ async function resetAllSettings(){
     CUSTOM_EVENTS_KEY,PERIOD_KEY,'teacherCalendarSlots','teacherCalendarActiveClass',
     'teacherCalendarSound','teacherCalendarSoundMinutes','teacherCalendarHomeView',
     'teacherCalendarViewMode','teacherCalendarShareToken',
-    'teacherCalendarSolidColor','teacherCalendarDarkSolidColor'
+    'teacherCalendarSolidColor','teacherCalendarDarkSolidColor',
+    'teacherCalendarTodos','teacherCalendarTodoCollapsed'
   ];
   keysToRemove.forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
   // Remove all class states
@@ -1871,7 +1934,7 @@ slots.forEach(function(s){
 totalWeeklyHrs=Math.round(totalWeeklyHrs*10)/10;
 slots.forEach((slot,idx)=>{const color=CLASS_COLORS[idx%CLASS_COLORS.length];const isHid=hiddenClasses.has(slot.id);const it=document.createElement('div');it.className='class-list-item'+(isHid?' hidden-class':'');it.innerHTML='<span class="c-dot" style="background:'+color+'"></span><span class="c-name">'+escapeHtml(slot.name)+'</span>'+(classHrsMap[slot.id]?'<span class="c-hrs">'+classHrsMap[slot.id]+'год</span>':'')+'<button class="vis-btn">'+(isHid?'\u{1f441}\u200d\u{1f5e8}':'\u{1f441}')+'</button>';it.querySelector('.vis-btn').addEventListener('click',e=>{e.stopPropagation();if(hiddenClasses.has(slot.id))hiddenClasses.delete(slot.id);else hiddenClasses.add(slot.id);saveHiddenClasses();cachedAllData=null;renderSidebar();if(homeView==='month')renderHomeCalendar();else renderWeekView()});cl.appendChild(it)});
 const ws=document.getElementById('workload-summary');
-if(ws){if(slots.length>0&&totalWeeklyHrs>0){ws.style.display='block';ws.innerHTML='Загальне навантаження: <strong>'+totalWeeklyHrs+' годин'+(totalWeeklyHrs===1?'a':totalWeeklyHrs<5?'\u0438':'')+'</strong> на тиждень';}else{ws.style.display='none';}}}
+if(ws){if(slots.length>0&&totalWeeklyHrs>0){ws.style.display='block';const mod10h=totalWeeklyHrs%10,mod100h=totalWeeklyHrs%100;const hWord=(mod10h===1&&mod100h!==11)?'година':(mod10h>=2&&mod10h<=4&&!(mod100h>=12&&mod100h<=14))?'години':'годин';ws.innerHTML='Загальне навантаження: <strong>'+totalWeeklyHrs+' '+hWord+'</strong> на тиждень';}else{ws.style.display='none';}}}
 function setHomeView(v){if(v!==homeView){if(v==='week'){const now=new Date();if(homeYear===now.getFullYear()&&homeMonth===now.getMonth()){weekStartDate=getMonday(now)}else{weekStartDate=getMonday(new Date(homeYear,homeMonth,1))}}else{const ref=new Date(weekStartDate);ref.setDate(ref.getDate()+3);homeYear=ref.getFullYear();homeMonth=ref.getMonth()}}homeView=v;try{localStorage.setItem('teacherCalendarHomeView',v)}catch(e){}document.getElementById('btn-view-month').classList.toggle('active',v==='month');document.getElementById('btn-view-week').classList.toggle('active',v==='week');document.getElementById('month-view').style.display=v==='month'?'flex':'none';document.getElementById('week-view').classList.toggle('active',v==='week');if(v==='month')renderHomeCalendar();else renderWeekView();updateTitle();renderSidebar()}
 function loadHomeView(){try{const s=localStorage.getItem('teacherCalendarHomeView');if(s==='week')setHomeView('week');else setHomeView('month')}catch(e){setHomeView('month')}}
 function updateTitle(){if(homeView==='month')document.getElementById('gcal-month-year').textContent=MONTH_NAMES_UK[homeMonth]+' '+homeYear;else{if(!weekStartDate)weekStartDate=getMonday(new Date());const e=new Date(weekStartDate);e.setDate(e.getDate()+6);document.getElementById('gcal-month-year').textContent=e.getMonth()===weekStartDate.getMonth()?weekStartDate.getDate()+' \u2013 '+e.getDate()+' '+MONTH_NAMES_UK_GEN[e.getMonth()]+' '+e.getFullYear():weekStartDate.getDate()+' '+MONTH_NAMES_UK_GEN[weekStartDate.getMonth()]+' \u2013 '+e.getDate()+' '+MONTH_NAMES_UK_GEN[e.getMonth()]+' '+e.getFullYear()}}
@@ -2425,6 +2488,7 @@ function jumpToDateSearch(dk){
 window.onload=function(){
   const _isReadonly=new URLSearchParams(window.location.search).has('share');
   loadTheme();
+  if(window.applySolidVars)window.applySolidVars();
   if(!_isReadonly){
     loadNotes();loadWeekdayNotes();loadLessonNotes();loadLessonTypes();loadCustomTimes();loadDeletedLessons();loadHiddenClasses();loadSlots();loadBellSchedule();loadSoundState();loadCustomEvents();loadPushNotifState();
     const sa=localStorage.getItem('teacherCalendarActiveClass');
@@ -2590,15 +2654,22 @@ let fbSaveTimer=null;
 const FB_DOC_NAME='calendarData';
 
 // Called by the Firebase module once auth state is known
+function appReady(){
+  const ov=document.getElementById('app-loading-overlay');
+  if(!ov)return;
+  ov.classList.add('fading');
+  setTimeout(()=>{document.body.classList.add('app-loaded');},460);
+}
 window._fbAuthReady=function(user){
   fbUser=user;
   if(user){
     gdriveUser=user.displayName||user.email||'';
     gdriveUpdateBtn(true);
-    gdriveLoad();
+    gdriveLoad(); // appReady() called inside gdriveLoad after data is applied
     _setPresence(user.uid,true);
   } else {
     gdriveUpdateBtn(false);
+    appReady(); // не залогінений — дані вже з localStorage, можна показувати
   }
 };
 
@@ -2746,6 +2817,8 @@ function gdriveCollectData(){
   slots.forEach(s=>{
     try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v);}catch(e){}
   });
+  // Todos
+  try{data.todos=JSON.parse(localStorage.getItem('teacherCalendarTodos')||'[]')}catch(e){data.todos=[];}
   return data;
 }
 
@@ -2766,6 +2839,12 @@ function gdriveApplyData(d){
   if(d.classStates)Object.keys(d.classStates).forEach(id=>{
     try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]));}catch(e){}
   });
+  // Todos
+  if(d.todos){
+    try{localStorage.setItem('teacherCalendarTodos',JSON.stringify(d.todos));}catch(e){}
+    if(window._todoSetItems)window._todoSetItems(d.todos);
+    else if(window.reloadTodosFromStorage)window.reloadTodosFromStorage();
+  }
   cachedAllData=null;
   const sa=localStorage.getItem('teacherCalendarActiveClass');
   currentClass=slots.some(s=>s.id===sa)?sa:slots[0]?.id;
@@ -2799,6 +2878,7 @@ async function gdriveLoad(){
     console.error(e);
   }
   gdriveSetSyncing(false);
+  appReady();
 }
 
 async function gdriveSave(){
@@ -2849,6 +2929,8 @@ const _origSaveLessonNotes=saveLessonNotes;
 saveLessonNotes=function(){_origSaveLessonNotes();gdriveScheduleSave();};
 const _origSavePeriodState=savePeriodState;
 savePeriodState=function(){_origSavePeriodState();gdriveScheduleSave();};
+// Патч ToDo: хукаємо Firebase-збереження через window._todoFirebaseSave
+window._todoFirebaseSave=function(){gdriveScheduleSave();};
 function toggleIEMenu(e){e.stopPropagation();const m=document.getElementById('ie-menu');m.classList.toggle('open');if(m.classList.contains('open')){const close=()=>{m.classList.remove('open');document.removeEventListener('click',close)};setTimeout(()=>document.addEventListener('click',close),0)}}
 function closeIEMenu(){document.getElementById('ie-menu').classList.remove('open')}
 function toggleThemeMenu(e){e.stopPropagation();const m=document.getElementById('theme-menu');m.classList.toggle('open');if(m.classList.contains('open')){const close=()=>{m.classList.remove('open');document.removeEventListener('click',close)};setTimeout(()=>document.addEventListener('click',close),0)}}
@@ -3214,6 +3296,7 @@ function applyReadonlyData(d){
       if(apply){
         const color=document.getElementById('solid-custom-input').value;
         try{localStorage.setItem(SOLID_COLOR_KEY,color)}catch(e){}
+        if(window.applySolidVars)window.applySolidVars();
         window._pendingSolidResolve(color);
       } else {
         window._pendingSolidResolve(null);
@@ -3246,6 +3329,7 @@ function applyReadonlyData(d){
       if(apply){
         const color=document.getElementById('dark-solid-custom-input').value;
         try{localStorage.setItem(DARK_SOLID_COLOR_KEY,color)}catch(e){}
+        if(window.applySolidVars)window.applySolidVars();
         window._pendingDarkSolidResolve(color);
       } else {
         window._pendingDarkSolidResolve(null);
@@ -3271,6 +3355,25 @@ function applyReadonlyData(d){
 
   // ── Override loadTheme ──────────────────────────────────────
   const _origLoadTheme=window.loadTheme;
+  function applySolidVars(){
+    const theme=document.documentElement.getAttribute('data-theme');
+    if(theme==='solid'){
+      let hex;try{hex=localStorage.getItem(SOLID_COLOR_KEY)||'#1a73e8'}catch(e){hex='#1a73e8'}
+      document.documentElement.style.setProperty('--blue',hex);
+      document.documentElement.style.setProperty('--blue-light',hex+'18');
+      document.documentElement.style.setProperty('--bg-hover',hex+'12');
+    } else if(theme==='dark-solid'){
+      let hex;try{hex=localStorage.getItem(DARK_SOLID_COLOR_KEY)||'#8ab4f8'}catch(e){hex='#8ab4f8'}
+      document.documentElement.style.setProperty('--blue',hex);
+      document.documentElement.style.setProperty('--blue-light',hex+'18');
+      document.documentElement.style.setProperty('--bg-hover',hex+'12');
+    } else {
+      document.documentElement.style.removeProperty('--blue');
+      document.documentElement.style.removeProperty('--blue-light');
+      document.documentElement.style.removeProperty('--bg-hover');
+    }
+  }
+  window.applySolidVars=applySolidVars;
   window.loadTheme=function(){
     try{
       const t=localStorage.getItem(THEME_KEY);
@@ -3279,6 +3382,7 @@ function applyReadonlyData(d){
       else if(t==='dark-solid') document.documentElement.setAttribute('data-theme','dark-solid');
       else document.documentElement.removeAttribute('data-theme');
     }catch(e){}
+    applySolidVars();
     updateThemeBtn();
   };
 
@@ -3349,6 +3453,178 @@ function applyReadonlyData(d){
     }
     return result;
   };
+})();
+
+// ── Sidebar Classes Section Toggle ─────────────────────────────────
+(function(){
+  const CLASSES_COLLAPSED_KEY='teacherCalendarClassesCollapsed';
+  function applyClassesSection(collapsed,animate){
+    const body=document.getElementById('sidebar-classes-body');
+    const toggle=document.getElementById('sidebar-classes-toggle');
+    const chevron=document.getElementById('sidebar-classes-chevron');
+    if(!body||!toggle)return;
+    if(collapsed){
+      if(!animate){body.style.transition='none'}
+      body.style.maxHeight=body.scrollHeight+'px';
+      body.offsetHeight; // force reflow
+      body.style.transition='';
+      body.style.maxHeight='0px';
+      body.style.opacity='0';
+      body.classList.add('collapsed');
+      toggle.setAttribute('aria-expanded','false');
+      if(chevron)chevron.style.transform='rotate(180deg)';
+    } else {
+      body.classList.remove('collapsed');
+      body.style.maxHeight=body.scrollHeight+'px';
+      body.style.opacity='1';
+      toggle.setAttribute('aria-expanded','true');
+      if(chevron)chevron.style.transform='rotate(0deg)';
+      setTimeout(()=>{if(!body.classList.contains('collapsed'))body.style.maxHeight='none'},300);
+    }
+  }
+  window.toggleClassesSection=function(){
+    const body=document.getElementById('sidebar-classes-body');
+    if(!body)return;
+    const isCollapsed=body.classList.contains('collapsed');
+    const next=!isCollapsed;
+    try{localStorage.setItem(CLASSES_COLLAPSED_KEY,next?'1':'0')}catch(e){}
+    applyClassesSection(next,true);
+  };
+  function initClassesSection(){
+    const body=document.getElementById('sidebar-classes-body');
+    if(!body)return;
+    // Set initial max-height so transition works
+    body.style.maxHeight='none';
+    let collapsed=false;
+    try{collapsed=localStorage.getItem(CLASSES_COLLAPSED_KEY)==='1'}catch(e){}
+    applyClassesSection(collapsed,false);
+  }
+  // Also re-apply after renderSidebar (content changes height)
+  const _origRenderSidebar=window.renderSidebar;
+  if(typeof _origRenderSidebar==='function'){
+    window.renderSidebar=function(){
+      _origRenderSidebar.apply(this,arguments);
+      const body=document.getElementById('sidebar-classes-body');
+      if(body&&!body.classList.contains('collapsed'))body.style.maxHeight='none';
+    };
+  }
+  document.addEventListener('DOMContentLoaded',initClassesSection);
+  if(document.readyState!=='loading')initClassesSection();
+})();
+
+// ── Sidebar ToDo List ────────────────────────────────────────────────
+(function(){
+  const TODO_KEY='teacherCalendarTodos';
+  const TODO_COLLAPSED_KEY='teacherCalendarTodoCollapsed';
+  let todos=[];
+  function loadTodos(){
+    try{const v=localStorage.getItem(TODO_KEY);todos=v?JSON.parse(v):[]}catch(e){todos=[]}
+  }
+  function saveTodos(){
+    try{localStorage.setItem(TODO_KEY,JSON.stringify(todos))}catch(e){}
+    if(window._todoFirebaseSave)window._todoFirebaseSave();
+  }
+  // Дозволяємо Firebase-модулю встановити хук на збереження
+  window._todoFirebaseSave=null;
+  // Дозволяємо gdriveApplyData встановити todos безпосередньо
+  window._todoSetItems=function(items){
+    todos=Array.isArray(items)?items:[];
+    try{localStorage.setItem(TODO_KEY,JSON.stringify(todos))}catch(e){}
+    renderTodos();
+  };
+  function uid(){return 't'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+  function escHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function renderTodos(){
+    const list=document.getElementById('todo-list');
+    const badge=document.getElementById('todo-count-badge');
+    if(!list)return;
+    if(!todos.length){
+      list.innerHTML='<div class="todo-empty">Немає справ. Додайте першу! 🎉</div>';
+    } else {
+      list.innerHTML=todos.map(t=>'<div class="todo-item '+(t.done?'done':'')+'" data-id="'+t.id+'">'
+        +'<div class="todo-checkbox '+(t.done?'checked':'')+'" onclick="toggleTodoDone(\''+t.id+'\')">'
+        +'<svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        +'</div>'
+        +'<span class="todo-text" onclick="toggleTodoDone(\''+t.id+'\')" title="'+escHtml(t.text)+'">'+escHtml(t.text)+'</span>'
+        +'<button class="todo-del-btn" onclick="deleteTodoItem(\''+t.id+'\')" title="Видалити">✕</button>'
+        +'</div>').join('');
+    }
+    const activeCount=todos.filter(t=>!t.done).length;
+    if(badge){
+      if(activeCount>0){badge.textContent=activeCount;badge.classList.add('show')}
+      else{badge.classList.remove('show')}
+    }
+    const body=document.getElementById('sidebar-todo-body');
+    if(body&&!body.classList.contains('collapsed'))body.style.maxHeight='none';
+  }
+  window.addTodoItem=function(){
+    const input=document.getElementById('todo-new-input');
+    if(!input)return;
+    const text=input.value.trim();
+    if(!text)return;
+    todos.unshift({id:uid(),text,done:false,created:Date.now()});
+    saveTodos();
+    input.value='';
+    input.focus();
+    renderTodos();
+  };
+  window.toggleTodoDone=function(id){
+    const t=todos.find(x=>x.id===id);
+    if(!t)return;
+    t.done=!t.done;
+    saveTodos();
+    renderTodos();
+  };
+  window.deleteTodoItem=function(id){
+    todos=todos.filter(x=>x.id!==id);
+    saveTodos();
+    renderTodos();
+  };
+  window.reloadTodosFromStorage=function(){loadTodos();renderTodos()};
+  function applyTodoSection(collapsed,animate){
+    const body=document.getElementById('sidebar-todo-body');
+    const toggle=document.getElementById('sidebar-todo-toggle');
+    const chevron=document.getElementById('sidebar-todo-chevron');
+    if(!body||!toggle)return;
+    if(collapsed){
+      if(!animate){body.style.transition='none'}
+      body.style.maxHeight=body.scrollHeight+'px';
+      body.offsetHeight; // force reflow
+      body.style.transition='';
+      body.style.maxHeight='0px';
+      body.style.opacity='0';
+      body.classList.add('collapsed');
+      toggle.setAttribute('aria-expanded','false');
+      if(chevron)chevron.style.transform='rotate(180deg)';
+    } else {
+      body.classList.remove('collapsed');
+      body.style.maxHeight=body.scrollHeight+'px';
+      body.style.opacity='1';
+      toggle.setAttribute('aria-expanded','true');
+      if(chevron)chevron.style.transform='rotate(0deg)';
+      setTimeout(()=>{if(!body.classList.contains('collapsed'))body.style.maxHeight='none'},300);
+    }
+  }
+  window.toggleTodoSection=function(){
+    const body=document.getElementById('sidebar-todo-body');
+    if(!body)return;
+    const isCollapsed=body.classList.contains('collapsed');
+    const next=!isCollapsed;
+    try{localStorage.setItem(TODO_COLLAPSED_KEY,next?'1':'0')}catch(e){}
+    applyTodoSection(next,true);
+  };
+  function initTodoSection(){
+    loadTodos();
+    renderTodos();
+    const body=document.getElementById('sidebar-todo-body');
+    if(!body)return;
+    body.style.maxHeight='none';
+    let collapsed=false;
+    try{collapsed=localStorage.getItem(TODO_COLLAPSED_KEY)==='1'}catch(e){}
+    applyTodoSection(collapsed,false);
+  }
+  document.addEventListener('DOMContentLoaded',initTodoSection);
+  if(document.readyState!=='loading')initTodoSection();
 })();
 
 // ── Settings Modal ─────────────────────────────────────────────────
