@@ -2655,6 +2655,7 @@ let fbSaveTimer=null;
 const FB_DOC_NAME='calendarData';
 const FB_DEVICE_ID=(()=>{let id;try{id=sessionStorage.getItem('tcDeviceId');}catch(e){}if(!id){id=Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem('tcDeviceId',id);}catch(e){}}return id;})();
 let fbRealtimeUnsubscribe=null;
+let fbLastSaveTime=0; // timestamp останнього власного збереження
 
 // Called by the Firebase module once auth state is known
 function appReady(){
@@ -2890,22 +2891,21 @@ function _startRealtimeListener(){
   if(!fbUser)return;
   const db=window._fbDb,docFn=window._fbDoc,onSnap=window._fbOnSnapshot;
   if(!db||!onSnap)return;
-  // Відписуємось від попереднього listener якщо є
   if(fbRealtimeUnsubscribe){try{fbRealtimeUnsubscribe();}catch(e){}fbRealtimeUnsubscribe=null;}
   const ref=docFn(db,'users',fbUser.uid,'data',FB_DOC_NAME);
-  let firstSnap=true;
   fbRealtimeUnsubscribe=onSnap(ref,snap=>{
-    // Перший snapshot — це початковий стан (вже завантажений через gdriveLoad), пропускаємо
-    if(firstSnap){firstSnap=false;return;}
     if(!snap.exists())return;
     const sdata=snap.data();
-    // Ігноруємо власні зміни (щоб не перезаписати дані поки fbSaveTimer ще не спрацював)
-    if(sdata.deviceId&&sdata.deviceId===FB_DEVICE_ID)return;
-    // Зовнішня зміна — застосовуємо дані
+    const remoteTs=sdata.updatedAt||0;
+    const remoteDevice=sdata.deviceId||'';
+    // Ігноруємо: власний пристрій АБО snapshot прийшов раніше ніж 5с після власного збереження
+    if(remoteDevice===FB_DEVICE_ID)return;
+    if(remoteTs<=fbLastSaveTime)return;
+    // Зовнішня зміна з новішим timestamp — застосовуємо
     try{
       const d=JSON.parse(sdata.payload);
       gdriveApplyData(d);
-      showNotification('Дані оновлено з іншого пристрою','info');
+      showNotification('📱 Синхронізовано з іншого пристрою','info');
     }catch(e){console.error('Realtime sync parse error',e);}
   },err=>{console.error('Realtime listener error',err);});
 }
@@ -2918,7 +2918,9 @@ async function gdriveSave(){
   try{
     const payload=JSON.stringify(gdriveCollectData());
     const ref=docFn(db,'users',fbUser.uid,'data',FB_DOC_NAME);
-    await setDocFn(ref,{payload,updatedAt:Date.now(),deviceId:FB_DEVICE_ID});
+    const saveTs=Date.now();
+    fbLastSaveTime=saveTs;
+    await setDocFn(ref,{payload,updatedAt:saveTs,deviceId:FB_DEVICE_ID});
   }catch(e){
     console.error('Firebase save error',e);
   }
