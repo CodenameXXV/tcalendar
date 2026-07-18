@@ -2656,6 +2656,8 @@ const FB_DOC_NAME='calendarData';
 const FB_DEVICE_ID=(()=>{let id;try{id=sessionStorage.getItem('tcDeviceId');}catch(e){}if(!id){id=Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem('tcDeviceId',id);}catch(e){}}return id;})();
 let fbRealtimeUnsubscribe=null;
 let fbLastSaveTime=0; // timestamp останнього власного збереження
+let fbLocalPending=false; // true = є незбережені локальні зміни
+let fbBlockUntil=0;      // ігнорувати listener до цього timestamp
 
 // Called by the Firebase module once auth state is known
 function appReady(){
@@ -2898,8 +2900,13 @@ function _startRealtimeListener(){
     const sdata=snap.data();
     const remoteTs=sdata.updatedAt||0;
     const remoteDevice=sdata.deviceId||'';
-    // Ігноруємо: власний пристрій АБО snapshot прийшов раніше ніж 5с після власного збереження
+    // Ігноруємо власний пристрій
     if(remoteDevice===FB_DEVICE_ID)return;
+    // Ігноруємо якщо є незбережені локальні зміни — вони мають пріоритет
+    if(fbLocalPending)return;
+    // Ігноруємо якщо ще діє блокування після нашого збереження
+    if(Date.now()<fbBlockUntil)return;
+    // Ігноруємо застарілий snapshot
     if(remoteTs<=fbLastSaveTime)return;
     // Зовнішня зміна з новішим timestamp — застосовуємо
     try{
@@ -2913,6 +2920,8 @@ async function gdriveSave(){
   if(!fbUser)return;
   const db=window._fbDb,docFn=window._fbDoc,setDocFn=window._fbSetDoc;
   if(!db)return;
+  // Знімаємо прапор очікування — зараз фактично зберігаємо
+  fbLocalPending=false;
   gdriveSetSyncing(true);
   try{
     const payload=JSON.stringify(gdriveCollectData());
@@ -2920,6 +2929,8 @@ async function gdriveSave(){
     const saveTs=Date.now();
     fbLastSaveTime=saveTs;
     await setDocFn(ref,{payload,updatedAt:saveTs,deviceId:FB_DEVICE_ID});
+    // Блокуємо listener на 5с після збереження, щоб не отримати власний snapshot назад
+    fbBlockUntil=Date.now()+5000;
   }catch(e){
     console.error('Firebase save error',e);
   }
@@ -2928,6 +2939,8 @@ async function gdriveSave(){
 
 function gdriveScheduleSave(){
   if(!fbUser)return;
+  // Одразу позначаємо що є локальні зміни — listener не перезапише їх до збереження
+  fbLocalPending=true;
   clearTimeout(fbSaveTimer);
   fbSaveTimer=setTimeout(gdriveSave,3000);
 }
