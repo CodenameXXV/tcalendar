@@ -1356,7 +1356,7 @@ function openAddEventModal(dk, existingId, defStartTime, defEndTime){
     defDate=String(ep[0]).padStart(4,'0')+'-'+String(parseInt(ep[1])+1).padStart(2,'0')+'-'+String(ep[2]).padStart(2,'0');
   } else if(dk){
     const p=dk.split('-');
-    defDate=String(p[0]).padStart(4,'0')+'-'+String(p[1]).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0');
+    defDate=String(p[0]).padStart(4,'0')+'-'+String(parseInt(p[1])+1).padStart(2,'0')+'-'+String(p[2]).padStart(2,'0');
   } else {
     const n=new Date();
     defDate=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
