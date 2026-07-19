@@ -534,13 +534,21 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .abm-dash{color:var(--text-light);font-size:.9em;flex-shrink:0}
 /* ── Context submenu (Тип уроку) ── */
 .ctx-submenu-wrap{position:relative}
-.ctx-submenu-wrap .ctx-submenu-arrow{margin-left:auto;font-size:.75em;opacity:.55}
+.ctx-submenu-wrap .ctx-submenu-arrow{margin-left:auto;font-size:.75em;opacity:.55;transition:transform .2s}
+.ctx-submenu-wrap.open .ctx-submenu-arrow{transform:rotate(90deg)}
 .ctx-submenu{display:none;position:absolute;left:100%;top:0;min-width:160px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);z-index:10000;overflow:hidden;animation:fadeIn .1s}
-@media(max-width:600px){.ctx-submenu{position:fixed !important;left:8px !important;right:8px !important;min-width:unset !important;width:calc(100vw - 16px) !important;max-height:55vh;overflow-y:auto;z-index:10001}}
 .ctx-submenu-wrap:hover .ctx-submenu,.ctx-submenu-wrap.open .ctx-submenu{display:block}
 .ctx-submenu-item{display:block;width:100%;padding:8px 14px;border:none;background:none;color:var(--text);font-size:.83em;font-weight:600;font-family:inherit;cursor:pointer;text-align:left;transition:background .12s;white-space:nowrap}
 .ctx-submenu-item:hover{background:var(--bg-hover)}
 .ctx-submenu-item.active{color:var(--blue);background:var(--blue-light)}
+/* ── Mobile: inline accordion for lesson type ── */
+.ctx-type-overlay{display:none;position:fixed;inset:0;z-index:20000;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
+.ctx-type-overlay.open{display:flex}
+.ctx-type-sheet{background:var(--bg-surface);border-radius:var(--radius-lg);min-width:240px;max-width:calc(100vw - 48px);max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:fadeIn .15s}
+.ctx-type-sheet-title{padding:14px 16px 10px;font-size:.8em;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border-light)}
+.ctx-inline-type-item{display:block;width:100%;padding:12px 20px;border:none;background:none;color:var(--text);font-size:.95em;font-weight:600;font-family:inherit;cursor:pointer;text-align:left;transition:background .12s}
+.ctx-inline-type-item:active{background:var(--bg-hover)}
+.ctx-inline-type-item.active{color:var(--blue);background:var(--blue-light)}
 /* ── Lesson type badge on month card ── */
 .gcal-event-type-badge{display:inline-block;font-size:.62em;font-weight:700;padding:0px 4px;border-radius:4px;background:rgba(0,0,0,.22);color:#fff;vertical-align:middle;margin-left:4px;letter-spacing:.02em;flex-shrink:0;white-space:nowrap;position:absolute;top:3px;right:4px;line-height:1.5;pointer-events:none}
 .gcal-event{position:relative}
@@ -1644,19 +1652,30 @@ function showContextMenu(e,dk,si,lessonName,classId){
   const hasNote=!!(weekdayNotes[weekdayNoteKey(wd,si)]||noteData.lessonNote);
   const currentType=getLessonType(dk,classId,si);
   const currentTypeInfo=getTypeInfo(currentType);
-  // Build lesson-type submenu items HTML
+  // Build lesson-type items — inline accordion on mobile, flyout submenu on desktop
+  const isMobileDevice=window.innerWidth<=600;
   const typeItemsHtml=LESSON_TYPES.map(t=>
     '<button class="ctx-submenu-item'+(t.id===currentType?' active':'')+'" data-type-id="'+t.id+'">'+t.label+'</button>'
   ).join('');
+  const inlineTypeItemsHtml=LESSON_TYPES.map(t=>
+    '<button class="ctx-inline-type-item'+(t.id===currentType?' active':'')+'" data-type-id="'+t.id+'">'+t.label+'</button>'
+  ).join('');
+  const typeRowHtml=isMobileDevice
+    ? '<div class="ctx-menu-item ctx-submenu-wrap" id="ctx-type-wrap">'+
+        '<span class="ctx-menu-icon">🏷️</span>Тип уроку'+
+        '<span style="font-size:.75em;color:var(--blue);margin-left:6px">— '+escapeHtml(currentTypeInfo.label)+'</span>'+
+        '<span class="ctx-submenu-arrow" style="margin-left:auto">▶</span>'+
+      '</div>'
+    : '<div class="ctx-menu-item ctx-submenu-wrap" id="ctx-type-wrap">'+
+        '<span class="ctx-menu-icon">🏷️</span>Тип уроку'+
+        '<span style="font-size:.75em;color:var(--blue);margin-left:6px">— '+escapeHtml(currentTypeInfo.label)+'</span>'+
+        '<span class="ctx-submenu-arrow">▶</span>'+
+        '<div class="ctx-submenu" id="ctx-type-submenu">'+typeItemsHtml+'</div>'+
+      '</div>';
   menu.innerHTML=
     '<div class="ctx-menu-item" id="ctx-note"><span class="ctx-menu-icon">📝</span>Нотатки'+(hasNote?' <span style="font-size:.75em;color:var(--orange);margin-left:4px">●</span>':'')+'</div>'+
     '<div class="ctx-menu-sep"></div>'+
-    '<div class="ctx-menu-item ctx-submenu-wrap" id="ctx-type-wrap">'+
-      '<span class="ctx-menu-icon">🏷️</span>Тип уроку'+
-      '<span style="font-size:.75em;color:var(--blue);margin-left:6px">— '+escapeHtml(currentTypeInfo.label)+'</span>'+
-      '<span class="ctx-submenu-arrow">▶</span>'+
-      '<div class="ctx-submenu" id="ctx-type-submenu">'+typeItemsHtml+'</div>'+
-    '</div>'+
+    typeRowHtml+
     '<div class="ctx-menu-sep"></div>'+
     '<div class="ctx-menu-item" id="ctx-set-time"><span class="ctx-menu-icon">⏰</span>Встановити власний час</div>'+
     (hasCustom?'<div class="ctx-menu-sep"></div><div class="ctx-menu-item" id="ctx-reset-time"><span class="ctx-menu-icon">↩️</span>Скинути до стандартного</div>':'')+
@@ -1664,7 +1683,7 @@ function showContextMenu(e,dk,si,lessonName,classId){
     '<div class="ctx-menu-item" id="ctx-cabinet"><span class="ctx-menu-icon">🏫</span>Кабінет'+(getLessonCabinet(dk,classId,si)?'<span style="font-size:.75em;color:var(--blue);margin-left:6px">— '+escapeHtml(getLessonCabinet(dk,classId,si))+'</span>':'')+'</div>'+
     '<div class="ctx-menu-sep"></div>'+
     '<div class="ctx-menu-item" id="ctx-delete-lesson" style="color:var(--red)"><span class="ctx-menu-icon">🗑️</span>Видалити урок</div>';
-  // Position menu, flip submenu if near right edge
+  // Position menu
   const approxMenuW=240;
   let mx=e.clientX,my=e.clientY;
   if(mx+approxMenuW>window.innerWidth)mx=window.innerWidth-approxMenuW-8;
@@ -1672,37 +1691,59 @@ function showContextMenu(e,dk,si,lessonName,classId){
   menu.style.left=mx+'px';
   menu.style.top=my+'px';
   document.body.appendChild(menu);
-  // Position submenu: measure after appendChild so getBoundingClientRect works
-  const submenu=menu.querySelector('#ctx-type-submenu');
-  const wrap=menu.querySelector('#ctx-type-wrap');
-  const isMobileDevice=window.innerWidth<=600;
   if(isMobileDevice){
-    // On mobile: position submenu as fixed panel below the "Тип уроку" row
-    const wrapRect=wrap.getBoundingClientRect();
-    let subTop=wrapRect.bottom+4;
-    // If not enough room below, show above the wrap row
-    submenu.style.cssText='display:block;visibility:hidden;';
-    const subH=submenu.offsetHeight||200;
-    if(subTop+subH>window.innerHeight-8) subTop=Math.max(8,wrapRect.top-subH-4);
-    submenu.style.cssText='top:'+subTop+'px';
+    // Mobile: tap on "Тип уроку" row opens centred overlay picker
+    const wrap=menu.querySelector('#ctx-type-wrap');
+    wrap.addEventListener('click',function(e2){
+      e2.stopPropagation();
+      closeContextMenu();
+      const overlay=document.createElement('div');
+      overlay.className='ctx-type-overlay';
+      overlay.innerHTML='<div class="ctx-type-sheet">'+
+
+        inlineTypeItemsHtml+
+        '</div>';
+      document.body.appendChild(overlay);
+      requestAnimationFrame(()=>overlay.classList.add('open'));
+      // Close on backdrop click
+      overlay.addEventListener('click',function(e3){
+        if(e3.target===overlay) overlay.remove();
+      });
+      // Type selection
+      overlay.querySelectorAll('.ctx-inline-type-item[data-type-id]').forEach(btn=>{
+        btn.addEventListener('click',function(e3){
+          e3.stopPropagation();
+          const typeId=btn.dataset.typeId;
+          setLessonType(dk,classId,si,typeId);
+          if(homeView==='month'){renderHomeCalendar();}else{_updateMonthCardTypeBadge(dk,classId,si,typeId);}
+          _updateWeekLessonTypeBadge(dk,si,typeId);
+          _updateDayModalTypeLabel(dk,classId,si,typeId);
+          overlay.remove();
+          showNotification('Тип уроку: '+getTypeInfo(typeId).label,'success');
+          gdriveScheduleSave();
+        });
+      });
+    });
   } else {
-    // Desktop: measure real dimensions after menu is in DOM
+    // Desktop: flyout submenu, measure after appendChild
+    const submenu=menu.querySelector('#ctx-type-submenu');
+    const wrap=menu.querySelector('#ctx-type-wrap');
     submenu.style.cssText='display:block;visibility:hidden;position:absolute;left:100%;top:0';
     const menuRect=menu.getBoundingClientRect();
     const wrapRect=wrap.getBoundingClientRect();
     const subW=submenu.offsetWidth||170;
     const subH=submenu.offsetHeight||200;
-    // Horizontal: default right of menu; flip left if overflows
-    let subLeft='100%', subRight='auto';
+    let subLeft='100%',subRight='auto';
     if(menuRect.right+subW>window.innerWidth){subLeft='auto';subRight='100%';}
-    // Vertical: align to wrap top; shift up if overflows bottom
     let subTop=0;
     const bottomOverflow=wrapRect.top+subH-window.innerHeight+8;
-    if(bottomOverflow>0) subTop=-Math.min(bottomOverflow, wrapRect.top);
+    if(bottomOverflow>0) subTop=-Math.min(bottomOverflow,wrapRect.top);
     submenu.style.cssText='position:absolute;left:'+subLeft+';right:'+subRight+';top:'+subTop+'px';
+    // Prevent submenu from closing when clicking wrap on desktop
+    wrap.addEventListener('click',e2=>e2.stopPropagation());
   }
-  // Submenu type selection
-  menu.querySelectorAll('.ctx-submenu-item[data-type-id]').forEach(btn=>{
+  // Type selection — works for both inline (mobile) and submenu (desktop) buttons
+  menu.querySelectorAll('.ctx-submenu-item[data-type-id],.ctx-inline-type-item[data-type-id]').forEach(btn=>{
     btn.addEventListener('click',e2=>{
       e2.stopPropagation();
       const typeId=btn.dataset.typeId;
@@ -1718,8 +1759,6 @@ function showContextMenu(e,dk,si,lessonName,classId){
       gdriveScheduleSave();
     });
   });
-  // Prevent submenu from closing when hovering wrap
-  menu.querySelector('#ctx-type-wrap').addEventListener('click',e2=>e2.stopPropagation());
   menu.querySelector('#ctx-note').addEventListener('click',()=>{
     closeContextMenu();
     const tileBtn=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"] .ln-btn')||
