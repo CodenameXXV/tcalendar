@@ -536,6 +536,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .ctx-submenu-wrap{position:relative}
 .ctx-submenu-wrap .ctx-submenu-arrow{margin-left:auto;font-size:.75em;opacity:.55}
 .ctx-submenu{display:none;position:absolute;left:100%;top:0;min-width:160px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);z-index:10000;overflow:hidden;animation:fadeIn .1s}
+@media(max-width:600px){.ctx-submenu{position:fixed !important;left:8px !important;right:8px !important;min-width:unset !important;width:calc(100vw - 16px) !important;max-height:55vh;overflow-y:auto;z-index:10001}}
 .ctx-submenu-wrap:hover .ctx-submenu,.ctx-submenu-wrap.open .ctx-submenu{display:block}
 .ctx-submenu-item{display:block;width:100%;padding:8px 14px;border:none;background:none;color:var(--text);font-size:.83em;font-weight:600;font-family:inherit;cursor:pointer;text-align:left;transition:background .12s;white-space:nowrap}
 .ctx-submenu-item:hover{background:var(--bg-hover)}
@@ -1671,23 +1672,35 @@ function showContextMenu(e,dk,si,lessonName,classId){
   menu.style.left=mx+'px';
   menu.style.top=my+'px';
   document.body.appendChild(menu);
-  // Position submenu: measure while temporarily visible, then apply inline styles
+  // Position submenu: measure after appendChild so getBoundingClientRect works
   const submenu=menu.querySelector('#ctx-type-submenu');
   const wrap=menu.querySelector('#ctx-type-wrap');
-  // Temporarily show to measure real dimensions
-  submenu.style.cssText='display:block;visibility:hidden;position:absolute;left:100%;top:0';
-  const menuRect=menu.getBoundingClientRect();
-  const wrapRect=wrap.getBoundingClientRect();
-  const subW=submenu.offsetWidth||170;
-  const subH=submenu.offsetHeight||200;
-  // Horizontal: default right of menu; flip left if overflows
-  let subLeft='100%', subRight='auto';
-  if(menuRect.right+subW>window.innerWidth){subLeft='auto';subRight='100%';}
-  // Vertical: align to wrap top; shift up if overflows bottom
-  let subTop=0;
-  const bottomOverflow=wrapRect.top+subH-window.innerHeight+8;
-  if(bottomOverflow>0) subTop=-Math.min(bottomOverflow, wrapRect.top);
-  submenu.style.cssText='position:absolute;left:'+subLeft+';right:'+subRight+';top:'+subTop+'px';
+  const isMobileDevice=window.innerWidth<=600;
+  if(isMobileDevice){
+    // On mobile: position submenu as fixed panel below the "Тип уроку" row
+    const wrapRect=wrap.getBoundingClientRect();
+    let subTop=wrapRect.bottom+4;
+    // If not enough room below, show above the wrap row
+    submenu.style.cssText='display:block;visibility:hidden;';
+    const subH=submenu.offsetHeight||200;
+    if(subTop+subH>window.innerHeight-8) subTop=Math.max(8,wrapRect.top-subH-4);
+    submenu.style.cssText='top:'+subTop+'px';
+  } else {
+    // Desktop: measure real dimensions after menu is in DOM
+    submenu.style.cssText='display:block;visibility:hidden;position:absolute;left:100%;top:0';
+    const menuRect=menu.getBoundingClientRect();
+    const wrapRect=wrap.getBoundingClientRect();
+    const subW=submenu.offsetWidth||170;
+    const subH=submenu.offsetHeight||200;
+    // Horizontal: default right of menu; flip left if overflows
+    let subLeft='100%', subRight='auto';
+    if(menuRect.right+subW>window.innerWidth){subLeft='auto';subRight='100%';}
+    // Vertical: align to wrap top; shift up if overflows bottom
+    let subTop=0;
+    const bottomOverflow=wrapRect.top+subH-window.innerHeight+8;
+    if(bottomOverflow>0) subTop=-Math.min(bottomOverflow, wrapRect.top);
+    submenu.style.cssText='position:absolute;left:'+subLeft+';right:'+subRight+';top:'+subTop+'px';
+  }
   // Submenu type selection
   menu.querySelectorAll('.ctx-submenu-item[data-type-id]').forEach(btn=>{
     btn.addEventListener('click',e2=>{
