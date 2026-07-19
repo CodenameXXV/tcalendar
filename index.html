@@ -1688,7 +1688,7 @@ function showContextMenu(e,dk,si,lessonName,classId){
       const typeId=btn.dataset.typeId;
       setLessonType(dk,classId,si,typeId);
       // Update badge on month card (if visible)
-      _updateMonthCardTypeBadge(dk,classId,si,typeId);
+      if(homeView==='month'){renderHomeCalendar();}else{_updateMonthCardTypeBadge(dk,classId,si,typeId);}
       // Update week lesson tile (if visible)
       _updateWeekLessonTypeBadge(dk,si,typeId);
       // Update dm-slot card detail (if day modal open)
@@ -2749,7 +2749,13 @@ var detDiv=document.createElement('div');detDiv.className='dm-slot-card-detail';
 card.appendChild(infoDiv);
 var sel=document.createElement('select');sel.className='lesson-type-select';sel.dataset.dk=dk;sel.dataset.cid=les.classId;sel.dataset.li=les.origIdx;
 LESSON_TYPES.forEach(function(t){var o=document.createElement('option');o.value=t.id;o.textContent=t.label;if(t.id===type)o.selected=true;sel.appendChild(o)});
-sel.addEventListener('change',function(){setLessonType(this.dataset.dk,this.dataset.cid,+this.dataset.li,this.value)});
+sel.addEventListener('change',function(){
+  const _dk=this.dataset.dk,_cid=this.dataset.cid,_li=+this.dataset.li,_tv=this.value;
+  setLessonType(_dk,_cid,_li,_tv);
+  if(homeView==='month'){renderHomeCalendar();}else{_updateMonthCardTypeBadge(_dk,_cid,_li,_tv);}
+  _updateWeekLessonTypeBadge(_dk,_li,_tv);
+  gdriveScheduleSave();
+});
 sel.addEventListener('mousedown',function(e){e.stopPropagation()});sel.addEventListener('dragstart',function(e){e.preventDefault();e.stopPropagation()});
 if(!document.body.classList.contains('readonly-mode'))card.appendChild(sel);
 // Cabinet display (right-click to edit)
