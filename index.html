@@ -1671,16 +1671,23 @@ function showContextMenu(e,dk,si,lessonName,classId){
   menu.style.left=mx+'px';
   menu.style.top=my+'px';
   document.body.appendChild(menu);
-  // Flip submenu to left if too close to right edge
+  // Position submenu: measure while temporarily visible, then apply inline styles
   const submenu=menu.querySelector('#ctx-type-submenu');
-  const afterRender=()=>{
-    const menuRect=menu.getBoundingClientRect();
-    const subW=submenu.offsetWidth||165;
-    if(menuRect.right+subW>window.innerWidth){
-      submenu.style.left='auto';submenu.style.right='100%';
-    }
-  };
-  setTimeout(afterRender,0);
+  const wrap=menu.querySelector('#ctx-type-wrap');
+  // Temporarily show to measure real dimensions
+  submenu.style.cssText='display:block;visibility:hidden;position:absolute;left:100%;top:0';
+  const menuRect=menu.getBoundingClientRect();
+  const wrapRect=wrap.getBoundingClientRect();
+  const subW=submenu.offsetWidth||170;
+  const subH=submenu.offsetHeight||200;
+  // Horizontal: default right of menu; flip left if overflows
+  let subLeft='100%', subRight='auto';
+  if(menuRect.right+subW>window.innerWidth){subLeft='auto';subRight='100%';}
+  // Vertical: align to wrap top; shift up if overflows bottom
+  let subTop=0;
+  const bottomOverflow=wrapRect.top+subH-window.innerHeight+8;
+  if(bottomOverflow>0) subTop=-Math.min(bottomOverflow, wrapRect.top);
+  submenu.style.cssText='position:absolute;left:'+subLeft+';right:'+subRight+';top:'+subTop+'px';
   // Submenu type selection
   menu.querySelectorAll('.ctx-submenu-item[data-type-id]').forEach(btn=>{
     btn.addEventListener('click',e2=>{
