@@ -1748,7 +1748,9 @@ function _updateWeekLessonTypeBadge(dk,si,typeId){
 
 // Helper: update type label in open day modal
 function _updateDayModalTypeLabel(dk,classId,si,typeId){
-  const card=document.querySelector('.dm-slot-card[data-class-id="'+classId+'"]');
+  // Try to find by slotIdx first (precise), fallback to classId
+  let card=document.querySelector('.dm-slot-card[data-slot-idx="'+si+'"]');
+  if(!card)card=document.querySelector('.dm-slot-card[data-class-id="'+classId+'"]');
   if(!card)return;
   const detDiv=card.querySelector('.dm-slot-card-detail');
   if(detDiv)detDiv.innerHTML='<span>'+getTypeInfo(typeId).label+'</span>';
@@ -2742,12 +2744,12 @@ var les=findLesson(key);
 if(les&&!hiddenClasses.has(les.classId)){
 var color=classColorMap[les.classId]||'#1a73e8';
 var card=document.createElement('div');card.className='dm-slot-card';card.draggable=true;card.style.background=color;card.dataset.slotIdx=si;card.dataset.classId=les.classId;card.dataset.origIdx=les.origIdx;
-var type=getLessonType(dk,les.classId,les.origIdx);var ti=getTypeInfo(type);
+var type=getLessonType(dk,les.classId,si);var ti=getTypeInfo(type);
 var infoDiv=document.createElement('div');infoDiv.className='dm-slot-card-info';
 var nameSpan=document.createElement('div');nameSpan.className='dm-slot-card-name';nameSpan.textContent=les.className;infoDiv.appendChild(nameSpan);
 var detDiv=document.createElement('div');detDiv.className='dm-slot-card-detail';detDiv.innerHTML='<span>'+ti.label+'</span>';infoDiv.appendChild(detDiv);
 card.appendChild(infoDiv);
-var sel=document.createElement('select');sel.className='lesson-type-select';sel.dataset.dk=dk;sel.dataset.cid=les.classId;sel.dataset.li=les.origIdx;
+var sel=document.createElement('select');sel.className='lesson-type-select';sel.dataset.dk=dk;sel.dataset.cid=les.classId;sel.dataset.li=si;
 LESSON_TYPES.forEach(function(t){var o=document.createElement('option');o.value=t.id;o.textContent=t.label;if(t.id===type)o.selected=true;sel.appendChild(o)});
 sel.addEventListener('change',function(){
   const _dk=this.dataset.dk,_cid=this.dataset.cid,_li=+this.dataset.li,_tv=this.value;
