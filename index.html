@@ -335,7 +335,7 @@ body.readonly-mode .fab-add-event{display:none!important}
 .gcal-more{font-size:.68em;color:var(--blue);font-weight:700;padding:1px 5px;cursor:pointer;flex-shrink:0;border-radius:3px}
 .gcal-more:hover{background:var(--blue-light)}
 .week-view{flex:1;display:none;flex-direction:column;overflow:hidden;min-height:0}.week-view.active{display:flex}
-.week-header{display:grid;border-bottom:1px solid var(--border);flex-shrink:0}
+.week-header{display:grid;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:30;background:var(--bg-surface)}
 .week-header-cell{text-align:center;padding:6px 3px;border-right:1px solid var(--border-light)}
 .week-header-cell:last-child{border-right:none}
 .week-header-day{font-size:.73em;font-weight:600;color:var(--text-light);text-transform:uppercase}
@@ -1240,7 +1240,7 @@ body.app-loaded #app-loading-overlay{display:none}
 </div>
 </div>
 <div id="month-view"><div class="gcal-weekdays" id="gcal-weekdays"></div><div class="gcal-grid" id="gcal-grid"></div></div>
-<div class="week-view" id="week-view"><div class="week-header" id="week-header"></div><div class="week-body" id="week-body"><div class="week-grid" id="week-grid"></div></div></div>
+<div class="week-view" id="week-view"><div class="week-body" id="week-body"><div class="week-header" id="week-header"></div><div class="week-grid" id="week-grid"></div></div></div>
 <div class="author-footer">Автор: <a href="https://codenamexxv.github.io/teacher/" target="_blank">Ihor Shuliak</a></div>
 </div></div>
 <div id="edit-view" onclick="if(event.target===this)cancelEditMode()"><div class="container"><div class="edit-top-bar"><h1>Налаштування розкладу</h1><button class="done-btn" onclick="exitEditMode()">&#10003; Готово</button></div>
