@@ -354,11 +354,58 @@ body.readonly-mode .fab-add-event{display:none!important}
 .week-lesson{position:absolute;left:2px;right:2px;border-radius:5px;padding:3px 6px;color:#fff;font-size:.73em;cursor:grab;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:box-shadow .2s,transform .15s;user-select:none;z-index:10}
 .week-lesson:hover{box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:20;transform:scale(1.02)}
 .week-lesson.dragging{cursor:grabbing;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:100;opacity:.92;transform:scale(1.05)}
+.week-lesson-note-ind{position:absolute;top:3px;right:4px;font-size:.85em;line-height:1;opacity:1;pointer-events:none;filter:brightness(1.5) drop-shadow(0 1px 3px rgba(0,0,0,.45))}
 #ctx-menu{position:fixed;z-index:9999;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);min-width:220px;padding:4px 0;animation:fadeIn .12s}
 .ctx-menu-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:.85em;color:var(--text);transition:background .15s;white-space:nowrap}
 .ctx-menu-item:hover{background:var(--bg-hover)}
 .ctx-menu-icon{font-size:1em;width:18px;text-align:center}
 .ctx-menu-sep{height:1px;background:var(--border-light);margin:4px 0}
+#lesson-info-popup{position:fixed;z-index:9998;background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.08);width:320px;padding:0;overflow:hidden;transform-origin:top left;animation:lipPopIn .28s cubic-bezier(.34,1.56,.64,1) both}#lesson-info-popup.lip-closing{animation:lipPopOut .18s cubic-bezier(.4,0,.2,1) both}
+#lesson-info-popup .lip-band{height:5px;width:100%}
+#lesson-info-popup .lip-top{position:relative;padding:13px 44px 0 16px}
+#lesson-info-popup .lip-title{font-size:1.06em;font-weight:700;color:var(--text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lesson-info-popup .lip-subtitle{font-size:.79em;color:var(--text-light);font-weight:500;margin-top:1px}
+#lesson-info-popup .lip-close{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--text-light);font-size:.95em;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s}
+#lesson-info-popup .lip-close:hover{background:var(--bg-hover);color:var(--text)}
+#lesson-info-popup .lip-meta{padding:9px 16px 11px;display:flex;flex-direction:column;gap:4px}
+#lesson-info-popup .lip-row{display:flex;align-items:center;gap:8px;font-size:.83em;color:var(--text-secondary)}
+#lesson-info-popup .lip-row-icon{width:15px;text-align:center;flex-shrink:0;font-size:.9em}
+#lesson-info-popup .lip-row-text{flex:1;line-height:1.4}
+#lesson-info-popup .lip-row-text strong{color:var(--text);font-weight:600}
+#lesson-info-popup .lip-notes{border-top:1px solid var(--border-light);padding:11px 16px 14px;display:flex;flex-direction:column;gap:8px}
+#lesson-info-popup .lip-note-field{display:flex;flex-direction:column;gap:4px}
+#lesson-info-popup .lip-note-lbl{font-size:.7em;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.04em}
+#lesson-info-popup .lip-note-row{display:flex;align-items:flex-start;gap:6px}
+#lesson-info-popup .lip-note-text{flex:1;font-size:.84em;font-family:inherit;line-height:1.5;color:var(--text);background:var(--bg-hover);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;min-height:32px;word-break:break-word;white-space:pre-wrap}
+#lesson-info-popup .lip-note-text.empty{color:var(--text-light);font-style:italic}
+#lesson-info-popup .lip-note-edit{flex-shrink:0;width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:var(--bg-surface);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s,color .15s;margin-top:2px}
+#lesson-info-popup .lip-note-edit:hover{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--bg-surface));color:var(--orange)}
+/* ── Redesigned notes area ── */
+#lesson-info-popup .lip-notes-empty{padding:10px 16px 14px;display:flex;align-items:center;justify-content:center}
+#lesson-info-popup .lip-add-note-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;border:1.5px dashed var(--border);border-radius:20px;background:transparent;color:var(--text-secondary);font-size:.82em;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .18s,color .18s,background .18s}
+#lesson-info-popup .lip-add-note-btn:hover{border-color:var(--orange);color:var(--orange);background:color-mix(in srgb,var(--orange) 7%,var(--bg-surface))}
+#lesson-info-popup .lip-notes-section{border-top:1px solid var(--border-light);padding:11px 16px 13px;display:flex;flex-direction:column;gap:8px}
+#lesson-info-popup .lip-note-card{background:var(--bg-page);border:1px solid var(--border-light);border-radius:8px;padding:8px 10px 8px 12px;position:relative}
+#lesson-info-popup .lip-note-card-lbl{font-size:.68em;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+#lesson-info-popup .lip-note-card-body{font-size:.84em;color:var(--text);line-height:1.5;word-break:break-word;padding-right:28px}
+#lesson-info-popup .lip-note-card-body.lip-rich{white-space:normal}
+#lesson-info-popup .lip-note-card-body.lip-rich.lip-rich-clamped{max-height:120px;overflow:hidden;position:relative}
+#lesson-info-popup .lip-note-card-body.lip-rich.lip-rich-clamped::after{content:'';position:absolute;bottom:0;left:0;right:0;height:36px;background:linear-gradient(transparent,var(--bg-page));pointer-events:none}
+#lesson-info-popup .lip-note-card-more{display:none;align-items:center;gap:4px;margin-top:4px;padding:2px 0;background:none;border:none;color:var(--blue);font-size:.76em;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .15s}
+#lesson-info-popup .lip-note-card-more:hover{opacity:.75}
+#lesson-info-popup .lip-rich p{margin:0 0 4px}
+#lesson-info-popup .lip-rich p:last-child{margin-bottom:0}
+#lesson-info-popup .lip-rich ul,#lesson-info-popup .lip-rich ol{margin:2px 0 4px;padding-left:18px}
+#lesson-info-popup .lip-rich li{margin-bottom:2px}
+#lesson-info-popup .lip-rich strong,#lesson-info-popup .lip-rich b{font-weight:700}
+#lesson-info-popup .lip-rich em,#lesson-info-popup .lip-rich i{font-style:italic}
+#lesson-info-popup .lip-rich u{text-decoration:underline}
+#lesson-info-popup .lip-rich a{color:var(--blue);text-decoration:underline;word-break:break-all}
+#lesson-info-popup .lip-rich a:hover{opacity:.8}
+#lesson-info-popup .lip-note-card-edit{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--bg-surface);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s,color .15s}
+#lesson-info-popup .lip-note-card-edit:hover{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--bg-surface));color:var(--orange)}
+#lesson-info-popup .lip-note-edit-all{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:14px;background:var(--bg-surface);color:var(--text-secondary);font-size:.77em;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .15s,color .15s,background .15s;align-self:flex-start;margin-top:2px}
+#lesson-info-popup .lip-note-edit-all:hover{border-color:var(--orange);color:var(--orange);background:color-mix(in srgb,var(--orange) 7%,var(--bg-surface))}
 #custom-time-modal .modal-time-row{display:flex;gap:10px;align-items:center;margin:12px 0}
 #custom-time-modal .modal-time-row label{font-size:.85em;color:var(--text-secondary);min-width:60px}
 #custom-time-modal .modal-time-row input[type=time]{flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:.9em;background:var(--bg-surface);color:var(--text);font-family:inherit}
@@ -377,7 +424,7 @@ body.readonly-mode .fab-add-event{display:none!important}
 .week-now-label{position:absolute;left:2px;top:-18px;background:var(--blue);color:#fff;font-size:.65em;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;letter-spacing:.3px;font-variant-numeric:tabular-nums;opacity:.85}
 .week-now-label::after{content:'';position:absolute;left:8px;top:100%;border:3px solid transparent;border-top-color:var(--blue)}
 .day-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;animation:fadeIn .2s;backdrop-filter:blur(4px)}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes lipPopIn{from{opacity:0;transform:scale(.82) translateY(-6px)}to{opacity:1;transform:scale(1) translateY(0)}}@keyframes lipPopOut{from{opacity:1;transform:scale(1) translateY(0)}to{opacity:0;transform:scale(.88) translateY(-4px)}}
 .day-modal{background:var(--bg-surface);border-radius:var(--radius-lg);width:100%;max-width:500px;max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);animation:slideUp .25s cubic-bezier(.4,0,.2,1);overflow:hidden}
 .day-modal-header{padding:11px 18px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;background:var(--blue-light)}
 .day-modal-title{font-size:1.1em;font-weight:600;color:var(--text)}
@@ -427,18 +474,48 @@ body.readonly-mode .fab-add-event{display:none!important}
 .week-lesson .ln-btn:hover{opacity:1}
 .week-lesson .ln-btn.has-note{opacity:1;filter:brightness(5)}
 /* Lesson note popup */
-.ln-popup-overlay{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.35);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .15s}
+.ln-popup-overlay{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.35);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .15s;align-items:flex-start;padding-top:max(16px,calc(50vh - 260px))}
+.ln-popup-overlay.ln-closing{animation:lnOverlayOut .2s cubic-bezier(.4,0,.2,1) forwards}
 .ln-popup{background:var(--bg-surface);border-radius:var(--radius-lg);width:100%;max-width:680px;box-shadow:var(--shadow-lg);border-top:3px solid var(--orange);animation:slideUp .2s cubic-bezier(.4,0,.2,1);overflow:hidden}
+.ln-closing .ln-popup{animation:lnPopupOut .2s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes lnOverlayOut{from{opacity:1}to{opacity:0}}
+@keyframes lnPopupOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(16px) scale(.97)}}
 .ln-popup-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid var(--border-light)}
-.ln-popup-title{font-size:1em;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+.ln-popup-title{font-size:1em;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.ln-popup-header-right{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:10px}
+.ln-weekly-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;padding:5px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg-page);transition:border-color .15s,background .15s;font-size:.78em;font-weight:600;color:var(--text-secondary);white-space:nowrap;flex-shrink:0}
+.ln-weekly-toggle:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.ln-weekly-toggle.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.ln-weekly-toggle input[type="checkbox"]{width:14px;height:14px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;margin:0}
+.ln-weekly-toggle .ln-weekly-icon{font-size:1em;flex-shrink:0}
 .ln-popup-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--green);cursor:pointer;font-size:1em;color:#fff;display:flex;align-items:center;justify-content:center;transition:filter .15s,transform .15s;box-shadow:0 2px 6px color-mix(in srgb,var(--green) 40%,transparent)}
 .ln-popup-close:hover{filter:brightness(1.12);transform:scale(1.1)}
-.ln-popup-body{padding:14px 18px 18px;display:flex;flex-direction:column;gap:14px}
+.ln-popup-body{padding:10px 18px 18px;display:flex;flex-direction:column;gap:10px}
 .ln-field label{display:block;font-size:.72em;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.ln-field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:.9em;font-family:inherit;color:var(--text);background:var(--bg-surface);resize:none;line-height:1.55;min-height:44px;max-height:400px;overflow-y:hidden;transition:border-color .15s,box-shadow .15s,height .25s cubic-bezier(.4,0,.2,1)}
-.ln-field textarea:focus,.ln-field textarea.expanded{min-height:160px;overflow-y:auto}
+.ln-editor-wrap{border:1.5px solid var(--border);border-radius:var(--radius);background:var(--bg-surface);display:flex;flex-direction:column;transition:border-color .15s,box-shadow .15s}
+.ln-editor-wrap:focus-within{border-color:var(--orange);box-shadow:0 0 0 2px color-mix(in srgb,var(--orange) 18%,transparent)}
+.ln-toolbar{display:flex;align-items:center;gap:2px;padding:5px 8px;border-bottom:1px solid var(--border-light);background:var(--bg-page);border-radius:var(--radius) var(--radius) 0 0;flex-wrap:wrap}
+.ln-toolbar-sep{width:1px;height:18px;background:var(--border);margin:0 3px;flex-shrink:0}
+.ln-tb-btn{width:28px;height:28px;border:none;background:transparent;border-radius:5px;cursor:pointer;font-size:.88em;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s;font-family:inherit;flex-shrink:0;padding:0}
+.ln-tb-btn:hover{background:var(--bg-hover);color:var(--text)}
+.ln-tb-btn.active{background:color-mix(in srgb,var(--orange) 15%,transparent);color:var(--orange)}
+.ln-tb-btn svg{width:14px;height:14px;flex-shrink:0}
+.ln-editor{min-height:220px;max-height:420px;overflow-y:auto;padding:10px 12px;font-size:.9em;font-family:inherit;color:var(--text);line-height:1.6;outline:none;word-break:break-word}
+.ln-editor:empty::before{content:attr(data-placeholder);color:var(--text-light);pointer-events:none}
+.ln-editor a{color:var(--blue);text-decoration:underline}
+.ln-editor p{margin:0 0 .35em}
+.ln-editor p:last-child{margin-bottom:0}
+.ln-link-dialog{position:fixed;z-index:9999;background:var(--bg-surface);border:1.5px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 16px rgba(0,0,0,.15);padding:10px 12px;display:flex;gap:6px;align-items:center;min-width:280px}
+.ln-link-input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.85em;font-family:inherit;color:var(--text);background:var(--bg-surface);outline:none}
+.ln-link-input:focus{border-color:var(--blue)}
+.ln-link-ok{padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.83em;font-weight:600;font-family:inherit;white-space:nowrap}
+.ln-link-ok:hover{filter:brightness(.9)}
+.ln-link-cancel{padding:5px 10px;background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.83em;font-weight:600;font-family:inherit}
+.ln-field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:.9em;font-family:inherit;color:var(--text);background:var(--bg-surface);resize:none;line-height:1.55;min-height:120px;max-height:400px;overflow-y:auto;transition:border-color .15s,box-shadow .15s}
 .ln-field textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px color-mix(in srgb,var(--orange) 18%,transparent)}
 .ln-field textarea::placeholder{color:var(--text-light)}
+.ln-weekly-hint{font-size:.72em;color:var(--blue);font-weight:600;padding:5px 10px;background:var(--blue-light);border-radius:var(--radius);border:1px solid color-mix(in srgb,var(--blue) 20%,transparent);visibility:hidden;opacity:0;max-height:0;overflow:hidden;padding-top:0;padding-bottom:0;margin-top:0;border-width:0;transition:opacity .18s,max-height .18s,padding .18s,margin .18s,border-width .18s}
+.ln-weekly-hint.show{visibility:visible;opacity:1;max-height:60px;padding-top:5px;padding-bottom:5px;border-width:1px}
 #edit-view{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overflow-y:auto;padding:20px 12px;animation:editFadeIn .3s cubic-bezier(.4,0,.2,1)}
 #edit-view.closing{animation:editFadeOut .25s cubic-bezier(.4,0,.2,1) forwards}
 @keyframes editFadeIn{from{opacity:0}to{opacity:1}}
@@ -1876,6 +1953,242 @@ function showCabinetPopup(dk,si,lessonName,classId){
 }
 
 function closeContextMenu(){const m=document.getElementById('ctx-menu');if(m)m.remove();document.removeEventListener('click',closeContextMenu)}
+function closeLessonInfoPopup(cb){const p=document.getElementById('lesson-info-popup');if(!p){document.removeEventListener('click',_lipOutsideHandler,true);if(cb)cb();return;}document.removeEventListener('click',_lipOutsideHandler,true);p.classList.add('lip-closing');setTimeout(function(){if(p.parentNode)p.remove();if(cb)cb();},160);}
+var _lipOutsideHandler=null;
+function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
+  closeLessonInfoPopup();closeContextMenu();
+  const bell=getBellForSlot(dk,si);
+  const noteData=getLessonNote(dk,classId,si);
+  const dateObj=new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2]));
+  const wd=(dateObj.getDay()+6)%7;
+  const wdNoteKey=weekdayNoteKey(wd,si);
+  const WD_EVERY=['кожен понеділок','кожен вівторок','кожну середу','кожен четвер',"кожну п'ятницю","кожну суботу","кожну неділю"];
+  const wdEvery=WD_EVERY[wd]||'кожен цей день';
+  const cab=getLessonCabinet(dk,classId,si);
+  const type=getLessonType(dk,classId,si);
+  const typeInfo=getTypeInfo(type);
+  const hasCustomT=!!getCustomTime(dk,si);
+  const dateStr=dateObj.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});
+  const pop=document.createElement('div');
+  pop.id='lesson-info-popup';
+  const slotNum=si+1;
+  let metaHtml='<div class="lip-row"><span class="lip-row-icon">🕐</span><span class="lip-row-text"><strong>'+bell.start+' – '+bell.end+'</strong>'+(hasCustomT?' <span style="font-size:.8em;opacity:.55">⏰ власний час</span>':'')+'</span></div>';
+  metaHtml+='<div class="lip-row"><span class="lip-row-icon">📅</span><span class="lip-row-text">'+escapeHtml(dateStr)+'</span></div>';
+  if(cab)metaHtml+='<div class="lip-row"><span class="lip-row-icon">🏫</span><span class="lip-row-text">'+escapeHtml(cab)+'</span></div>';
+  if(type!=='lesson')metaHtml+='<div class="lip-row"><span class="lip-row-icon">🏷️</span><span class="lip-row-text">'+escapeHtml(typeInfo.label)+'</span></div>';
+  function _sH(h){if(!h)return'';const _d=document.createElement('div');_d.innerHTML=h;return _d.textContent||_d.innerText||'';}
+  const wdNoteVal=weekdayNotes[wdNoteKey]||'';
+  const lesNoteVal=noteData.lessonNote||'';
+  const hasWdNote=!!(_sH(wdNoteVal).trim());
+  const hasLesNote=!!(_sH(lesNoteVal).trim());
+  const hasAnyNote=hasWdNote||hasLesNote;
+  let _ncIdxLip=0;
+  function makeNoteCard(labelText,html){
+    const cardId='lip-nc-'+(++_ncIdxLip);
+    return '<div class="lip-note-card">'+
+      '<div class="lip-note-card-lbl">'+labelText+'</div>'+
+      '<div class="lip-note-card-body lip-rich" id="'+cardId+'">'+html+'</div>'+
+      '<button class="lip-note-card-more" id="'+cardId+'-more" style="display:none" data-target="'+cardId+'">Показати більше &#9662;</button>'+
+      '<button class="lip-note-card-edit" title="Редагувати">'+
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'+
+      '</button>'+
+    '</div>';
+  }
+
+  let notesHtml='';
+  if(hasAnyNote){
+    notesHtml='<div class="lip-notes-section">';
+    if(hasWdNote) notesHtml+=makeNoteCard('\uD83D\uDD01 '+escapeHtml(wdEvery.charAt(0).toUpperCase()+wdEvery.slice(1)),wdNoteVal);
+    if(hasLesNote) notesHtml+=makeNoteCard('\uD83D\uDCCC Цей урок',lesNoteVal);
+    notesHtml+='</div>';
+  } else if(!document.body.classList.contains('readonly-mode')){
+    notesHtml='<div class="lip-notes-empty">'+
+      '<button class="lip-add-note-btn" id="lip-edit-note-btn">'+
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'+
+        'Нотатки'+
+      '</button>'+
+    '</div>';
+  }
+
+  pop.innerHTML=
+    '<div class="lip-band" style="background:'+color+'"></div>'+
+    '<div class="lip-top">'+
+      '<div class="lip-title">'+escapeHtml(lessonName)+'</div>'+
+      '<div class="lip-subtitle">Урок '+slotNum+'</div>'+
+      '<button class="lip-close" id="lip-close-btn" title="Закрити">✕</button>'+
+    '</div>'+
+    '<div class="lip-meta">'+metaHtml+'</div>'+
+    notesHtml;
+  document.body.appendChild(pop);
+  const tile=e.target.closest('.week-lesson');
+  const rect=tile?tile.getBoundingClientRect():{right:e.clientX,left:e.clientX,top:e.clientY};
+  const pw=320;
+  let left=rect.right+10;
+  let top=rect.top;
+  const ph=pop.offsetHeight||300;
+  if(left+pw>window.innerWidth-8)left=rect.left-pw-10;
+  if(left<8)left=8;
+  if(top+ph>window.innerHeight-8)top=window.innerHeight-ph-8;
+  if(top<8)top=8;
+  pop.style.left=left+'px';pop.style.top=top+'px';
+  const originX=(left===rect.right+10||left===rect.left-pw-10&&left>=8)?
+    (left<rect.left?'right':'left'):'left';
+  pop.style.transformOrigin=originX+' top';
+  pop.querySelector('#lip-close-btn').addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup();});
+  // Note edit button(s) → open full note editor popup
+  function openNoteEditor(ev){
+    ev.stopPropagation();
+    closeLessonInfoPopup(function(){
+      const tileEl=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"]');
+      const lnBtn=tileEl?tileEl.querySelector('.ln-btn'):null;
+      showLessonNotePopup(dk,classId,si,lessonName,lnBtn);
+    });
+  }
+  const editNoteBtn=pop.querySelector('#lip-edit-note-btn');
+  if(editNoteBtn){
+    editNoteBtn.addEventListener('mousedown',function(ev){ev.stopPropagation();});
+    editNoteBtn.addEventListener('click',openNoteEditor);
+  }
+  pop.querySelectorAll('.lip-note-card-edit').forEach(function(btn){
+    btn.addEventListener('mousedown',function(ev){ev.stopPropagation();});
+    btn.addEventListener('click',openNoteEditor);
+  });
+  // Open links in new tab, stop propagation so popup doesn't close
+  pop.querySelectorAll('.lip-rich a').forEach(function(a){
+    a.setAttribute('target','_blank');
+    a.setAttribute('rel','noopener noreferrer');
+    a.addEventListener('click',function(ev){ev.stopPropagation();});
+  });
+  // Check height of each note body — if taller than max, clamp and show "more" button
+  var LIP_NOTE_MAX=120;
+  pop.querySelectorAll('.lip-note-card-body.lip-rich').forEach(function(body){
+    if(body.scrollHeight>LIP_NOTE_MAX+10){
+      body.classList.add('lip-rich-clamped');
+      var moreBtn=pop.querySelector('#'+body.id+'-more');
+      if(moreBtn){
+        moreBtn.style.display='inline-flex';
+        moreBtn.addEventListener('mousedown',function(ev){ev.stopPropagation();});
+        moreBtn.addEventListener('click',function(ev){
+          ev.stopPropagation();
+          body.classList.toggle('lip-rich-clamped');
+          moreBtn.textContent=body.classList.contains('lip-rich-clamped')?'Показати більше \u25BE':'Згорнути \u25B4';
+        });
+      }
+    }
+  });
+  setTimeout(function(){
+    _lipOutsideHandler=function(ev){if(!pop.contains(ev.target)){closeLessonInfoPopup();}};
+    document.addEventListener('click',_lipOutsideHandler,true);
+  },0);
+}
+
+function showEventInfoPopup(e,ev,dk){
+  closeLessonInfoPopup();closeContextMenu();
+  const dateObj=new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2]));
+  const dateStr=dateObj.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});
+  const pop=document.createElement('div');
+  pop.id='lesson-info-popup';
+  let metaHtml='<div class="lip-row"><span class="lip-row-icon">🕐</span><span class="lip-row-text"><strong>'+ev.startTime+' – '+ev.endTime+'</strong></span></div>';
+  metaHtml+='<div class="lip-row"><span class="lip-row-icon">📅</span><span class="lip-row-text">'+escapeHtml(dateStr)+'</span></div>';
+  if(ev.recurring)metaHtml+='<div class="lip-row"><span class="lip-row-icon">🔁</span><span class="lip-row-text">Щотижня</span></div>';
+  function _sH(h){if(!h)return'';const _d=document.createElement('div');_d.innerHTML=h;return _d.textContent||_d.innerText||'';}
+  const onceNoteVal=getEventOccurrenceNote(ev.id,dk)||'';
+  const everyNoteVal=ev.note||'';
+  const hasOnceNote=!!(_sH(onceNoteVal).trim());
+  const hasEveryNote=!!(_sH(everyNoteVal).trim());
+  const hasAnyNote=hasOnceNote||hasEveryNote;
+  let _ncIdxLip=0;
+  function makeNoteCard(labelText,html){
+    const cardId='lip-ev-nc-'+(++_ncIdxLip);
+    return '<div class="lip-note-card">'+
+      '<div class="lip-note-card-lbl">'+labelText+'</div>'+
+      '<div class="lip-note-card-body lip-rich" id="'+cardId+'">'+html+'</div>'+
+      '<button class="lip-note-card-more" id="'+cardId+'-more" style="display:none" data-target="'+cardId+'">Показати більше &#9662;</button>'+
+      '<button class="lip-note-card-edit" title="Редагувати">'+
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'+
+      '</button>'+
+    '</div>';
+  }
+  let notesHtml='';
+  if(hasAnyNote){
+    notesHtml='<div class="lip-notes-section">';
+    if(ev.recurring){
+      if(hasEveryNote) notesHtml+=makeNoteCard('\uD83D\uDD01 Кожне повторення',everyNoteVal);
+      if(hasOnceNote) notesHtml+=makeNoteCard('\uD83D\uDCCC Ця дата',onceNoteVal);
+    } else {
+      if(hasEveryNote||hasOnceNote) notesHtml+=makeNoteCard('\uD83D\uDCCC Нотатка до події',onceNoteVal||everyNoteVal);
+    }
+    notesHtml+='</div>';
+  } else if(!document.body.classList.contains('readonly-mode')){
+    notesHtml='<div class="lip-notes-empty">'+
+      '<button class="lip-add-note-btn" id="lip-edit-note-btn">'+
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'+
+        'Нотатки'+
+      '</button>'+
+    '</div>';
+  }
+  pop.innerHTML=
+    '<div class="lip-band" style="background:#e37400"></div>'+
+    '<div class="lip-top">'+
+      '<div class="lip-title" style="padding-right:20px"><span style="font-size:0.9em">📌</span> '+escapeHtml(ev.title)+'</div>'+
+      '<button class="lip-close" id="lip-close-btn" title="Закрити">✕</button>'+
+    '</div>'+
+    '<div class="lip-meta">'+metaHtml+'</div>'+
+    notesHtml;
+  document.body.appendChild(pop);
+  const tile=e.target.closest('.custom-event-block');
+  const rect=tile?tile.getBoundingClientRect():{right:e.clientX,left:e.clientX,top:e.clientY};
+  const pw=320;
+  let left=rect.right+10;
+  let top=rect.top;
+  const ph=pop.offsetHeight||300;
+  if(left+pw>window.innerWidth-8)left=rect.left-pw-10;
+  if(left<8)left=8;
+  if(top+ph>window.innerHeight-8)top=window.innerHeight-ph-8;
+  if(top<8)top=8;
+  pop.style.left=left+'px';pop.style.top=top+'px';
+  const originX=(left===rect.right+10||left===rect.left-pw-10&&left>=8)?(left<rect.left?'right':'left'):'left';
+  pop.style.transformOrigin=originX+' top';
+  pop.querySelector('#lip-close-btn').addEventListener('click',function(ev2){ev2.stopPropagation();closeLessonInfoPopup();});
+  function openNoteEditor(ev2){
+    ev2.stopPropagation();
+    closeLessonInfoPopup(function(){showEventNotePopup(ev.id,dk,null);});
+  }
+  const editNoteBtn=pop.querySelector('#lip-edit-note-btn');
+  if(editNoteBtn){
+    editNoteBtn.addEventListener('mousedown',function(ev2){ev2.stopPropagation();});
+    editNoteBtn.addEventListener('click',openNoteEditor);
+  }
+  pop.querySelectorAll('.lip-note-card-edit').forEach(function(btn){
+    btn.addEventListener('mousedown',function(ev2){ev2.stopPropagation();});
+    btn.addEventListener('click',openNoteEditor);
+  });
+  pop.querySelectorAll('.lip-rich a').forEach(function(a){
+    a.setAttribute('target','_blank');
+    a.setAttribute('rel','noopener noreferrer');
+    a.addEventListener('click',function(ev2){ev2.stopPropagation();});
+  });
+  var LIP_NOTE_MAX=120;
+  pop.querySelectorAll('.lip-note-card-body.lip-rich').forEach(function(body){
+    if(body.scrollHeight>LIP_NOTE_MAX+10){
+      body.classList.add('lip-rich-clamped');
+      var moreBtn=pop.querySelector('#'+body.id+'-more');
+      if(moreBtn){
+        moreBtn.style.display='inline-flex';
+        moreBtn.addEventListener('mousedown',function(ev2){ev2.stopPropagation();});
+        moreBtn.addEventListener('click',function(ev2){
+          ev2.stopPropagation();
+          body.classList.toggle('lip-rich-clamped');
+          moreBtn.textContent=body.classList.contains('lip-rich-clamped')?'Показати більше \u25BE':'Згорнути \u25B4';
+        });
+      }
+    }
+  });
+  setTimeout(function(){
+    _lipOutsideHandler=function(ev2){if(!pop.contains(ev2.target)){closeLessonInfoPopup();}};
+    document.addEventListener('click',_lipOutsideHandler,true);
+  },0);
+}
 
 function showMonthCellContextMenu(e, dk){
   if(document.body.classList.contains('readonly-mode'))return;
@@ -2138,8 +2451,9 @@ function exportToGoogleCalendar(){
       const bell=getBellForSlot(dk,si);
       const lesNote=getLessonNote(dk,cid,si);
       const wd=(dateObj.getDay()+6)%7;
-      const wdNote=weekdayNotes[weekdayNoteKey(wd,si)]||'';
-      const noteText=[wdNote,lesNote.lessonNote].filter(Boolean).join('\n');
+      function _sHics(h){if(!h)return'';const d=document.createElement('div');d.innerHTML=h;return d.textContent||d.innerText||'';}
+      const wdNote=_sHics(weekdayNotes[weekdayNoteKey(wd,si)]||'');
+      const noteText=[wdNote,_sHics(lesNote.lessonNote||'')].filter(Boolean).join('\n');
       const dtstart=icsDate(dateObj,bell.start);
       const dtend=icsDate(dateObj,bell.end);
       const summary=lesson.className+' · Урок '+(si+1);
@@ -2360,7 +2674,7 @@ function updateNowLessonPanel(){
 clearInterval(window._nowPanelTimer);
 window._nowPanelTimer=setInterval(updateNowLessonPanel,1000);
 
-function renderSidebar(){const today=new Date();today.setHours(0,0,0,0);const dk=dateKey(today);if(!cachedAllData)cachedAllData=buildAllClassesData();const dc=(cachedAllData.allDayMap[dk]||[]);const visibleDc=dc.filter(c=>!hiddenClasses.has(c.classId));const el=document.getElementById('today-summary');const dayStr=today.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});const total=visibleDc.length>0?visibleDc.reduce((s,c)=>s+c.lessons,0):0;let h='<div class="today-summary-date">'+dayStr+'</div><div class="today-summary-title">'+(visibleDc.length>0?pluralLesson(total):'\u0412\u0456\u043b\u044c\u043d\u0438\u0439 \u0434\u0435\u043d\u044c')+'</div>';const evsToday2=(typeof getActiveEventsForDate==='function'?getActiveEventsForDate(dk):[]).slice().sort((a,b)=>a.startTime.localeCompare(b.startTime));if(dc.length>0){const allL2=buildDayOrderList(dc);const totalSlots2=Math.max(allL2.length,bellSchedule.length);const slotArr2=getSlotOrder(dk,allL2,totalSlots2);for(let si2=0;si2<totalSlots2;si2++){const key2=slotArr2[si2];if(!key2)continue;const p2=key2.split(':');const cid2=p2[0];const les2=allL2.find(l=>l.classId===cid2&&l.origIdx===parseInt(p2[1],10));if(!les2)continue;if(isLessonDeletedFull(dk,cid2))continue;if(hiddenClasses.has(cid2))continue;const color=cachedAllData.classColorMap[cid2]||'#1a73e8';const bell=getBellForSlot(dk,si2);const wd=(today.getDay()+6)%7;const nd=getLessonNote(dk,cid2,si2);const sideCab2=getLessonCabinet(dk,cid2,si2);const sideCabHtm=sideCab2?'<span class="today-lesson-cabinet">\ud83c\udfeb '+escapeHtml(sideCab2)+'</span>':'';let ntxt=nd.lessonNote||nd.dayNote||(weekdayNotes[weekdayNoteKey(wd,si2)]||'');let nhtm='';if(ntxt){if(ntxt.length>25)ntxt=ntxt.substring(0,25)+'...';nhtm='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;">\ud83d\udcdd '+escapeHtml(ntxt)+'</span>'}h+='<div class="today-lesson-item"><span class="today-lesson-dot" style="background:'+color+'"></span><span class="today-lesson-time">'+bell.start+'</span><span class="today-lesson-info"><span class="today-lesson-name">'+escapeHtml(les2.className)+'</span><span class="today-lesson-num">Урок '+(si2+1)+'</span>'+sideCabHtm+nhtm+'</span></div>'}}else if(evsToday2.length===0)h+='<div class="today-no-lessons">\u041d\u0435\u043c\u0430\u0454 \u0443\u0440\u043e\u043a\u0456\u0432</div>';evsToday2.forEach(function(ev2){const noteTxt2=getEventNoteForDisplay(ev2,dk);let noteHtm2='';if(noteTxt2){let nt2=noteTxt2;if(nt2.length>25)nt2=nt2.substring(0,25)+'...';noteHtm2='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;">📝 '+escapeHtml(nt2)+'</span>'}h+='<div class="today-event-item" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Правий клік для редагування / видалення"><span class="today-event-dot">📌</span><span class="today-event-time">'+ev2.startTime+'</span><span class="today-event-info"><span class="today-event-name">'+escapeHtml(ev2.title)+'</span>'+noteHtm2+'</span>'+(ev2.recurring?'<span class="today-event-badge">🔁</span>':'')+'<button class="ln-btn today-event-notebtn'+(noteTxt2?' has-note':'')+'" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Нотатка до події">📝</button></div>'});el.innerHTML=h;el.querySelectorAll('.today-event-item').forEach(function(row){row.addEventListener('contextmenu',function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)});addLongPress(row,function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)})});el.querySelectorAll('.today-event-notebtn').forEach(function(btn){btn.addEventListener('mousedown',function(e){e.stopPropagation()});btn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(btn.dataset.evId,btn.dataset.evDk,btn)})});updateNowLessonPanel();const cl=document.getElementById('sidebar-class-list');cl.innerHTML='';// Calculate per-class weekly hours
+function renderSidebar(){const today=new Date();today.setHours(0,0,0,0);const dk=dateKey(today);if(!cachedAllData)cachedAllData=buildAllClassesData();const dc=(cachedAllData.allDayMap[dk]||[]);const visibleDc=dc.filter(c=>!hiddenClasses.has(c.classId));const el=document.getElementById('today-summary');const dayStr=today.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});const total=visibleDc.length>0?visibleDc.reduce((s,c)=>s+c.lessons,0):0;let h='<div class="today-summary-date">'+dayStr+'</div><div class="today-summary-title">'+(visibleDc.length>0?pluralLesson(total):'\u0412\u0456\u043b\u044c\u043d\u0438\u0439 \u0434\u0435\u043d\u044c')+'</div>';const evsToday2=(typeof getActiveEventsForDate==='function'?getActiveEventsForDate(dk):[]).slice().sort((a,b)=>a.startTime.localeCompare(b.startTime));if(dc.length>0){const allL2=buildDayOrderList(dc);const totalSlots2=Math.max(allL2.length,bellSchedule.length);const slotArr2=getSlotOrder(dk,allL2,totalSlots2);for(let si2=0;si2<totalSlots2;si2++){const key2=slotArr2[si2];if(!key2)continue;const p2=key2.split(':');const cid2=p2[0];const les2=allL2.find(l=>l.classId===cid2&&l.origIdx===parseInt(p2[1],10));if(!les2)continue;if(isLessonDeletedFull(dk,cid2))continue;if(hiddenClasses.has(cid2))continue;const color=cachedAllData.classColorMap[cid2]||'#1a73e8';const bell=getBellForSlot(dk,si2);const wd=(today.getDay()+6)%7;const nd=getLessonNote(dk,cid2,si2);const sideCab2=getLessonCabinet(dk,cid2,si2);const sideCabHtm=sideCab2?'<span class="today-lesson-cabinet">\ud83c\udfeb '+escapeHtml(sideCab2)+'</span>':'';let ntxt=nd.lessonNote||nd.dayNote||(weekdayNotes[weekdayNoteKey(wd,si2)]||'');let nhtm='';if(ntxt){const _sd=document.createElement('div');_sd.innerHTML=ntxt;ntxt=_sd.textContent||_sd.innerText||'';if(ntxt.length>25)ntxt=ntxt.substring(0,25)+'...';nhtm='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;">\ud83d\udcdd '+escapeHtml(ntxt)+'</span>'}h+='<div class="today-lesson-item"><span class="today-lesson-dot" style="background:'+color+'"></span><span class="today-lesson-time">'+bell.start+'</span><span class="today-lesson-info"><span class="today-lesson-name">'+escapeHtml(les2.className)+'</span><span class="today-lesson-num">Урок '+(si2+1)+'</span>'+sideCabHtm+nhtm+'</span></div>'}}else if(evsToday2.length===0)h+='<div class="today-no-lessons">\u041d\u0435\u043c\u0430\u0454 \u0443\u0440\u043e\u043a\u0456\u0432</div>';evsToday2.forEach(function(ev2){const noteTxt2=getEventNoteForDisplay(ev2,dk);let noteHtm2='';if(noteTxt2){let nt2=noteTxt2;if(nt2.length>25)nt2=nt2.substring(0,25)+'...';noteHtm2='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;">📝 '+escapeHtml(nt2)+'</span>'}h+='<div class="today-event-item" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Правий клік для редагування / видалення"><span class="today-event-dot">📌</span><span class="today-event-time">'+ev2.startTime+'</span><span class="today-event-info"><span class="today-event-name">'+escapeHtml(ev2.title)+'</span>'+noteHtm2+'</span>'+(ev2.recurring?'<span class="today-event-badge">🔁</span>':'')+'<button class="ln-btn today-event-notebtn'+(noteTxt2?' has-note':'')+'" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Нотатка до події">📝</button></div>'});el.innerHTML=h;el.querySelectorAll('.today-event-item').forEach(function(row){row.addEventListener('contextmenu',function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)});addLongPress(row,function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)})});el.querySelectorAll('.today-event-notebtn').forEach(function(btn){btn.addEventListener('mousedown',function(e){e.stopPropagation()});btn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(btn.dataset.evId,btn.dataset.evDk,btn)})});updateNowLessonPanel();const cl=document.getElementById('sidebar-class-list');cl.innerHTML='';// Calculate per-class weekly hours
 const classHrsMap={};
 let totalWeeklyHrs=0;
 slots.forEach(function(s){
@@ -2419,26 +2733,13 @@ if(!outside){
 }
 return cell}
 function renderWeekView(){if(!weekStartDate)weekStartDate=getMonday(new Date());if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;updateTitle();const hEl=document.getElementById('week-header');hEl.innerHTML='';hEl.style.gridTemplateColumns='60px repeat(7,1fr)';const th=document.createElement('div');th.className='week-header-cell';hEl.appendChild(th);const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);const c=document.createElement('div');c.className='week-header-cell';const wi=(dt.getDay()+6)%7;if(wi>=5)c.classList.add('weekend');if(dt.getTime()===today.getTime())c.classList.add('today');c.innerHTML='<div class="week-header-day">'+DAY_HEADERS_UK[wi]+'</div><div class="week-header-date">'+dt.getDate()+'</div>';hEl.appendChild(c)}const gEl=document.getElementById('week-grid');gEl.innerHTML='';gEl.style.gridTemplateColumns='60px repeat(7,1fr)';const tCol=document.createElement('div');tCol.className='week-time-col';const tH=DAY_END_HOUR-DAY_START_HOUR;tCol.style.height=tH*HOUR_HEIGHT+'px';for(let h=DAY_START_HOUR;h<=DAY_END_HOUR;h++){const l=document.createElement('div');l.className='week-time-label';l.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+'px';l.textContent=String(h).padStart(2,'0')+':00';tCol.appendChild(l)}gEl.appendChild(tCol);for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);const dc=document.createElement('div');dc.className='week-day-col';const wi=(dt.getDay()+6)%7;if(wi>=5)dc.classList.add('weekend');dc.style.height=tH*HOUR_HEIGHT+'px';dc.dataset.dayIndex=i;dc.dataset.dateKey=dateKey(dt);for(let h=DAY_START_HOUR;h<=DAY_END_HOUR;h++){const ln=document.createElement('div');ln.className='week-hour-line';ln.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+'px';dc.appendChild(ln);if(h<DAY_END_HOUR){const hl=document.createElement('div');hl.className='week-half-line';hl.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+HOUR_HEIGHT/2+'px';dc.appendChild(hl)}}const dk=dateKey(dt);const inR=dt>=period.start&&dt<=period.end;const dC=inR?(allDayMap[dk]||[]):[];if(dC.length>0){const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);slotArr.forEach((key,si)=>{if(!key)return;const p=key.split(':');const cid=p[0],oi=parseInt(p[1],10);const lesson=allL.find(l=>l.classId===cid&&l.origIdx===oi);if(!lesson)return;if(isLessonDeletedFull(dk,cid))return;if(hiddenClasses.has(cid))return;const color=classColorMap[lesson.classId]||'#1a73e8';const bell=getBellForSlot(dk,si);const hasCustomT=!!getCustomTime(dk,si);const sm=timeToMinutes(bell.start),em=timeToMinutes(bell.end);const top=((sm/60)-DAY_START_HOUR)*HOUR_HEIGHT;const height=Math.max(((em-sm)/60)*HOUR_HEIGHT,20);const les=document.createElement('div');les.className='week-lesson';les.style.background=color;les.style.top=top+'px';les.style.height=height+'px';var wkCab=getLessonCabinet(dk,lesson.classId,si);
-const wkType=getLessonType(dk,lesson.classId,si);const wkTypeInfo=getTypeInfo(wkType);const wkTypeBadge=(wkType!=='lesson')?'<span class="week-lesson-type-badge">'+escapeHtml(wkTypeInfo.label)+'</span>':'';const wkCabShort=wkCab.length>14?wkCab.substring(0,14)+'\u2026':wkCab;const wkCabBadge=wkCab?'<span class="week-lesson-cabinet-badge" title="'+escapeHtml(wkCab)+'">\ud83c\udfeb '+escapeHtml(wkCabShort)+'</span>':'';les.innerHTML=wkTypeBadge+'<div class="lesson-title"><span class="lesson-name">'+escapeHtml(lesson.className)+(hasCustomT?' <span style="font-size:.8em;opacity:.7">⏰</span>':'')+'</span></div><div class="lesson-time-range">'+bell.start+' \u2013 '+bell.end+'</div>'+wkCabBadge;les.dataset.classId=lesson.classId;les.dataset.className=lesson.className;les.dataset.lessonIdx=si;les.dataset.dateKey=dk;les.dataset.dayIndex=i;les.addEventListener('contextmenu',e=>{e.stopPropagation();showContextMenu(e,dk,si,lesson.className,lesson.classId)});addLongPress(les,e=>{showContextMenu(e,dk,si,lesson.className,lesson.classId)});
+const wkType=getLessonType(dk,lesson.classId,si);const wkTypeInfo=getTypeInfo(wkType);const wkTypeBadge=(wkType!=='lesson')?'<span class="week-lesson-type-badge">'+escapeHtml(wkTypeInfo.label)+'</span>':'';const wkCabShort=wkCab.length>14?wkCab.substring(0,14)+'\u2026':wkCab;const wkCabBadge=wkCab?'<span class="week-lesson-cabinet-badge" title="'+escapeHtml(wkCab)+'">\ud83c\udfeb '+escapeHtml(wkCabShort)+'</span>':'';les.innerHTML=wkTypeBadge+'<div class="lesson-title"><span class="lesson-name">'+escapeHtml(lesson.className)+(hasCustomT?' <span style="font-size:.8em;opacity:.7">⏰</span>':'')+'</span></div><div class="lesson-time-range">'+bell.start+' \u2013 '+bell.end+'</div>'+wkCabBadge;les.dataset.classId=lesson.classId;les.dataset.className=lesson.className;les.dataset.lessonIdx=si;les.dataset.dateKey=dk;les.dataset.dayIndex=i;les.addEventListener('click',e=>{if(e.target.closest('.ln-btn'))return;if(les.dataset.wasDragged)return;e.stopPropagation();showLessonInfoPopup(e,dk,si,lesson.className,lesson.classId,color);});les.addEventListener('contextmenu',e=>{e.stopPropagation();showContextMenu(e,dk,si,lesson.className,lesson.classId)});addLongPress(les,e=>{showContextMenu(e,dk,si,lesson.className,lesson.classId)});
 if(!document.body.classList.contains('readonly-mode')&&!dc.classList.contains('_cevdone')){
   makeDraggable(les,dk,si,totalSlots);
-  // Week note button — inserted before the class name
-  (function(){
-    const wNoteData=getLessonNote(dk,lesson.classId,si);
-    const wWd=(new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2])).getDay()+6)%7;
-    const wHasNote=!!(weekdayNotes[weekdayNoteKey(wWd,si)]||wNoteData.lessonNote);
-    const wBtn=document.createElement('button');
-    wBtn.className='ln-btn'+(wHasNote?' has-note':'');
-    wBtn.title='Нотатка до уроку';
-    wBtn.textContent='📝';
-    wBtn.addEventListener('mousedown',function(e){e.stopPropagation()});
-    wBtn.addEventListener('click',function(e){e.stopPropagation();showLessonNotePopup(dk,lesson.classId,si,lesson.className,wBtn)});
-    const titleEl=les.querySelector('.lesson-title');
-    titleEl.insertBefore(wBtn,titleEl.firstChild);
-  })();
 } else {
   les.style.cursor='default';
 }
+(function(){var _nd=getLessonNote(dk,lesson.classId,si);var _wd=(new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2])).getDay()+6)%7;if(weekdayNotes[weekdayNoteKey(_wd,si)]||_nd.lessonNote){var _i=document.createElement('span');_i.className='week-lesson-note-ind';_i.textContent='📝';les.appendChild(_i)}})();
 dc.appendChild(les);
 })}// Render custom events for this day column
 (function(){
@@ -2454,20 +2755,12 @@ dc.appendChild(les);
     el.style.height=height+'px';
     const noteTxt=getEventNoteForDisplay(ev,dk);
     el.innerHTML='<div class="cev-title"><span class="cev-pin">📌</span> '+escapeHtml(ev.title)+'</div><div class="cev-time">'+ev.startTime+' – '+ev.endTime+'</div>';
-    el.title=ev.title+'\n'+ev.startTime+' – '+ev.endTime+(ev.recurring?' (щотижня)':'')+(noteTxt?'\n📝 '+noteTxt:'');
+    el.title=ev.title+'\n'+ev.startTime+' – '+ev.endTime+(ev.recurring?' (щотижня)':'');
+    el.addEventListener('click',function(e){if(el.dataset.wasDragged)return;e.stopPropagation();showEventInfoPopup(e,ev,dk);});
     el.addEventListener('contextmenu',function(e){e.stopPropagation();showEventContextMenu(e,ev.id,dk)});
     addLongPress(el,function(e){showEventContextMenu(e,ev.id,dk)});
     makeEventDraggable(el,ev,dk);
-    if(!document.body.classList.contains('readonly-mode')){
-      const nBtn=document.createElement('button');
-      nBtn.className='ln-btn'+(noteTxt?' has-note':'');
-      nBtn.title='Нотатка до події';
-      nBtn.textContent='📝';
-      nBtn.addEventListener('mousedown',function(e){e.stopPropagation()});
-      nBtn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(ev.id,dk,nBtn)});
-      const titleEl=el.querySelector('.cev-title');
-      titleEl.insertBefore(nBtn,titleEl.firstChild);
-    }
+    if(noteTxt){var _i=document.createElement('span');_i.className='week-lesson-note-ind';_i.textContent='📝';el.appendChild(_i);}
     dc.appendChild(el);
   });
 })();
@@ -2501,7 +2794,7 @@ const wb=document.getElementById('week-body');let scrollMin=null;if(bellSchedule
 function weekSlotTop(idx){const bell=bellSchedule[idx]||bellSchedule[bellSchedule.length-1]||{start:'00:00',end:'00:00'};return ((timeToMinutes(bell.start)/60)-DAY_START_HOUR)*HOUR_HEIGHT}
 function weekSlotHeight(idx){const bell=bellSchedule[idx]||bellSchedule[bellSchedule.length-1]||{start:'00:00',end:'00:00'};return Math.max(((timeToMinutes(bell.end)-timeToMinutes(bell.start))/60)*HOUR_HEIGHT,20)}
 function moveWeekLesson(dk,fromIdx,toIdx){if(fromIdx===toIdx){renderWeekView();return}if(!cachedAllData)cachedAllData=buildAllClassesData();const dC=cachedAllData.allDayMap[dk]||[];const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);if(toIdx<0||toIdx>=totalSlots){renderWeekView();return}const newArr=slotArr.slice();const tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope){renderWeekView();return}if(scope==='day'){setDayOrder(dk,newArr)}else if(scope==='all'){setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr)}cachedAllData=null;renderWeekView()})}
-function makeDraggable(el,dk,si,totalSlots){let isDrag=false,startY=0,startTop=0,curTarget=si;const badge=document.getElementById('drag-slot-badge');function nearestSlot(top){let best=0,bd=Infinity;for(let i=0;i<totalSlots;i++){const d=Math.abs(weekSlotTop(i)-top);if(d<bd){bd=d;best=i}}return best}function showBadge(cx,cy,slot){if(!badge)return;const bell=bellSchedule[slot]||bellSchedule[bellSchedule.length-1]||{start:'',end:''};badge.textContent=(slot+1)+'\u0443\u0440 \u00b7 '+bell.start;badge.style.left=cx+'px';badge.style.top=cy+'px';badge.style.display='block'}function hideBadge(){if(badge)badge.style.display='none'}function onS(cx,cy){isDrag=true;startY=cy;startTop=parseInt(el.style.top);curTarget=si;el.classList.add('dragging');showBadge(cx,cy,curTarget)}function onM(cx,cy){if(!isDrag)return;const raw=startTop+(cy-startY);const clamped=Math.max(0,Math.min(raw,(DAY_END_HOUR-DAY_START_HOUR)*HOUR_HEIGHT));curTarget=nearestSlot(clamped);el.style.top=weekSlotTop(curTarget)+'px';el.style.height=weekSlotHeight(curTarget)+'px';const bell=getBellForSlot(dk,curTarget);const tr=el.querySelector('.lesson-time-range');if(tr)tr.textContent=bell.start+' \u2013 '+bell.end;showBadge(cx,cy,curTarget)}function onE(){if(!isDrag)return;isDrag=false;el.classList.remove('dragging');hideBadge();if(curTarget!==si)moveWeekLesson(dk,si,curTarget)}el.addEventListener('mousedown',e=>{if(e.button!==0)return;onS(e.clientX,e.clientY);e.preventDefault();e.stopPropagation()});document.addEventListener('mousemove',e=>onM(e.clientX,e.clientY));document.addEventListener('mouseup',onE);el.addEventListener('touchstart',e=>{const t=e.touches[0];let lpTimer=setTimeout(()=>{lpTimer=null;onS(t.clientX,t.clientY);if(navigator.vibrate)navigator.vibrate(40);},400);function tmove(ev){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;return;}if(isDrag){closeContextMenu();onM(ev.touches[0].clientX,ev.touches[0].clientY);}}function tend(){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;}onE();document.removeEventListener('touchmove',tmove);document.removeEventListener('touchend',tend);}document.addEventListener('touchmove',tmove,{passive:false});document.addEventListener('touchend',tend);e.preventDefault();},{passive:false});document.addEventListener('touchmove',e=>{if(isDrag)onM(e.touches[0].clientX,e.touches[0].clientY)},{passive:false});document.addEventListener('touchend',onE)}
+function makeDraggable(el,dk,si,totalSlots){let isDrag=false,startY=0,startTop=0,curTarget=si,_moved=false;const badge=document.getElementById('drag-slot-badge');function nearestSlot(top){let best=0,bd=Infinity;for(let i=0;i<totalSlots;i++){const d=Math.abs(weekSlotTop(i)-top);if(d<bd){bd=d;best=i}}return best}function showBadge(cx,cy,slot){if(!badge)return;const bell=bellSchedule[slot]||bellSchedule[bellSchedule.length-1]||{start:'',end:''};badge.textContent=(slot+1)+'\u0443\u0440 \u00b7 '+bell.start;badge.style.left=cx+'px';badge.style.top=cy+'px';badge.style.display='block'}function hideBadge(){if(badge)badge.style.display='none'}function onS(cx,cy){if(typeof closeLessonInfoPopup==='function')closeLessonInfoPopup();isDrag=true;_moved=false;startY=cy;startTop=parseInt(el.style.top);curTarget=si;el.classList.add('dragging');showBadge(cx,cy,curTarget)}function onM(cx,cy){if(!isDrag)return;_moved=true;el.dataset.wasDragged='1';const raw=startTop+(cy-startY);const clamped=Math.max(0,Math.min(raw,(DAY_END_HOUR-DAY_START_HOUR)*HOUR_HEIGHT));curTarget=nearestSlot(clamped);el.style.top=weekSlotTop(curTarget)+'px';el.style.height=weekSlotHeight(curTarget)+'px';const bell=getBellForSlot(dk,curTarget);const tr=el.querySelector('.lesson-time-range');if(tr)tr.textContent=bell.start+' \u2013 '+bell.end;showBadge(cx,cy,curTarget)}function onE(){if(!isDrag)return;isDrag=false;el.classList.remove('dragging');hideBadge();if(curTarget!==si)moveWeekLesson(dk,si,curTarget);if(_moved){setTimeout(function(){delete el.dataset.wasDragged;},200);}}el.addEventListener('mousedown',e=>{if(e.button!==0)return;onS(e.clientX,e.clientY);e.preventDefault();e.stopPropagation()});document.addEventListener('mousemove',e=>onM(e.clientX,e.clientY));document.addEventListener('mouseup',onE);el.addEventListener('touchstart',e=>{const t=e.touches[0];let lpTimer=setTimeout(()=>{lpTimer=null;onS(t.clientX,t.clientY);if(navigator.vibrate)navigator.vibrate(40);},400);function tmove(ev){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;return;}if(isDrag){closeContextMenu();onM(ev.touches[0].clientX,ev.touches[0].clientY);}}function tend(){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;}onE();document.removeEventListener('touchmove',tmove);document.removeEventListener('touchend',tend);}document.addEventListener('touchmove',tmove,{passive:false});document.addEventListener('touchend',tend);e.preventDefault();},{passive:false});document.addEventListener('touchmove',e=>{if(isDrag)onM(e.touches[0].clientX,e.touches[0].clientY)},{passive:false});document.addEventListener('touchend',onE)}
 function makeEventDraggable(el,ev,dk){
   if(document.body.classList.contains('readonly-mode'))return;
   const SNAP=10;
@@ -2513,6 +2806,7 @@ function makeEventDraggable(el,ev,dk){
   function getWB(){return document.getElementById('week-body');}
 
   function onStart(clientY){
+    if(typeof closeLessonInfoPopup==='function')closeLessonInfoPopup();
     isDrag=true;
     const wb=getWB();
     startClientY=clientY;
@@ -2526,6 +2820,7 @@ function makeEventDraggable(el,ev,dk){
 
   function onMove(clientY){
     if(!isDrag)return;
+    el.dataset.wasDragged='1';
     const wb=getWB();
     const scrollDelta=(wb?wb.scrollTop:0)-startScrollY;
     const dy=(clientY-startClientY)+scrollDelta;
@@ -2545,6 +2840,7 @@ function makeEventDraggable(el,ev,dk){
     isDrag=false;
     el.classList.remove('dragging');
     document.body.style.userSelect='';
+    setTimeout(function(){delete el.dataset.wasDragged;},200);
     const origStart=timeToMinutes(ev.startTime);
     if(curStartMin===origStart)return;
     const newStart=fmt(curStartMin);
@@ -2636,146 +2932,335 @@ function showDayModalTimeEdit(dk,si,lessonName,cid,gridEl,dC,classColorMap){
   b.querySelector('#dmt-reset').onclick=reset;
   ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
 }
+function closeLnPopup(ov,cb){if(!ov||ov.classList.contains('ln-closing'))return;ov.classList.add('ln-closing');setTimeout(function(){if(ov.parentNode)ov.remove();if(cb)cb();},200);}
 function weekdayNoteKey(wd,si){return wd+'|'+si}
 function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
   if(document.body.classList.contains('readonly-mode'))return;
   // Close any existing popup
   const existing=document.querySelector('.ln-popup-overlay');
-  if(existing){existing.remove();return;}
+  if(existing){closeLnPopup(existing);return;}
   const note=getLessonNote(dk,cid,si);
   const wd=weekdayFromDateKey(dk);
   const wdNoteKey=weekdayNoteKey(wd,si);
-  const WD_NAMES_ACC=['понеділок','вівторок','середу','четвер','п\'ятницю','суботу','неділю'];
   const WD_EVERY=['кожен понеділок','кожен вівторок','кожну середу','кожен четвер','кожну п\'ятницю','кожну суботу','кожну неділю'];
-  const wdName=WD_NAMES_ACC[wd]||'';
   const wdEvery=WD_EVERY[wd]||'кожен цей день';
+  // Determine initial state: if weekday note exists → weekly mode; else lesson-specific
+  const existingWdNote=weekdayNotes[wdNoteKey]||'';
+  const existingLesNote=note.lessonNote||'';
+  // Weekly is active if there's a weekday note, OR if there's no lesson note at all yet
+  let isWeekly=!!(existingWdNote)||((!existingWdNote&&!existingLesNote));
+  // Prefer lesson-specific if it already has content and weekday note doesn't
+  if(!existingWdNote&&existingLesNote)isWeekly=false;
   const ov=document.createElement('div');ov.className='ln-popup-overlay';
   const popup=document.createElement('div');popup.className='ln-popup';
   popup.innerHTML=
     '<div class="ln-popup-header">'+
       '<div class="ln-popup-title">📝 '+escapeHtml(lessonName)+' · Урок '+(si+1)+'</div>'+
-      '<button class="ln-popup-close" id="ln-close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="2,7 5.5,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+      '<div class="ln-popup-header-right">'+
+        '<label class="ln-weekly-toggle'+(isWeekly?' active':'')+'" >'+
+          '<input type="checkbox" id="ln-weekly-cb"'+(isWeekly?' checked':'')+'>'+
+          '<span class="ln-weekly-icon">🔁</span>'+
+          'Нагадувати кожен тиждень'+
+        '</label>'+
+        '<button class="ln-popup-close" id="ln-close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="2,7 5.5,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+      '</div>'+
     '</div>'+
     '<div class="ln-popup-body">'+
-      '<div class="ln-field"><label>Запис на '+escapeHtml(wdEvery)+', урок '+(si+1)+'</label><textarea id="ln-day" placeholder="Нотатки до уроку '+(si+1)+' на '+escapeHtml(wdEvery)+'..."></textarea></div>'+
-      '<div class="ln-field"><label>Запис лише про цей урок</label><textarea id="ln-lesson" placeholder="Нотатки до конкретного уроку..."></textarea></div>'+
+      '<div class="ln-field">'+
+        '<div class="ln-editor-wrap">'+
+          '<div class="ln-toolbar" id="ln-toolbar">'+
+            '<button class="ln-tb-btn" data-cmd="bold" title="Жирний (Ctrl+B)"><svg viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="italic" title="Курсив (Ctrl+I)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="underline" title="Підкреслений (Ctrl+U)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg></button>'+
+            '<div class="ln-toolbar-sep"></div>'+
+            '<button class="ln-tb-btn" data-cmd="justifyLeft" title="По лівому краю"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="justifyCenter" title="По центру"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="justifyRight" title="По правому краю"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg></button>'+
+            '<div class="ln-toolbar-sep"></div>'+
+            '<button class="ln-tb-btn" id="ln-link-btn" title="Вставити посилання"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>'+
+          '</div>'+
+          '<div class="ln-editor" id="ln-note" contenteditable="true" data-placeholder="Нотатки до уроку..."></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="ln-weekly-hint" id="ln-weekly-hint">🔁 Ця нотатка відображатиметься '+escapeHtml(wdEvery)+' на уроці '+(si+1)+'</div>'+
     '</div>';
   ov.appendChild(popup);document.body.appendChild(ov);
-  // Pre-fill
-  const dayTA=popup.querySelector('#ln-day');
-  const lesTA=popup.querySelector('#ln-lesson');
-  dayTA.value=weekdayNotes[wdNoteKey]||'';
-  lesTA.value=note.lessonNote||'';
-  lesTA.focus();
-  // Dynamic resize helper
-  function autoResize(ta){ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,400)+'px'}
-  function shrinkTA(ta){
-    ta.classList.remove('expanded');
-    if(ta.value.trim()){
-      // Compress to a small preview height but keep overflow scrollable so text isn't lost
-      ta.style.height=Math.min(ta.scrollHeight,72)+'px';
-      ta.style.overflowY='auto';
+  const noteEditor=popup.querySelector('#ln-note');
+  const weeklyCb=popup.querySelector('#ln-weekly-cb');
+  const weeklyToggleLabel=popup.querySelector('.ln-weekly-toggle');
+  const weeklyHint=popup.querySelector('#ln-weekly-hint');
+  function setEditorContent(html){
+    if(!html){noteEditor.innerHTML='';return;}
+    if(!/<[a-z]/i.test(html)){
+      noteEditor.innerHTML=html.split('\n').map(function(l){return l?'<p>'+escapeHtml(l)+'</p>':'<p><br></p>';}).join('');
     } else {
-      ta.style.height='44px';
-      ta.style.overflowY='hidden';
+      noteEditor.innerHTML=html;
     }
   }
-  function initTA(ta){
-    if(ta.value.trim())ta.classList.add('expanded');
-    autoResize(ta);
-    ta.addEventListener('focus',()=>{ta.classList.add('expanded');autoResize(ta);ta.style.overflowY='auto'});
-    ta.addEventListener('input',()=>{autoResize(ta)});
-    ta.addEventListener('blur',()=>shrinkTA(ta));
+  function getEditorContent(){
+    const h=noteEditor.innerHTML;
+    const div=document.createElement('div');div.innerHTML=h;
+    const txt=(div.textContent||div.innerText||'').trim();
+    return txt?h:'';
   }
-  initTA(dayTA);
-  initTA(lesTA);
+  setEditorContent(isWeekly?existingWdNote:existingLesNote);
+  if(isWeekly&&weeklyHint)weeklyHint.classList.add('show');
+  noteEditor.focus();
+  const toolbar=popup.querySelector('#ln-toolbar');
+  function updateToolbarState(){
+    toolbar.querySelectorAll('.ln-tb-btn[data-cmd]').forEach(function(btn){
+      try{btn.classList.toggle('active',document.queryCommandState(btn.dataset.cmd));}catch(e){}
+    });
+  }
+  toolbar.addEventListener('mousedown',function(e){
+    const btn=e.target.closest('.ln-tb-btn[data-cmd]');
+    if(btn){e.preventDefault();document.execCommand(btn.dataset.cmd,false,null);noteEditor.focus();updateToolbarState();save();}
+  });
+  noteEditor.addEventListener('keyup',updateToolbarState);
+  noteEditor.addEventListener('mouseup',updateToolbarState);
+  const linkBtn=popup.querySelector('#ln-link-btn');
+  let linkDialogEl=null;
+  linkBtn.addEventListener('mousedown',function(e){
+    e.preventDefault();
+    if(linkDialogEl){linkDialogEl.remove();linkDialogEl=null;return;}
+    const sel=window.getSelection();
+    const savedRange=sel&&sel.rangeCount?sel.getRangeAt(0).cloneRange():null;
+    const existingAnchor=sel&&sel.focusNode?sel.focusNode.parentElement.closest('a'):null;
+    const existingHref=existingAnchor?existingAnchor.href:'';
+    linkDialogEl=document.createElement('div');
+    linkDialogEl.className='ln-link-dialog';
+    linkDialogEl.innerHTML='<input class="ln-link-input" id="ln-link-url" placeholder="https://..." value="'+escapeHtml(existingHref)+'"><button class="ln-link-ok" id="ln-link-ok">Вставити</button><button class="ln-link-cancel" id="ln-link-cancel">✕</button>';
+    const r=linkBtn.getBoundingClientRect();
+    linkDialogEl.style.cssText='top:'+(r.bottom+4)+'px;left:'+Math.max(8,r.left-120)+'px;';
+    document.body.appendChild(linkDialogEl);
+    const urlInput=linkDialogEl.querySelector('#ln-link-url');
+    urlInput.focus();urlInput.select();
+    linkDialogEl.querySelector('#ln-link-cancel').addEventListener('click',function(){linkDialogEl.remove();linkDialogEl=null;});
+    linkDialogEl.querySelector('#ln-link-ok').addEventListener('click',function(){
+      const url=urlInput.value.trim();
+      linkDialogEl.remove();linkDialogEl=null;
+      noteEditor.focus();
+      if(savedRange){const s=window.getSelection();s.removeAllRanges();s.addRange(savedRange);}
+      if(url){
+        const href=(url.startsWith('http')||url.startsWith('mailto:'))?url:'https://'+url;
+        document.execCommand('createLink',false,href);
+        noteEditor.querySelectorAll('a').forEach(function(a){a.target='_blank';a.rel='noopener';});
+      } else {document.execCommand('unlink',false,null);}
+      save();
+    });
+    urlInput.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){linkDialogEl.querySelector('#ln-link-ok').click();}
+      if(e.key==='Escape'){linkDialogEl.remove();linkDialogEl=null;}
+    });
+  });
+  ov.addEventListener('mousedown',function(e){
+    if(linkDialogEl&&!linkDialogEl.contains(e.target)&&e.target!==linkBtn){linkDialogEl.remove();linkDialogEl=null;}
+  });
+  // Toggle handler: switch between weekly and lesson-specific modes
+  // Keep current editor text — just change where it gets saved
+  weeklyCb.addEventListener('change',function(){
+    isWeekly=this.checked;
+    weeklyToggleLabel.classList.toggle('active',isWeekly);
+    weeklyHint.classList.toggle('show',isWeekly);
+    noteEditor.focus();
+    save();
+  });
   function save(){
-    // Weekday+slot note
-    const dv=dayTA.value.trim();
-    weekdayNotes[wdNoteKey]=dv;
-    if(!dv)delete weekdayNotes[wdNoteKey];
-    saveWeekdayNotes();
-    // Lesson note
-    const lv=lesTA.value.trim();
-    const cur=getLessonNote(dk,cid,si);
-    cur.lessonNote=lv;
-    setLessonNote(dk,cid,si,cur);
-    // Update button color
-    const hasNote=!!(dv||lv);
+    const html=getEditorContent();
+    const hasNote=!!(html);
+    if(isWeekly){
+      weekdayNotes[wdNoteKey]=html;
+      if(!html)delete weekdayNotes[wdNoteKey];
+      saveWeekdayNotes();
+      const cur=getLessonNote(dk,cid,si);
+      cur.lessonNote='';
+      setLessonNote(dk,cid,si,cur);
+    } else {
+      const cur=getLessonNote(dk,cid,si);
+      cur.lessonNote=html;
+      setLessonNote(dk,cid,si,cur);
+      delete weekdayNotes[wdNoteKey];
+      saveWeekdayNotes();
+    }
     if(btnEl)btnEl.classList.toggle('has-note',hasNote);
     gdriveScheduleSave();
     renderSidebar();
   }
   let saveTO;
-  dayTA.addEventListener('input',()=>{clearTimeout(saveTO);saveTO=setTimeout(save,400)});
-  lesTA.addEventListener('input',()=>{clearTimeout(saveTO);saveTO=setTimeout(save,400)});
+  noteEditor.addEventListener('input',function(){clearTimeout(saveTO);saveTO=setTimeout(save,400);updateToolbarState();});
   const lnCloseBtn=popup.querySelector('#ln-close');
-  lnCloseBtn.addEventListener('mousedown',e=>e.preventDefault());
-  lnCloseBtn.addEventListener('click',()=>{save();ov.remove()});
-  ov.addEventListener('keydown',e=>{if(e.key==='Escape'){save();ov.remove()}});
+  lnCloseBtn.addEventListener('mousedown',function(e){e.preventDefault();});
+  lnCloseBtn.addEventListener('click',function(){save();closeLnPopup(ov);});
+  ov.addEventListener('keydown',function(e){if(e.key==='Escape'){save();closeLnPopup(ov);}});
 }
 // ── Нотатки до подій (аналог showLessonNotePopup, але для customEvents) ──
 function showEventNotePopup(evId,dk,btnEl){
   if(document.body.classList.contains('readonly-mode'))return;
   const existing=document.querySelector('.ln-popup-overlay');
-  if(existing){existing.remove();return;}
+  if(existing){closeLnPopup(existing);return;}
   const ev=customEvents.find(e=>e.id===evId);
   if(!ev)return;
+  const existingEveryNote=ev.note||'';
+  const existingOnceNote=getEventOccurrenceNote(evId,dk)||'';
+  let isEvery=ev.recurring ? (!!existingEveryNote || (!existingEveryNote && !existingOnceNote)) : false;
+  if(ev.recurring && !existingEveryNote && existingOnceNote) isEvery=false;
+  
   const ov=document.createElement('div');ov.className='ln-popup-overlay';
   const popup=document.createElement('div');popup.className='ln-popup';
-  let bodyHtml='';
+  
+  let headerRightHtml='<button class="ln-popup-close" id="ln-close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="2,7 5.5,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+  
   if(ev.recurring){
-    bodyHtml=
-      '<div class="ln-field"><label>Запис на кожне повторення події</label><textarea id="ln-ev-every" placeholder="Нотатка до кожного повторення..."></textarea></div>'+
-      '<div class="ln-field"><label>Запис лише про цю дату</label><textarea id="ln-ev-once" placeholder="Нотатка тільки до цієї конкретної дати..."></textarea></div>';
-  } else {
-    bodyHtml='<div class="ln-field"><label>Нотатка до події</label><textarea id="ln-ev-once" placeholder="Нотатка до події..."></textarea></div>';
+    headerRightHtml=
+      '<label class="ln-weekly-toggle'+(isEvery?' active':'')+'">'+
+        '<input type="checkbox" id="ln-every-cb"'+(isEvery?' checked':'')+'>'+
+        '<span class="ln-weekly-icon">🔁</span>'+
+        'На кожне повторення'+
+      '</label>'+headerRightHtml;
   }
+  
   popup.innerHTML=
     '<div class="ln-popup-header">'+
       '<div class="ln-popup-title">📌 '+escapeHtml(ev.title)+'</div>'+
-      '<button class="ln-popup-close" id="ln-close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="2,7 5.5,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+      '<div class="ln-popup-header-right">'+headerRightHtml+'</div>'+
     '</div>'+
-    '<div class="ln-popup-body">'+bodyHtml+'</div>';
+    '<div class="ln-popup-body">'+
+      '<div class="ln-field">'+
+        '<div class="ln-editor-wrap">'+
+          '<div class="ln-toolbar" id="ln-toolbar">'+
+            '<button class="ln-tb-btn" data-cmd="bold" title="Жирний (Ctrl+B)"><svg viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="italic" title="Курсив (Ctrl+I)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="underline" title="Підкреслений (Ctrl+U)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg></button>'+
+            '<div class="ln-toolbar-sep"></div>'+
+            '<button class="ln-tb-btn" data-cmd="justifyLeft" title="По лівому краю"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="justifyCenter" title="По центру"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="justifyRight" title="По правому краю"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg></button>'+
+            '<div class="ln-toolbar-sep"></div>'+
+            '<button class="ln-tb-btn" id="ln-link-btn" title="Вставити посилання"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>'+
+          '</div>'+
+          '<div class="ln-editor" id="ln-note" contenteditable="true" data-placeholder="Нотатка до події..."></div>'+
+        '</div>'+
+      '</div>'+
+      (ev.recurring?'<div class="ln-weekly-hint" id="ln-every-hint">🔁 Ця нотатка відображатиметься на кожному повторенні події</div>':'')+
+    '</div>';
   ov.appendChild(popup);document.body.appendChild(ov);
-  const everyTA=popup.querySelector('#ln-ev-every');
-  const onceTA=popup.querySelector('#ln-ev-once');
-  if(everyTA)everyTA.value=ev.note||'';
-  onceTA.value=getEventOccurrenceNote(evId,dk);
-  (everyTA||onceTA).focus();
-  function autoResize(ta){ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,400)+'px'}
-  function shrinkTA(ta){
-    ta.classList.remove('expanded');
-    if(ta.value.trim()){ta.style.height=Math.min(ta.scrollHeight,72)+'px';ta.style.overflowY='auto';}
-    else{ta.style.height='44px';ta.style.overflowY='hidden';}
-  }
-  function initTA(ta){
-    if(!ta)return;
-    if(ta.value.trim())ta.classList.add('expanded');
-    autoResize(ta);
-    ta.addEventListener('focus',()=>{ta.classList.add('expanded');autoResize(ta);ta.style.overflowY='auto'});
-    ta.addEventListener('input',()=>{autoResize(ta)});
-    ta.addEventListener('blur',()=>shrinkTA(ta));
-  }
-  initTA(everyTA);initTA(onceTA);
-  function save(){
-    if(everyTA){
-      const ev2=customEvents.find(e=>e.id===evId);
-      if(ev2){ev2.note=everyTA.value.trim();saveCustomEvents();}
+  const noteEditor=popup.querySelector('#ln-note');
+  const everyCb=popup.querySelector('#ln-every-cb');
+  const everyToggleLabel=popup.querySelector('.ln-weekly-toggle');
+  const everyHint=popup.querySelector('#ln-every-hint');
+  
+  function setEditorContent(html){
+    if(!html){noteEditor.innerHTML='';return;}
+    if(!/<[a-z]/i.test(html)){
+      noteEditor.innerHTML=html.split('\n').map(function(l){return l?'<p>'+escapeHtml(l)+'</p>':'<p><br></p>';}).join('');
+    } else {
+      noteEditor.innerHTML=html;
     }
-    setEventOccurrenceNote(evId,dk,onceTA.value.trim());
-    const hasNote=eventHasNote(ev,dk);
-    if(btnEl)btnEl.classList.toggle('has-note',hasNote);
+  }
+  function getEditorContent(){
+    const h=noteEditor.innerHTML;
+    const div=document.createElement('div');div.innerHTML=h;
+    const txt=(div.textContent||div.innerText||'').trim();
+    return txt?h:'';
+  }
+  
+  setEditorContent(isEvery?existingEveryNote:(ev.recurring?existingOnceNote:(existingOnceNote||existingEveryNote)));
+  if(isEvery&&everyHint)everyHint.classList.add('show');
+  noteEditor.focus();
+  
+  const toolbar=popup.querySelector('#ln-toolbar');
+  function updateToolbarState(){
+    toolbar.querySelectorAll('.ln-tb-btn[data-cmd]').forEach(function(btn){
+      try{btn.classList.toggle('active',document.queryCommandState(btn.dataset.cmd));}catch(e){}
+    });
+  }
+  toolbar.addEventListener('mousedown',function(e){
+    const btn=e.target.closest('.ln-tb-btn[data-cmd]');
+    if(btn){e.preventDefault();document.execCommand(btn.dataset.cmd,false,null);noteEditor.focus();updateToolbarState();save();}
+  });
+  noteEditor.addEventListener('keyup',updateToolbarState);
+  noteEditor.addEventListener('mouseup',updateToolbarState);
+  
+  const linkBtn=popup.querySelector('#ln-link-btn');
+  let linkDialogEl=null;
+  linkBtn.addEventListener('mousedown',function(e){
+    e.preventDefault();
+    if(linkDialogEl){linkDialogEl.remove();linkDialogEl=null;return;}
+    const sel=window.getSelection();
+    const savedRange=sel&&sel.rangeCount?sel.getRangeAt(0).cloneRange():null;
+    const existingAnchor=sel&&sel.focusNode?sel.focusNode.parentElement.closest('a'):null;
+    const existingHref=existingAnchor?existingAnchor.href:'';
+    linkDialogEl=document.createElement('div');
+    linkDialogEl.className='ln-link-dialog';
+    linkDialogEl.innerHTML='<input class="ln-link-input" id="ln-link-url" placeholder="https://..." value="'+escapeHtml(existingHref)+'"><button class="ln-link-ok" id="ln-link-ok">Вставити</button><button class="ln-link-cancel" id="ln-link-cancel">✕</button>';
+    const r=linkBtn.getBoundingClientRect();
+    linkDialogEl.style.cssText='top:'+(r.bottom+4)+'px;left:'+Math.max(8,r.left-120)+'px;';
+    document.body.appendChild(linkDialogEl);
+    const urlInput=linkDialogEl.querySelector('#ln-link-url');
+    urlInput.focus();urlInput.select();
+    linkDialogEl.querySelector('#ln-link-cancel').addEventListener('click',function(){linkDialogEl.remove();linkDialogEl=null;});
+    linkDialogEl.querySelector('#ln-link-ok').addEventListener('click',function(){
+      const url=urlInput.value.trim();
+      linkDialogEl.remove();linkDialogEl=null;
+      noteEditor.focus();
+      if(savedRange){const s=window.getSelection();s.removeAllRanges();s.addRange(savedRange);}
+      if(url){
+        const href=(url.startsWith('http')||url.startsWith('mailto:'))?url:'https://'+url;
+        document.execCommand('createLink',false,href);
+        noteEditor.querySelectorAll('a').forEach(function(a){a.target='_blank';a.rel='noopener';});
+      } else {document.execCommand('unlink',false,null);}
+      save();
+    });
+    urlInput.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){linkDialogEl.querySelector('#ln-link-ok').click();}
+      if(e.key==='Escape'){linkDialogEl.remove();linkDialogEl=null;}
+    });
+  });
+  ov.addEventListener('mousedown',function(e){
+    if(linkDialogEl&&!linkDialogEl.contains(e.target)&&e.target!==linkBtn){linkDialogEl.remove();linkDialogEl=null;}
+  });
+  
+  if(everyCb){
+    everyCb.addEventListener('change',function(){
+      isEvery=this.checked;
+      everyToggleLabel.classList.toggle('active',isEvery);
+      everyHint.classList.toggle('show',isEvery);
+      noteEditor.focus();
+      save();
+    });
+  }
+  
+  function save(){
+    const html=getEditorContent();
+    const ev2=customEvents.find(e=>e.id===evId);
+    if(!ev2)return;
+    
+    if(ev.recurring){
+      if(isEvery){
+        ev2.note=html;
+        saveCustomEvents();
+        setEventOccurrenceNote(evId,dk,'');
+      } else {
+        setEventOccurrenceNote(evId,dk,html);
+        ev2.note='';
+        saveCustomEvents();
+      }
+    } else {
+      setEventOccurrenceNote(evId,dk,html);
+    }
+    
+    const overallHasNote=eventHasNote(ev2,dk);
+    if(btnEl)btnEl.classList.toggle('has-note',overallHasNote);
     gdriveScheduleSave();
     renderSidebar();
   }
+  
   let saveTO2;
-  if(everyTA)everyTA.addEventListener('input',()=>{clearTimeout(saveTO2);saveTO2=setTimeout(save,400)});
-  onceTA.addEventListener('input',()=>{clearTimeout(saveTO2);saveTO2=setTimeout(save,400)});
+  noteEditor.addEventListener('input',function(){clearTimeout(saveTO2);saveTO2=setTimeout(save,400);updateToolbarState();});
   const lnCloseBtn2=popup.querySelector('#ln-close');
   lnCloseBtn2.addEventListener('mousedown',e=>e.preventDefault());
-  lnCloseBtn2.addEventListener('click',()=>{save();ov.remove();_refreshAfterEventChange()});
-  ov.addEventListener('keydown',e=>{if(e.key==='Escape'){save();ov.remove();_refreshAfterEventChange()}});
+  lnCloseBtn2.addEventListener('click',()=>{save();closeLnPopup(ov,()=>_refreshAfterEventChange())});
+  ov.addEventListener('keydown',e=>{if(e.key==='Escape'){save();closeLnPopup(ov,()=>_refreshAfterEventChange())}});
 }
 function renderDayModalLessons(gridEl,dk,dC,classColorMap){
 var allL=buildDayOrderList(dC);
