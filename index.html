@@ -98,7 +98,7 @@
 .custom-event-block .ln-btn.has-note{opacity:1;filter:brightness(5)}
 .day-modal-add-event-btn{width:100%;margin-top:10px;padding:9px 0;border:2px dashed var(--border);border-radius:var(--radius);background:transparent;color:var(--text-secondary);font-size:.85em;font-weight:600;font-family:inherit;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px}
 .day-modal-add-event-btn:hover{border-color:#e37400;color:#e37400;background:rgba(227,116,0,.05)}
-.day-modal-custom-event{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius);background:rgba(227,116,0,.1);border-left:3px solid #e37400;margin-bottom:5px;font-size:.83em;cursor:pointer}
+.day-modal-custom-event{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius);background:rgba(227,116,0,.1);border-left:3px solid #e37400;margin-bottom:5px;font-size:.83em;cursor:pointer;position:relative}
 .day-modal-custom-event .cev-dm-time{font-weight:700;color:#e37400;font-variant-numeric:tabular-nums;min-width:85px}
 .day-modal-custom-event .cev-dm-title{flex:1;font-weight:600;color:var(--text)}
 .day-modal-custom-event .cev-dm-badge{font-size:.72em;background:#e37400;color:#fff;border-radius:8px;padding:1px 6px;flex-shrink:0}
@@ -406,6 +406,34 @@ body.readonly-mode .fab-add-event{display:none!important}
 #lesson-info-popup .lip-note-card-edit:hover{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--bg-surface));color:var(--orange)}
 #lesson-info-popup .lip-note-edit-all{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:14px;background:var(--bg-surface);color:var(--text-secondary);font-size:.77em;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .15s,color .15s,background .15s;align-self:flex-start;margin-top:2px}
 #lesson-info-popup .lip-note-edit-all:hover{border-color:var(--orange);color:var(--orange);background:color-mix(in srgb,var(--orange) 7%,var(--bg-surface))}
+@media(max-width:640px){
+  #lesson-info-popup, #ctx-menu {
+    top: auto !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    width: 100% !important; border-radius: 20px 20px 0 0 !important;
+    max-height: 85vh !important; overflow-y: auto !important;
+    animation: lip-slide-up 0.3s cubic-bezier(0.2,1,0.3,1) forwards !important;
+    transform-origin: bottom center !important; border: none !important;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.15), 0 0 0 10000px rgba(0,0,0,0.35) !important;
+  }
+  #lesson-info-popup.lip-closing { animation: lip-slide-down 0.16s ease-in forwards !important; }
+  #lesson-info-popup .lip-top { padding: 18px 50px 10px 20px; }
+  #lesson-info-popup .lip-title { font-size: 1.25em; }
+  #lesson-info-popup .lip-close { top: 14px; right: 14px; width: 38px; height: 38px; background: var(--bg-hover); font-size: 1.1em; }
+  #lesson-info-popup .lip-meta { padding: 14px 20px 18px; }
+  #lesson-info-popup .lip-row { font-size: 0.95em; gap: 12px; margin-bottom: 4px; }
+  #lesson-info-popup .lip-row-icon { font-size: 1.1em; width: 20px; }
+  #lesson-info-popup .lip-notes, #lesson-info-popup .lip-notes-section { padding: 16px 20px 24px; }
+  #lesson-info-popup .lip-note-card { padding: 14px 44px 14px 16px; margin-bottom: 8px; }
+  #lesson-info-popup .lip-note-card-lbl { font-size: 0.75em; margin-bottom: 8px; }
+  #lesson-info-popup .lip-note-card-body { font-size: 0.95em; }
+  #lesson-info-popup .lip-note-card-edit { top: 14px; right: 14px; width: 36px; height: 36px; }
+  #lesson-info-popup .lip-add-note-btn { padding: 14px 20px; font-size: 1.05em; width: 100%; justify-content: center; }
+  #ctx-menu { padding: 16px 0 !important; }
+  .ctx-menu-item { padding: 16px 24px !important; font-size: 1.05em !important; gap: 16px !important; }
+  .ctx-menu-icon { font-size: 1.2em !important; }
+  @keyframes lip-slide-up { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
+  @keyframes lip-slide-down { 0% { transform: translateY(0); } 100% { transform: translateY(100%); } }
+}
 #custom-time-modal .modal-time-row{display:flex;gap:10px;align-items:center;margin:12px 0}
 #custom-time-modal .modal-time-row label{font-size:.85em;color:var(--text-secondary);min-width:60px}
 #custom-time-modal .modal-time-row input[type=time]{flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:.9em;background:var(--bg-surface);color:var(--text);font-family:inherit}
@@ -510,6 +538,27 @@ body.readonly-mode .fab-add-event{display:none!important}
 .ln-link-input:focus{border-color:var(--blue)}
 .ln-link-ok{padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.83em;font-weight:600;font-family:inherit;white-space:nowrap}
 .ln-link-ok:hover{filter:brightness(.9)}
+@media(max-width:640px){
+  .ln-popup-overlay{padding:0;align-items:flex-end}
+  .ln-popup{border-radius:20px 20px 0 0;height:auto;width:100%;max-height:85vh;border-top:none;display:flex;flex-direction:column;animation:lip-slide-up .3s cubic-bezier(.2,1,.3,1) forwards}
+  .ln-closing .ln-popup{animation:lip-slide-down .16s ease-in forwards !important}
+  .ln-popup-header{padding:14px 60px 12px 20px;display:block;position:relative}
+  .ln-popup-title{font-size:1.15em;width:100%;margin-bottom:10px;line-height:1.4}
+  .ln-popup-header-right{margin-left:0;width:100%;display:flex}
+  .ln-popup-close{position:absolute;top:14px;right:14px;width:40px;height:40px;font-size:1.15em;border-radius:12px}
+  .ln-popup-body{flex:1;padding:12px 16px 16px;overflow-y:hidden}
+  .ln-editor-wrap{flex:1;border-radius:12px;border-width:1.5px}
+  .ln-toolbar{padding:6px 10px;border-radius:12px 12px 0 0;gap:6px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .ln-toolbar::-webkit-scrollbar{display:none}
+  .ln-tb-btn{width:38px;height:38px;border-radius:8px;flex-shrink:0}
+  .ln-tb-btn svg{width:18px;height:18px}
+  .ln-editor{min-height:0;flex:1;max-height:none;font-size:1.05em;padding:16px}
+  .ln-weekly-toggle{padding:10px 14px;font-size:.95em}
+  .ln-weekly-toggle input[type="checkbox"]{width:20px;height:20px}
+  .ln-link-dialog{left:16px !important;right:16px !important;top:60px !important;bottom:auto !important;width:auto !important;min-width:0 !important;padding:14px !important;border-radius:12px !important;box-shadow:0 10px 30px rgba(0,0,0,.2) !important}
+  .ln-link-input{padding:12px 14px !important;font-size:1em !important}
+  .ln-link-ok{padding:12px 20px !important;font-size:1em !important}
+}
 .ln-link-cancel{padding:5px 10px;background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.83em;font-weight:600;font-family:inherit}
 .ln-field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:.9em;font-family:inherit;color:var(--text);background:var(--bg-surface);resize:none;line-height:1.55;min-height:120px;max-height:400px;overflow-y:auto;transition:border-color .15s,box-shadow .15s}
 .ln-field textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px color-mix(in srgb,var(--orange) 18%,transparent)}
@@ -2020,7 +2069,7 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
     '<div class="lip-meta">'+metaHtml+'</div>'+
     notesHtml;
   document.body.appendChild(pop);
-  const tile=e.target.closest('.week-lesson');
+  const tile=e.target.closest('.week-lesson') || e.target.closest('.dm-slot-card') || e.target.closest('.day-modal-custom-event');
   const rect=tile?tile.getBoundingClientRect():{right:e.clientX,left:e.clientX,top:e.clientY};
   const pw=320;
   let left=rect.right+10;
@@ -2136,7 +2185,7 @@ function showEventInfoPopup(e,ev,dk){
     '<div class="lip-meta">'+metaHtml+'</div>'+
     notesHtml;
   document.body.appendChild(pop);
-  const tile=e.target.closest('.custom-event-block');
+  const tile=e.target.closest('.custom-event-block') || e.target.closest('.day-modal-custom-event');
   const rect=tile?tile.getBoundingClientRect():{right:e.clientX,left:e.clientX,top:e.clientY};
   const pw=320;
   let left=rect.right+10;
@@ -2794,7 +2843,7 @@ const wb=document.getElementById('week-body');let scrollMin=null;if(bellSchedule
 function weekSlotTop(idx){const bell=bellSchedule[idx]||bellSchedule[bellSchedule.length-1]||{start:'00:00',end:'00:00'};return ((timeToMinutes(bell.start)/60)-DAY_START_HOUR)*HOUR_HEIGHT}
 function weekSlotHeight(idx){const bell=bellSchedule[idx]||bellSchedule[bellSchedule.length-1]||{start:'00:00',end:'00:00'};return Math.max(((timeToMinutes(bell.end)-timeToMinutes(bell.start))/60)*HOUR_HEIGHT,20)}
 function moveWeekLesson(dk,fromIdx,toIdx){if(fromIdx===toIdx){renderWeekView();return}if(!cachedAllData)cachedAllData=buildAllClassesData();const dC=cachedAllData.allDayMap[dk]||[];const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);if(toIdx<0||toIdx>=totalSlots){renderWeekView();return}const newArr=slotArr.slice();const tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope){renderWeekView();return}if(scope==='day'){setDayOrder(dk,newArr)}else if(scope==='all'){setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr)}cachedAllData=null;renderWeekView()})}
-function makeDraggable(el,dk,si,totalSlots){let isDrag=false,startY=0,startTop=0,curTarget=si,_moved=false;const badge=document.getElementById('drag-slot-badge');function nearestSlot(top){let best=0,bd=Infinity;for(let i=0;i<totalSlots;i++){const d=Math.abs(weekSlotTop(i)-top);if(d<bd){bd=d;best=i}}return best}function showBadge(cx,cy,slot){if(!badge)return;const bell=bellSchedule[slot]||bellSchedule[bellSchedule.length-1]||{start:'',end:''};badge.textContent=(slot+1)+'\u0443\u0440 \u00b7 '+bell.start;badge.style.left=cx+'px';badge.style.top=cy+'px';badge.style.display='block'}function hideBadge(){if(badge)badge.style.display='none'}function onS(cx,cy){if(typeof closeLessonInfoPopup==='function')closeLessonInfoPopup();isDrag=true;_moved=false;startY=cy;startTop=parseInt(el.style.top);curTarget=si;el.classList.add('dragging');showBadge(cx,cy,curTarget)}function onM(cx,cy){if(!isDrag)return;_moved=true;el.dataset.wasDragged='1';const raw=startTop+(cy-startY);const clamped=Math.max(0,Math.min(raw,(DAY_END_HOUR-DAY_START_HOUR)*HOUR_HEIGHT));curTarget=nearestSlot(clamped);el.style.top=weekSlotTop(curTarget)+'px';el.style.height=weekSlotHeight(curTarget)+'px';const bell=getBellForSlot(dk,curTarget);const tr=el.querySelector('.lesson-time-range');if(tr)tr.textContent=bell.start+' \u2013 '+bell.end;showBadge(cx,cy,curTarget)}function onE(){if(!isDrag)return;isDrag=false;el.classList.remove('dragging');hideBadge();if(curTarget!==si)moveWeekLesson(dk,si,curTarget);if(_moved){setTimeout(function(){delete el.dataset.wasDragged;},200);}}el.addEventListener('mousedown',e=>{if(e.button!==0)return;onS(e.clientX,e.clientY);e.preventDefault();e.stopPropagation()});document.addEventListener('mousemove',e=>onM(e.clientX,e.clientY));document.addEventListener('mouseup',onE);el.addEventListener('touchstart',e=>{const t=e.touches[0];let lpTimer=setTimeout(()=>{lpTimer=null;onS(t.clientX,t.clientY);if(navigator.vibrate)navigator.vibrate(40);},400);function tmove(ev){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;return;}if(isDrag){closeContextMenu();onM(ev.touches[0].clientX,ev.touches[0].clientY);}}function tend(){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;}onE();document.removeEventListener('touchmove',tmove);document.removeEventListener('touchend',tend);}document.addEventListener('touchmove',tmove,{passive:false});document.addEventListener('touchend',tend);e.preventDefault();},{passive:false});document.addEventListener('touchmove',e=>{if(isDrag)onM(e.touches[0].clientX,e.touches[0].clientY)},{passive:false});document.addEventListener('touchend',onE)}
+function makeDraggable(el,dk,si,totalSlots){let isDrag=false,startY=0,startTop=0,curTarget=si,_moved=false;const badge=document.getElementById('drag-slot-badge');function nearestSlot(top){let best=0,bd=Infinity;for(let i=0;i<totalSlots;i++){const d=Math.abs(weekSlotTop(i)-top);if(d<bd){bd=d;best=i}}return best}function showBadge(cx,cy,slot){if(!badge)return;const bell=bellSchedule[slot]||bellSchedule[bellSchedule.length-1]||{start:'',end:''};badge.textContent=(slot+1)+'\u0443\u0440 \u00b7 '+bell.start;badge.style.left=cx+'px';badge.style.top=cy+'px';badge.style.display='block'}function hideBadge(){if(badge)badge.style.display='none'}function onS(cx,cy){if(typeof closeLessonInfoPopup==='function')closeLessonInfoPopup();isDrag=true;_moved=false;startY=cy;startTop=parseInt(el.style.top);curTarget=si;el.classList.add('dragging');showBadge(cx,cy,curTarget)}function onM(cx,cy){if(!isDrag)return;_moved=true;el.dataset.wasDragged='1';const raw=startTop+(cy-startY);const clamped=Math.max(0,Math.min(raw,(DAY_END_HOUR-DAY_START_HOUR)*HOUR_HEIGHT));curTarget=nearestSlot(clamped);el.style.top=weekSlotTop(curTarget)+'px';el.style.height=weekSlotHeight(curTarget)+'px';const bell=getBellForSlot(dk,curTarget);const tr=el.querySelector('.lesson-time-range');if(tr)tr.textContent=bell.start+' \u2013 '+bell.end;showBadge(cx,cy,curTarget)}function onE(){if(!isDrag)return;isDrag=false;el.classList.remove('dragging');hideBadge();if(curTarget!==si)moveWeekLesson(dk,si,curTarget);if(_moved){setTimeout(function(){delete el.dataset.wasDragged;},200);}}el.addEventListener('mousedown',e=>{if(e.button!==0)return;onS(e.clientX,e.clientY);e.preventDefault();e.stopPropagation()});document.addEventListener('mousemove',e=>onM(e.clientX,e.clientY));document.addEventListener('mouseup',onE);el.addEventListener('touchstart',e=>{const t=e.touches[0];let lpTimer=setTimeout(()=>{lpTimer=null;onS(t.clientX,t.clientY);if(navigator.vibrate)navigator.vibrate(40);},400);function tmove(ev){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;return;}if(isDrag){closeContextMenu();onM(ev.touches[0].clientX,ev.touches[0].clientY);}}function tend(){let wasTap=false;if(lpTimer){wasTap=true;clearTimeout(lpTimer);lpTimer=null;}onE();document.removeEventListener('touchmove',tmove);document.removeEventListener('touchend',tend);if(wasTap){var fakeEvt={target:el,clientX:t.clientX,clientY:t.clientY,stopPropagation:function(){}};showLessonInfoPopup(fakeEvt,dk,si,el.dataset.className,el.dataset.classId,el.style.backgroundColor);}}document.addEventListener('touchmove',tmove,{passive:false});document.addEventListener('touchend',tend);e.preventDefault();},{passive:false});document.addEventListener('touchmove',e=>{if(isDrag)onM(e.touches[0].clientX,e.touches[0].clientY)},{passive:false});document.addEventListener('touchend',onE)}
 function makeEventDraggable(el,ev,dk){
   if(document.body.classList.contains('readonly-mode'))return;
   const SNAP=10;
@@ -2856,7 +2905,7 @@ function makeEventDraggable(el,ev,dk){
 
   el.addEventListener('mousedown',function(e){
     if(e.button!==0)return;
-    e.preventDefault();e.stopPropagation();
+    e.stopPropagation();
     onStart(e.clientY);
     function mmove(e){onMove(e.clientY);}
     function mup(){onEnd();document.removeEventListener('mousemove',mmove);document.removeEventListener('mouseup',mup);}
@@ -2866,9 +2915,29 @@ function makeEventDraggable(el,ev,dk){
 
   el.addEventListener('touchstart',function(e){
     e.preventDefault();e.stopPropagation();
-    onStart(e.touches[0].clientY);
-    function tmove(e){e.preventDefault();onMove(e.touches[0].clientY);}
-    function tend(){onEnd();document.removeEventListener('touchmove',tmove);document.removeEventListener('touchend',tend);}
+    var _evTouchStartY=e.touches[0].clientY;
+    var _evMoved=false;
+    var _evLpTimer=setTimeout(function(){
+      _evLpTimer=null;
+      onStart(e.touches[0].clientY);
+      if(navigator.vibrate)navigator.vibrate(40);
+    },400);
+    function tmove(ev){
+      _evMoved=true;
+      if(_evLpTimer){clearTimeout(_evLpTimer);_evLpTimer=null;return;}
+      if(isDrag){ev.preventDefault();onMove(ev.touches[0].clientY);}
+    }
+    function tend(){
+      var wasTap=(_evLpTimer&&!_evMoved);
+      if(_evLpTimer){clearTimeout(_evLpTimer);_evLpTimer=null;}
+      onEnd();
+      document.removeEventListener('touchmove',tmove);
+      document.removeEventListener('touchend',tend);
+      if(wasTap){
+        var fakeEvt={target:el,clientX:100,clientY:_evTouchStartY,stopPropagation:function(){}};
+        showEventInfoPopup(fakeEvt,ev,dk);
+      }
+    }
     document.addEventListener('touchmove',tmove,{passive:false});
     document.addEventListener('touchend',tend);
   },{passive:false});
@@ -3278,14 +3347,14 @@ if(!key&&si<lastUsed)slot.classList.add('window');
 var numEl=document.createElement('span');numEl.className='dm-slot-num';numEl.textContent=si+1;slot.appendChild(numEl);
 var bell=bellSchedule[si];
 var timeEl=document.createElement('span');timeEl.className='dm-slot-time';var bellForSlot=getBellForSlot(dk,si);var hasCustomSlot=!!getCustomTime(dk,si);timeEl.innerHTML='<span class="dm-slot-time-text">'+bellForSlot.start+'\u2013'+bellForSlot.end+'</span>'+(hasCustomSlot?' \u23f0':'');if(!document.body.classList.contains('readonly-mode')){timeEl.title='Клікніть щоб змінити час';timeEl.style.cursor='pointer';timeEl.addEventListener('click',function(e){e.stopPropagation();var les2=findLesson(slotArr[si]);if(les2)showDayModalTimeEdit(dk,si,les2.className,les2.classId,gridEl,dC,classColorMap);});}else{timeEl.style.cursor='default';}slot.appendChild(timeEl);
-var les=findLesson(key);
+const les=findLesson(key);
 if(les&&!hiddenClasses.has(les.classId)){
-var color=classColorMap[les.classId]||'#1a73e8';
-var card=document.createElement('div');card.className='dm-slot-card';card.draggable=true;card.style.background=color;card.dataset.slotIdx=si;card.dataset.classId=les.classId;card.dataset.origIdx=les.origIdx;
-var type=getLessonType(dk,les.classId,si);var ti=getTypeInfo(type);
-var infoDiv=document.createElement('div');infoDiv.className='dm-slot-card-info';
-var nameSpan=document.createElement('div');nameSpan.className='dm-slot-card-name';nameSpan.textContent=les.className;infoDiv.appendChild(nameSpan);
-var detDiv=document.createElement('div');detDiv.className='dm-slot-card-detail';detDiv.innerHTML='<span>'+ti.label+'</span>';infoDiv.appendChild(detDiv);
+const color=classColorMap[les.classId]||'#1a73e8';
+const card=document.createElement('div');card.className='dm-slot-card';card.draggable=true;card.style.background=color;card.dataset.slotIdx=si;card.dataset.classId=les.classId;card.dataset.origIdx=les.origIdx;
+const type=getLessonType(dk,les.classId,si);const ti=getTypeInfo(type);
+const infoDiv=document.createElement('div');infoDiv.className='dm-slot-card-info';
+const nameSpan=document.createElement('div');nameSpan.className='dm-slot-card-name';nameSpan.textContent=les.className;infoDiv.appendChild(nameSpan);
+const detDiv=document.createElement('div');detDiv.className='dm-slot-card-detail';detDiv.innerHTML='<span>'+ti.label+'</span>';infoDiv.appendChild(detDiv);
 card.appendChild(infoDiv);
 // Cabinet display (right-click to edit)
 (function(capturedDk,capturedCid,capturedLi,capturedSi){
@@ -3297,29 +3366,30 @@ card.addEventListener('dragstart',function(e){if(document.body.classList.contain
 card.addEventListener('dragend',function(){this.classList.remove('dragging');gridEl.querySelectorAll('.dm-slot').forEach(function(s){s.classList.remove('drag-over')});dragSrc=null;dragFromIdx=null});
 var _cardLpTimer=null;var _cardLpMoved=false;
 var _lesClassName=les.className,_lesClassId=les.classId;
-card.addEventListener('touchstart',function(e){if(e.target.tagName==='SELECT')return;_cardLpMoved=false;_cardLpTimer=setTimeout(function(){if(_cardLpMoved)return;if(navigator.vibrate)navigator.vibrate(40);var touch=e.touches[0];var fakeEvt={preventDefault:function(){},stopPropagation:function(){},clientX:touch.clientX,clientY:touch.clientY};showContextMenu(fakeEvt,dk,si,_lesClassName,_lesClassId);},500);dragSrc=this;dragFromIdx=parseInt(this.dataset.slotIdx,10);this.classList.add('dragging');e.preventDefault()},{passive:false});
+card.addEventListener('touchstart',function(e){if(e.target.tagName==='SELECT')return;_cardLpMoved=false;_cardLpTimer=setTimeout(function(){_cardLpTimer=null;if(_cardLpMoved)return;if(navigator.vibrate)navigator.vibrate(40);var touch=e.touches[0];var fakeEvt={preventDefault:function(){},stopPropagation:function(){},clientX:touch.clientX,clientY:touch.clientY};showContextMenu(fakeEvt,dk,si,_lesClassName,_lesClassId);},500);dragSrc=this;dragFromIdx=parseInt(this.dataset.slotIdx,10);this.classList.add('dragging');e.preventDefault()},{passive:false});
 card.addEventListener('touchmove',function(e){_cardLpMoved=true;if(_cardLpTimer){clearTimeout(_cardLpTimer);_cardLpTimer=null;}if(!dragSrc||dragSrc!==this)return;e.preventDefault();var t=e.touches[0];var el=document.elementFromPoint(t.clientX,t.clientY);var tSlot=el?el.closest('.dm-slot'):null;gridEl.querySelectorAll('.dm-slot').forEach(function(s){s.classList.remove('drag-over')});if(tSlot)tSlot.classList.add('drag-over')},{passive:false});
-card.addEventListener('touchend',function(e){if(_cardLpTimer){clearTimeout(_cardLpTimer);_cardLpTimer=null;}if(!dragSrc||dragSrc!==this)return;this.classList.remove('dragging');var t=e.changedTouches[0];var el=document.elementFromPoint(t.clientX,t.clientY);var tSlot=el?el.closest('.dm-slot'):null;gridEl.querySelectorAll('.dm-slot').forEach(function(s){s.classList.remove('drag-over')});var fi=dragFromIdx;dragSrc=null;dragFromIdx=null;if(tSlot&&!_cardLpMoved===false){moveCard(fi,parseInt(tSlot.dataset.slotIdx,10))}else if(tSlot){moveCard(fi,parseInt(tSlot.dataset.slotIdx,10))}});
+card.addEventListener('touchend',function(e){var wasTap=(_cardLpTimer&&!_cardLpMoved);if(_cardLpTimer){clearTimeout(_cardLpTimer);_cardLpTimer=null;}if(!dragSrc||dragSrc!==this)return;this.classList.remove('dragging');var t=e.changedTouches[0];var el=document.elementFromPoint(t.clientX,t.clientY);var tSlot=el?el.closest('.dm-slot'):null;gridEl.querySelectorAll('.dm-slot').forEach(function(s){s.classList.remove('drag-over')});var fi=dragFromIdx;dragSrc=null;dragFromIdx=null;if(_cardLpMoved&&tSlot){moveCard(fi,parseInt(tSlot.dataset.slotIdx,10))}else if(wasTap){var fakeEvt={target:card,clientX:t.clientX,clientY:t.clientY,stopPropagation:function(){}};showLessonInfoPopup(fakeEvt,dk,si,les.className,les.classId,classColorMap[les.classId]||'#1a73e8');}});
 // Right-click on card opens context menu
 (function(capturedDk,capturedCid,capturedSi,capturedName){
   if(!document.body.classList.contains('readonly-mode')){
     card.addEventListener('contextmenu',function(e){e.stopPropagation();showContextMenu(e,capturedDk,capturedSi,capturedName,capturedCid);});
-    addLongPress(card,function(e){showContextMenu(e,capturedDk,capturedSi,capturedName,capturedCid);});
   }
 })(dk,les.classId,si,les.className);
+card.addEventListener('click', function(e){
+  if(card.dataset.wasDragged)return;
+  e.stopPropagation();
+  showLessonInfoPopup(e, dk, si, les.className, les.classId, classColorMap[les.classId]||'#1a73e8');
+});
+var noteData=getLessonNote(dk,les.classId,si);
+var capturedWd=weekdayFromDateKey(dk);
+var hasNote=!!(weekdayNotes[weekdayNoteKey(capturedWd,si)]||noteData.lessonNote);
+if(hasNote){
+  var ind=document.createElement('span');
+  ind.className='week-lesson-note-ind';
+  ind.textContent='📝';
+  card.appendChild(ind);
+}
 slot.appendChild(card);
-// Note button — outside draggable card to avoid drag interference
-(function(capturedLes,capturedSi){
-  var noteData=getLessonNote(dk,capturedLes.classId,capturedSi);
-  var capturedWd=weekdayFromDateKey(dk);
-  var hasNote=!!(weekdayNotes[weekdayNoteKey(capturedWd,capturedSi)]||noteData.lessonNote);
-  var nBtn=document.createElement('button');
-  nBtn.className='ln-btn'+(hasNote?' has-note':'');
-  nBtn.title='Нотатка до уроку';
-  nBtn.textContent='📝';
-  nBtn.addEventListener('click',function(e){e.stopPropagation();showLessonNotePopup(dk,capturedLes.classId,capturedSi,capturedLes.className,nBtn)});
-  if(!document.body.classList.contains('readonly-mode'))slot.appendChild(nBtn);
-})(les,si);
 }else{
 var emp=document.createElement('span');emp.className='dm-slot-empty';emp.textContent=(si<lastUsed)?'\u0412\u0456\u043a\u043d\u043e':'\u0412\u0456\u043b\u044c\u043d\u043e';slot.appendChild(emp)}
 slot.addEventListener('dragover',function(e){e.preventDefault();e.dataTransfer.dropEffect='move';this.classList.add('drag-over')});
@@ -3348,15 +3418,13 @@ function _renderDayModalEvents(body,dk){
       (noteTxt?'<div class="cev-dm-notepreview">📝 '+escapeHtml(noteTxt.length>60?noteTxt.slice(0,60)+'…':noteTxt)+'</div>':'');
     row.addEventListener('contextmenu',function(e){showEventContextMenu(e,ev.id,dk)});
     addLongPress(row,function(e){showEventContextMenu(e,ev.id,dk)});
-    row.title='Довге натискання для редагування / видалення';
-    if(!document.body.classList.contains('readonly-mode')){
-      const nBtn=document.createElement('button');
-      nBtn.className='ln-btn'+(noteTxt?' has-note':'');
-      nBtn.title='Нотатка до події';
-      nBtn.textContent='📝';
-      nBtn.addEventListener('mousedown',function(e){e.stopPropagation()});
-      nBtn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(ev.id,dk,nBtn)});
-      row.appendChild(nBtn);
+    row.addEventListener('click',function(e){e.stopPropagation();showEventInfoPopup(e,ev,dk);});
+    row.title='Клікніть для деталей або затисніть для меню';
+    if(noteTxt){
+      var _i=document.createElement('span');
+      _i.className='week-lesson-note-ind';
+      _i.textContent='📝';
+      row.appendChild(_i);
     }
     section.appendChild(row);
   });
