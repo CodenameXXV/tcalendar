@@ -407,13 +407,15 @@ body.readonly-mode .fab-add-event{display:none!important}
 #lesson-info-popup .lip-note-edit-all{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:14px;background:var(--bg-surface);color:var(--text-secondary);font-size:.77em;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .15s,color .15s,background .15s;align-self:flex-start;margin-top:2px}
 #lesson-info-popup .lip-note-edit-all:hover{border-color:var(--orange);color:var(--orange);background:color-mix(in srgb,var(--orange) 7%,var(--bg-surface))}
 @media(max-width:640px){
-  #lesson-info-popup, #ctx-menu {
+  #lip-overlay { display:block; }
+  #lesson-info-popup {
     top: auto !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
     width: 100% !important; border-radius: 20px 20px 0 0 !important;
     max-height: 85vh !important; overflow-y: auto !important;
     animation: lip-slide-up 0.3s cubic-bezier(0.2,1,0.3,1) forwards !important;
     transform-origin: bottom center !important; border: none !important;
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.15), 0 0 0 10000px rgba(0,0,0,0.35) !important;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.15) !important;
+    position: relative !important;
   }
   #lesson-info-popup.lip-closing { animation: lip-slide-down 0.16s ease-in forwards !important; }
   #lesson-info-popup .lip-top { padding: 18px 50px 10px 20px; }
@@ -428,12 +430,13 @@ body.readonly-mode .fab-add-event{display:none!important}
   #lesson-info-popup .lip-note-card-body { font-size: 0.95em; }
   #lesson-info-popup .lip-note-card-edit { top: 14px; right: 14px; width: 36px; height: 36px; }
   #lesson-info-popup .lip-add-note-btn { padding: 14px 20px; font-size: 1.05em; width: 100%; justify-content: center; }
-  #ctx-menu { padding: 16px 0 !important; }
-  .ctx-menu-item { padding: 16px 24px !important; font-size: 1.05em !important; gap: 16px !important; }
-  .ctx-menu-icon { font-size: 1.2em !important; }
   @keyframes lip-slide-up { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
   @keyframes lip-slide-down { 0% { transform: translateY(0); } 100% { transform: translateY(100%); } }
+  #lip-backdrop { display:none !important; }
 }
+#lip-overlay { display:none; position:fixed; inset:0; z-index:9997; background:rgba(0,0,0,0.35); animation:lipBdIn 0.25s ease forwards; align-items:flex-end; }
+#lip-backdrop { display:none; position:fixed; inset:0; z-index:9997; background:rgba(0,0,0,0.35); touch-action:none; animation:lipBdIn 0.25s ease forwards; }
+@keyframes lipBdIn { from{opacity:0} to{opacity:1} }
 #custom-time-modal .modal-time-row{display:flex;gap:10px;align-items:center;margin:12px 0}
 #custom-time-modal .modal-time-row label{font-size:.85em;color:var(--text-secondary);min-width:60px}
 #custom-time-modal .modal-time-row input[type=time]{flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:.9em;background:var(--bg-surface);color:var(--text);font-family:inherit}
@@ -663,6 +666,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .ctx-submenu-wrap .ctx-submenu-arrow{margin-left:auto;font-size:.75em;opacity:.55;transition:transform .2s}
 .ctx-submenu-wrap.open .ctx-submenu-arrow{transform:rotate(90deg)}
 .ctx-submenu{display:none;position:absolute;left:100%;top:0;min-width:160px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);z-index:10000;overflow:hidden;animation:fadeIn .1s}
+.ctx-submenu.flip-left{left:auto;right:100%}
 .ctx-submenu-wrap:hover .ctx-submenu,.ctx-submenu-wrap.open .ctx-submenu{display:block}
 .ctx-submenu-item{display:block;width:100%;padding:8px 14px;border:none;background:none;color:var(--text);font-size:.83em;font-weight:600;font-family:inherit;cursor:pointer;text-align:left;transition:background .12s;white-space:nowrap}
 .ctx-submenu-item:hover{background:var(--bg-hover)}
@@ -1631,9 +1635,15 @@ function showEventContextMenu(e,evId,dk){
     '<div class="ctx-menu-item" id="ctx-ev-edit"><span class="ctx-menu-icon">✏️</span>Редагувати</div>'+
     '<div class="ctx-menu-sep"></div>'+
     '<div class="ctx-menu-item" id="ctx-ev-delete" style="color:var(--red)"><span class="ctx-menu-icon">🗑️</span>Видалити</div>';
-  menu.style.left=Math.min(e.clientX,window.innerWidth-200)+'px';
-  menu.style.top=Math.min(e.clientY,window.innerHeight-130)+'px';
+  menu.style.visibility='hidden';
   document.body.appendChild(menu);
+  const _evmw=menu.offsetWidth||200,_evmh=menu.offsetHeight||130;
+  let _evx=e.clientX,_evy=e.clientY;
+  if(_evx+_evmw>window.innerWidth-6)_evx=window.innerWidth-_evmw-6;
+  if(_evx<6)_evx=6;
+  if(_evy+_evmh>window.innerHeight-6)_evy=window.innerHeight-_evmh-6;
+  if(_evy<6)_evy=6;
+  menu.style.left=_evx+'px';menu.style.top=_evy+'px';menu.style.visibility='';
 
   menu.querySelector('#ctx-ev-note').addEventListener('click',()=>{
     closeContextMenu();
@@ -1804,14 +1814,18 @@ function showContextMenu(e,dk,si,lessonName,classId){
     '<div class="ctx-menu-item" id="ctx-cabinet"><span class="ctx-menu-icon">🏫</span>Кабінет'+(getLessonCabinet(dk,classId,si)?'<span style="font-size:.75em;color:var(--blue);margin-left:6px">— '+escapeHtml(getLessonCabinet(dk,classId,si))+'</span>':'')+'</div>'+
     '<div class="ctx-menu-sep"></div>'+
     '<div class="ctx-menu-item" id="ctx-delete-lesson" style="color:var(--red)"><span class="ctx-menu-icon">🗑️</span>Видалити урок</div>';
-  // Position menu
-  const approxMenuW=240;
+  // Position menu — append first (hidden), measure, then place
+  menu.style.visibility='hidden';
+  document.body.appendChild(menu);
+  const mw=menu.offsetWidth||240,mh=menu.offsetHeight||260;
   let mx=e.clientX,my=e.clientY;
-  if(mx+approxMenuW>window.innerWidth)mx=window.innerWidth-approxMenuW-8;
-  if(my+220>window.innerHeight)my=window.innerHeight-220;
+  if(mx+mw>window.innerWidth-6)mx=window.innerWidth-mw-6;
+  if(mx<6)mx=6;
+  if(my+mh>window.innerHeight-6)my=window.innerHeight-mh-6;
+  if(my<6)my=6;
   menu.style.left=mx+'px';
   menu.style.top=my+'px';
-  document.body.appendChild(menu);
+  menu.style.visibility='';
   if(isMobileDevice){
     // Mobile: tap on "Тип уроку" row opens centred overlay picker
     const wrap=menu.querySelector('#ctx-type-wrap');
@@ -2002,10 +2016,12 @@ function showCabinetPopup(dk,si,lessonName,classId){
 }
 
 function closeContextMenu(){const m=document.getElementById('ctx-menu');if(m)m.remove();document.removeEventListener('click',closeContextMenu)}
-function closeLessonInfoPopup(cb){const p=document.getElementById('lesson-info-popup');if(!p){document.removeEventListener('click',_lipOutsideHandler,true);if(cb)cb();return;}document.removeEventListener('click',_lipOutsideHandler,true);p.classList.add('lip-closing');setTimeout(function(){if(p.parentNode)p.remove();if(cb)cb();},160);}
+var _lipCloseTimer=null;
+function closeLessonInfoPopup(cb){if(_lipCloseTimer){clearTimeout(_lipCloseTimer);_lipCloseTimer=null;}const p=document.getElementById('lesson-info-popup');const ov=document.getElementById('lip-overlay');const bd=document.getElementById('lip-backdrop');if(bd)bd.remove();document.removeEventListener('click',_lipOutsideHandler,true);if(!p){if(ov)ov.remove();if(cb)cb();return;}p.classList.add('lip-closing');_lipCloseTimer=setTimeout(function(){_lipCloseTimer=null;if(ov&&ov.parentNode)ov.remove();else if(p.parentNode)p.remove();if(cb)cb();},160);}
+function _forceCloseLip(){if(_lipCloseTimer){clearTimeout(_lipCloseTimer);_lipCloseTimer=null;}const p=document.getElementById('lesson-info-popup');const ov=document.getElementById('lip-overlay');const bd=document.getElementById('lip-backdrop');if(bd)bd.remove();document.removeEventListener('click',_lipOutsideHandler,true);if(ov&&ov.parentNode)ov.remove();else if(p&&p.parentNode)p.remove();}
 var _lipOutsideHandler=null;
 function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
-  closeLessonInfoPopup();closeContextMenu();
+  _forceCloseLip();closeContextMenu();
   const bell=getBellForSlot(dk,si);
   const noteData=getLessonNote(dk,classId,si);
   const dateObj=new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2]));
@@ -2020,6 +2036,7 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
   const dateStr=dateObj.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});
   const pop=document.createElement('div');
   pop.id='lesson-info-popup';
+  pop.dataset.lipDk=dk;pop.dataset.lipSi=si;pop.dataset.lipCid=classId;
   const slotNum=si+1;
   let metaHtml='<div class="lip-row"><span class="lip-row-icon">🕐</span><span class="lip-row-text"><strong>'+bell.start+' – '+bell.end+'</strong>'+(hasCustomT?' <span style="font-size:.8em;opacity:.55">⏰ власний час</span>':'')+'</span></div>';
   metaHtml+='<div class="lip-row"><span class="lip-row-icon">📅</span><span class="lip-row-text">'+escapeHtml(dateStr)+'</span></div>';
@@ -2125,14 +2142,28 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
       }
     }
   });
+  if(window.innerWidth<=640){
+    const ov=document.createElement('div');
+    ov.id='lip-overlay';
+    ov.style.display='flex';
+    document.body.removeChild(pop);
+    ov.appendChild(pop);
+    document.body.appendChild(ov);
+    ov.addEventListener('touchstart',function(ev){
+      if(!pop.contains(ev.target)){ev.preventDefault();closeLessonInfoPopup();}
+    },{passive:false});
+    ov.addEventListener('click',function(ev){
+      if(!pop.contains(ev.target)){closeLessonInfoPopup();}
+    });
+  }
   setTimeout(function(){
-    _lipOutsideHandler=function(ev){if(!pop.contains(ev.target)){closeLessonInfoPopup();}};
+    _lipOutsideHandler=function(ev){if(window.innerWidth>640&&!pop.contains(ev.target)){closeLessonInfoPopup();}};
     document.addEventListener('click',_lipOutsideHandler,true);
   },0);
 }
 
 function showEventInfoPopup(e,ev,dk){
-  closeLessonInfoPopup();closeContextMenu();
+  _forceCloseLip();closeContextMenu();
   const dateObj=new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2]));
   const dateStr=dateObj.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});
   const pop=document.createElement('div');
@@ -2233,8 +2264,22 @@ function showEventInfoPopup(e,ev,dk){
       }
     }
   });
+  if(window.innerWidth<=640){
+    const ov2=document.createElement('div');
+    ov2.id='lip-overlay';
+    ov2.style.display='flex';
+    document.body.removeChild(pop);
+    ov2.appendChild(pop);
+    document.body.appendChild(ov2);
+    ov2.addEventListener('touchstart',function(ev2){
+      if(!pop.contains(ev2.target)){ev2.preventDefault();closeLessonInfoPopup();}
+    },{passive:false});
+    ov2.addEventListener('click',function(ev2){
+      if(!pop.contains(ev2.target)){closeLessonInfoPopup();}
+    });
+  }
   setTimeout(function(){
-    _lipOutsideHandler=function(ev2){if(!pop.contains(ev2.target)){closeLessonInfoPopup();}};
+    _lipOutsideHandler=function(ev2){if(window.innerWidth>640&&!pop.contains(ev2.target)){closeLessonInfoPopup();}};
     document.addEventListener('click',_lipOutsideHandler,true);
   },0);
 }
@@ -3152,6 +3197,56 @@ function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
       saveWeekdayNotes();
     }
     if(btnEl)btnEl.classList.toggle('has-note',hasNote);
+    // Update 📝 indicator on week tile
+    const weekTile=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"]');
+    if(weekTile){
+      let ind=weekTile.querySelector('.week-lesson-note-ind');
+      if(hasNote&&!ind){ind=document.createElement('span');ind.className='week-lesson-note-ind';ind.textContent='📝';weekTile.appendChild(ind);}
+      else if(!hasNote&&ind){ind.remove();}
+    }
+    // Update 📝 indicator on day-modal card
+    const dmCard=document.querySelector('.dm-slot-card[data-slot-idx="'+si+'"]')||document.querySelector('.dm-slot-card[data-class-id="'+cid+'"]');
+    if(dmCard){
+      let ind=dmCard.querySelector('.week-lesson-note-ind');
+      if(hasNote&&!ind){ind=document.createElement('span');ind.className='week-lesson-note-ind';ind.textContent='📝';dmCard.appendChild(ind);}
+      else if(!hasNote&&ind){ind.remove();}
+    }
+    // Update lesson-info-popup note section if open for this lesson
+    const lip=document.getElementById('lesson-info-popup');
+    if(lip&&lip.dataset&&(lip.dataset.lipDk===dk&&lip.dataset.lipSi==si&&lip.dataset.lipCid===cid)){
+      const noteData2=getLessonNote(dk,cid,si);
+      const wdNoteVal2=weekdayNotes[wdNoteKey]||'';
+      const lesNoteVal2=noteData2.lessonNote||'';
+      function _sH2(h){if(!h)return'';const d=document.createElement('div');d.innerHTML=h;return d.textContent||d.innerText||'';}
+      const hasWd2=!!(_sH2(wdNoteVal2).trim());
+      const hasLes2=!!(_sH2(lesNoteVal2).trim());
+      let notesEl=lip.querySelector('.lip-notes-section,.lip-notes-empty');
+      if(notesEl)notesEl.remove();
+      const WD_EVERY2=['кожен понеділок','кожен вівторок','кожну середу','кожен четвер','кожну п\'ятницю','кожну суботу','кожну неділю'];
+      const wd2=weekdayFromDateKey(dk);
+      const wdEvery2=WD_EVERY2[wd2]||'кожен цей день';
+      let _ncIdx2=0;
+      function makeNC2(lbl,html){const cId='lip-lnc2-'+(++_ncIdx2);return'<div class="lip-note-card"><div class="lip-note-card-lbl">'+lbl+'</div><div class="lip-note-card-body lip-rich" id="'+cId+'">'+html+'</div><button class="lip-note-card-edit" title="Редагувати"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div>';}
+      const metaEl=lip.querySelector('.lip-meta');
+      if(hasWd2||hasLes2){
+        const sec=document.createElement('div');sec.className='lip-notes-section';
+        let h2='';
+        if(hasWd2)h2+=makeNC2('\uD83D\uDD01 '+escapeHtml(wdEvery2.charAt(0).toUpperCase()+wdEvery2.slice(1)),wdNoteVal2);
+        if(hasLes2)h2+=makeNC2('\uD83D\uDCCC Цей урок',lesNoteVal2);
+        sec.innerHTML=h2;
+        sec.querySelectorAll('.lip-note-card-edit').forEach(function(btn){
+          btn.addEventListener('mousedown',function(ev){ev.stopPropagation();});
+          btn.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){const tileEl=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"]');const lnBtn=tileEl?tileEl.querySelector('.ln-btn'):null;showLessonNotePopup(dk,cid,si,lessonName,lnBtn);});});
+        });
+        sec.querySelectorAll('.lip-rich a').forEach(function(a){a.target='_blank';a.rel='noopener noreferrer';a.addEventListener('click',function(ev){ev.stopPropagation();});});
+        if(metaEl)metaEl.after(sec); else lip.appendChild(sec);
+      } else if(!document.body.classList.contains('readonly-mode')){
+        const emp=document.createElement('div');emp.className='lip-notes-empty';
+        emp.innerHTML='<button class="lip-add-note-btn" id="lip-edit-note-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Нотатки</button>';
+        emp.querySelector('#lip-edit-note-btn').addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){const tileEl=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"]');const lnBtn=tileEl?tileEl.querySelector('.ln-btn'):null;showLessonNotePopup(dk,cid,si,lessonName,lnBtn);});});
+        if(metaEl)metaEl.after(emp); else lip.appendChild(emp);
+      }
+    }
     gdriveScheduleSave();
     renderSidebar();
   }
@@ -3529,9 +3624,15 @@ function showClassTabContextMenu(e,slotId){
     '<div class="ctx-menu-item" id="ctx-cls-rename"><span class="ctx-menu-icon">\u270f\ufe0f</span>\u041f\u0435\u0440\u0435\u0439\u043c\u0435\u043d\u0443\u0432\u0430\u0442\u0438</div>'+
     '<div class="ctx-menu-sep"></div>'+
     '<div class="ctx-menu-item" id="ctx-cls-delete" style="color:var(--red)"><span class="ctx-menu-icon">\ud83d\uddd1\ufe0f</span>\u0412\u0438\u0434\u0430\u043b\u0438\u0442\u0438 \u00ab'+escapeHtml(s.name)+'\u00bb</div>';
-  menu.style.left=Math.min(e.clientX,window.innerWidth-220)+'px';
-  menu.style.top=Math.min(e.clientY,window.innerHeight-100)+'px';
+  menu.style.visibility='hidden';
   document.body.appendChild(menu);
+  const _clsmw=menu.offsetWidth||220,_clsmh=menu.offsetHeight||100;
+  let _clsx=e.clientX,_clsy=e.clientY;
+  if(_clsx+_clsmw>window.innerWidth-6)_clsx=window.innerWidth-_clsmw-6;
+  if(_clsx<6)_clsx=6;
+  if(_clsy+_clsmh>window.innerHeight-6)_clsy=window.innerHeight-_clsmh-6;
+  if(_clsy<6)_clsy=6;
+  menu.style.left=_clsx+'px';menu.style.top=_clsy+'px';menu.style.visibility='';
   menu.querySelector('#ctx-cls-rename').addEventListener('click',()=>{closeContextMenu();renameSlot(slotId)});
   menu.querySelector('#ctx-cls-delete').addEventListener('click',()=>{closeContextMenu();deleteSlot(slotId)});
   setTimeout(()=>document.addEventListener('click',closeContextMenu,{once:true}),0);
