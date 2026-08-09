@@ -7,16 +7,19 @@
 <meta name="google-site-verification" content="397050c5a347b391">
 <link rel="canonical" href="https://codenamexxv.github.io/teacher/">
 
+<!-- Open Graph (Facebook, Telegram, Viber) -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://codenamexxv.github.io/teacher/">
 <meta property="og:title" content="Календар учителя — розклад уроків онлайн">
 <meta property="og:description" content="Зручний онлайн-інструмент для вчителів: розклад уроків, нотатки, список справ, синхронізація між пристроями. Безкоштовно.">
 <meta property="og:locale" content="uk_UA">
 
+<!-- Twitter Card -->
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Календар учителя — розклад уроків онлайн">
 <meta name="twitter:description" content="Зручний онлайн-інструмент для вчителів: розклад уроків, нотатки, список справ, синхронізація між пристроями.">
 
+<!-- Structured Data (JSON-LD) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -40,7 +43,7 @@
 <link rel="apple-touch-icon" href="icons/icon.svg">
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getAuth, signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getCountFromServer, serverTimestamp, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -61,6 +64,8 @@
   window._fbDb = db;
   window._fbProvider = provider;
   window._fbSignInWithPopup = signInWithPopup;
+  window._fbSignInWithRedirect = signInWithRedirect;
+  window._fbGetRedirectResult = getRedirectResult;
   window._fbSignOut = signOut;
   window._fbOnAuthStateChanged = onAuthStateChanged;
   window._fbDoc = doc;
@@ -77,6 +82,14 @@
   onAuthStateChanged(auth, (user) => {
     if (window._fbAuthReady) window._fbAuthReady(user);
   });
+
+  getRedirectResult(auth).then(result => {
+    // redirect sign-in handled automatically by onAuthStateChanged
+  }).catch(err => {
+    if (err && err.code && err.code !== 'auth/popup-closed-by-user') {
+      if (window.showNotification) window.showNotification('Помилка входу: ' + err.message, 'error');
+    }
+  });
 </script>
 <style>
 :root{--blue:#1a73e8;--blue-light:#e8f0fe;--green:#34a853;--red:#ea4335;--orange:#fbbc04;--text:#202124;--text-secondary:#5f6368;--text-light:#70757a;--border:#dadce0;--border-light:#e8eaed;--bg-hover:#f1f3f4;--bg-surface:#fff;--bg-page:#f8f9fa;--shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.1);--shadow-lg:0 8px 30px rgba(0,0,0,.12);--radius:8px;--radius-lg:12px;--transition:.2s cubic-bezier(.4,0,.2,1);--sidebar-w:280px}
@@ -84,7 +97,7 @@
 [data-theme="dark-solid"]{--blue:#8ab4f8;--blue-light:#1f2d3d;--green:#81c995;--red:#f28b82;--orange:#fdd663;--text:#e8eaed;--text-secondary:#9aa0a6;--text-light:#80868b;--border:#3c4043;--border-light:#2d2f31;--bg-hover:#35373a;--bg-surface:#202124;--bg-page:#171819;--shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 12px rgba(0,0,0,.4);--shadow-lg:0 8px 30px rgba(0,0,0,.5)}
 [data-theme="solid"]{--blue-light:rgba(0,0,0,.07);--bg-hover:rgba(0,0,0,.06)}
 [data-theme="dark-solid"]{--blue-light:rgba(255,255,255,.07);--bg-hover:rgba(255,255,255,.07)}
-
+/* ── Custom Events ─────────────────────────────────────────────── */
 .custom-event-block{position:absolute;left:2px;right:2px;border-radius:5px;padding:3px 6px;color:#fff;font-size:.73em;cursor:grab;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.18);transition:box-shadow .2s,transform .15s;user-select:none;z-index:12;background:#e37400}
 .custom-event-block:hover{box-shadow:0 4px 12px rgba(0,0,0,.22);z-index:22;transform:scale(1.02)}
 .custom-event-block.dragging{cursor:grabbing;box-shadow:0 8px 24px rgba(227,116,0,.45);z-index:100;opacity:.93;transform:scale(1.04);transition:none}
@@ -109,12 +122,13 @@
 .fab-group:hover .fab-add-event,.fab-group:focus-within .fab-add-event{opacity:1;pointer-events:auto;transform:translateX(0)}
 body.readonly-mode .fab-add-event{display:none!important}
 @media(max-width:640px){.fab-add-event{width:34px;height:34px;font-size:1.15em}.fab-group{bottom:14px;right:14px}}
-
+/* ── Settings FAB ──────────────────────────────────────────────── */
 .fab-settings{width:38px;height:38px;border-radius:50%;background:var(--blue);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px color-mix(in srgb,var(--blue) 40%,transparent);opacity:0;pointer-events:none;position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%) translateY(10px);transition:opacity .18s cubic-bezier(.4,0,.2,1),transform .18s cubic-bezier(.4,0,.2,1),box-shadow .2s;flex-shrink:0}
 .fab-settings:hover{filter:brightness(1.1);box-shadow:0 5px 16px color-mix(in srgb,var(--blue) 45%,transparent)}
 .fab-settings:active{transform:translateX(-50%) scale(.93)}
 .fab-edit-wrap:hover .fab-settings,.fab-group:hover .fab-settings,.fab-group:focus-within .fab-settings{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);transition-delay:.04s}
 
+/* ── Settings modal ────────────────────────────────────────────── */
 #settings-overlay{position:fixed;inset:0;z-index:5000;background:transparent;display:none;align-items:flex-end;justify-content:flex-end;padding:72px 16px 16px}
 #settings-overlay.open{display:flex}
 #settings-modal{background:var(--bg-surface);border-radius:var(--radius-lg);width:100%;max-width:420px;height:auto;max-height:calc(100vh - 88px);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);border:1px solid var(--border);animation:slideUp .22s cubic-bezier(.4,0,.2,1)}
@@ -162,11 +176,12 @@ body.readonly-mode .fab-add-event{display:none!important}
 .smod-toggle input:checked+.smod-toggle-slider:before{transform:translateX(16px)}
 @media(max-width:640px){#settings-overlay{padding:60px 8px 8px}#settings-modal{max-width:100%;max-height:calc(100vh - 68px)}}
 
+/* solid-color tile picker */
 #solid-color-picker-overlay{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px}
 #solid-color-picker-overlay.open{display:flex}
 #solid-color-picker-box{background:var(--bg-surface);border-radius:14px;padding:22px 24px 20px;max-width:320px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.22);border-top:4px solid var(--blue);animation:slideUp .2s cubic-bezier(.4,0,.2,1)}
 #solid-color-picker-box h3{font-size:.98em;font-weight:700;color:var(--text);margin-bottom:14px}
-
+/* dark-solid-color tile picker */
 #dark-solid-color-picker-overlay{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px}
 #dark-solid-color-picker-overlay.open{display:flex}
 #dark-solid-color-picker-box{background:#202124;border-radius:14px;padding:22px 24px 20px;max-width:320px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.55);border-top:4px solid #8ab4f8;animation:slideUp .2s cubic-bezier(.4,0,.2,1)}
@@ -197,7 +212,7 @@ body.readonly-mode .fab-add-event{display:none!important}
 .sidebar-header .app-name{font-size:.88em;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .sidebar-section{padding:10px 14px;border-bottom:1px solid var(--border-light)}
 .sidebar-section.scrollable{border-bottom:none}
-
+/* Current lesson panel */
 .now-lesson-panel{margin:10px 14px;border-radius:10px;overflow:hidden;background:var(--bg-surface);border:1px solid var(--border-light);box-shadow:var(--shadow-sm);flex-shrink:0}
 .now-lesson-panel.active{border-color:var(--blue);background:linear-gradient(135deg,var(--blue-light),var(--bg-surface))}
 .now-lesson-panel.break{border-color:var(--green);background:linear-gradient(135deg,color-mix(in srgb,var(--green) 10%,var(--bg-surface)),var(--bg-surface))}
@@ -375,7 +390,7 @@ body.readonly-mode .fab-add-event{display:none!important}
 #lesson-info-popup .lip-note-text.empty{color:var(--text-light);font-style:italic}
 #lesson-info-popup .lip-note-edit{flex-shrink:0;width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:var(--bg-surface);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s,color .15s;margin-top:2px}
 #lesson-info-popup .lip-note-edit:hover{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--bg-surface));color:var(--orange)}
-
+/* ── Redesigned notes area ── */
 #lesson-info-popup .lip-notes-empty{padding:10px 16px 14px;display:flex;align-items:center;justify-content:center}
 #lesson-info-popup .lip-add-note-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;border:1.5px dashed var(--border);border-radius:20px;background:transparent;color:var(--text-secondary);font-size:.82em;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .18s,color .18s,background .18s}
 #lesson-info-popup .lip-add-note-btn:hover{border-color:var(--orange);color:var(--orange);background:color-mix(in srgb,var(--orange) 7%,var(--bg-surface))}
@@ -443,7 +458,7 @@ body.readonly-mode .fab-add-event{display:none!important}
 
 .week-current-time{position:absolute;left:0;right:0;height:2px;background:var(--red);z-index:5;pointer-events:none}
 .week-current-time::before{content:'';position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--red)}
-
+/* Full-width now-line spanning the whole grid */
 .week-now-line{position:absolute;left:0;right:0;height:1px;z-index:50;pointer-events:none;display:flex;align-items:center;opacity:.7}
 .week-now-line-bar{flex:1;height:1px;background:linear-gradient(90deg,var(--blue),color-mix(in srgb,var(--blue) 40%,transparent))}
 .week-now-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-left:-1px;box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 20%,transparent)}
@@ -486,7 +501,7 @@ body.readonly-mode .fab-add-event{display:none!important}
 .notes-textarea{width:100%;min-height:70px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:.85em;font-family:inherit;color:var(--text);background:var(--bg-surface);resize:vertical;transition:var(--transition);line-height:1.5}
 .notes-textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 15%,transparent)}
 .notes-textarea::placeholder{color:var(--text-light)}
-
+/* Lesson note icon button on card */
 .ln-btn{background:none;border:none;cursor:pointer;font-size:1em;line-height:1;padding:0 2px;flex-shrink:0;opacity:.35;transition:opacity .15s,filter .15s;filter:grayscale(1)}
 .cab-inline-inp{font-size:.72em;padding:2px 5px;border-radius:4px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.18);color:#fff;width:100%;max-width:120px;margin-top:3px;box-sizing:border-box;outline:none}
 .cab-inline-inp::placeholder{color:rgba(255,255,255,.45);font-style:italic}
@@ -499,7 +514,7 @@ body.readonly-mode .fab-add-event{display:none!important}
 .week-lesson .ln-btn{font-size:.85em;padding:0;opacity:.55;z-index:25;filter:grayscale(1) brightness(5);flex-shrink:0}
 .week-lesson .ln-btn:hover{opacity:1}
 .week-lesson .ln-btn.has-note{opacity:1;filter:brightness(5)}
-
+/* Lesson note popup */
 .ln-popup-overlay{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.35);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .15s;align-items:flex-start;padding-top:max(16px,calc(50vh - 260px))}
 .ln-popup-overlay.ln-closing{animation:lnOverlayOut .2s cubic-bezier(.4,0,.2,1) forwards}
 .ln-popup{background:var(--bg-surface);border-radius:var(--radius-lg);width:100%;max-width:680px;box-shadow:var(--shadow-lg);border-top:3px solid var(--orange);animation:slideUp .2s cubic-bezier(.4,0,.2,1);overflow:hidden}
@@ -656,7 +671,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .abm-times{display:flex;align-items:center;gap:8px;flex:1}
 .abm-times input[type=time]{flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:.88em;background:var(--bg-surface);color:var(--text);font-family:inherit}
 .abm-dash{color:var(--text-light);font-size:.9em;flex-shrink:0}
-
+/* ── Context submenu (Тип уроку) ── */
 .ctx-submenu-wrap{position:relative}
 .ctx-submenu-wrap .ctx-submenu-arrow{margin-left:auto;font-size:.75em;opacity:.55;transition:transform .2s}
 .ctx-submenu-wrap.open .ctx-submenu-arrow{transform:rotate(90deg)}
@@ -666,7 +681,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .ctx-submenu-item{display:block;width:100%;padding:8px 14px;border:none;background:none;color:var(--text);font-size:.83em;font-weight:600;font-family:inherit;cursor:pointer;text-align:left;transition:background .12s;white-space:nowrap}
 .ctx-submenu-item:hover{background:var(--bg-hover)}
 .ctx-submenu-item.active{color:var(--blue);background:var(--blue-light)}
-
+/* ── Mobile: inline accordion for lesson type ── */
 .ctx-type-overlay{display:none;position:fixed;inset:0;z-index:20000;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
 .ctx-type-overlay.open{display:flex}
 .ctx-type-sheet{background:var(--bg-surface);border-radius:var(--radius-lg);min-width:240px;max-width:calc(100vw - 48px);max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:fadeIn .15s}
@@ -674,18 +689,18 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .ctx-inline-type-item{display:block;width:100%;padding:12px 20px;border:none;background:none;color:var(--text);font-size:.95em;font-weight:600;font-family:inherit;cursor:pointer;text-align:left;transition:background .12s}
 .ctx-inline-type-item:active{background:var(--bg-hover)}
 .ctx-inline-type-item.active{color:var(--blue);background:var(--blue-light)}
-
+/* ── Lesson type badge on month card ── */
 .gcal-event-type-badge{display:inline-block;font-size:.62em;font-weight:700;padding:0px 4px;border-radius:4px;background:rgba(0,0,0,.22);color:#fff;vertical-align:middle;margin-left:4px;letter-spacing:.02em;flex-shrink:0;white-space:nowrap;position:absolute;top:3px;right:4px;line-height:1.5;pointer-events:none}
 .gcal-event{position:relative}
-
+/* ── Lesson type badge on week tile ── */
 .week-lesson-type-badge{position:absolute;top:4px;right:5px;font-size:.64em;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(0,0,0,.22);color:#fff;white-space:nowrap;pointer-events:none;line-height:1.45;z-index:2;letter-spacing:.01em}
-
+/* ── Cabinet badge on week tile ── */
 .week-lesson-cabinet-badge{position:absolute;bottom:4px;right:5px;font-size:.78em;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(0,0,0,.22);color:#fff;white-space:nowrap;pointer-events:none;line-height:1.45;z-index:2;letter-spacing:.01em}
 .notification{position:fixed;bottom:16px;left:16px;max-width:280px;padding:10px 16px;border-radius:var(--radius);color:#fff;font-weight:600;font-size:.9em;box-shadow:0 6px 20px rgba(0,0,0,.15);z-index:9000;animation:slideInLeft .3s;display:flex;align-items:center;gap:7px}
 @keyframes slideInLeft{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:translateX(0)}}
 .author-footer{padding:6px 14px;font-size:.7em;color:var(--text-light);text-align:center;border-top:1px solid var(--border-light)}
 .author-footer a{color:var(--blue);text-decoration:none;font-weight:500}
-
+/* ── Share / публічний перегляд ── */
 .share-modal-overlay{position:fixed;inset:0;z-index:4500;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .2s}
 .share-modal-box{background:var(--bg-surface);border-radius:var(--radius-lg);padding:22px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);border-top:4px solid var(--green);animation:slideUp .2s}
 .share-modal-title{font-size:1.05em;font-weight:700;color:var(--green);margin-bottom:6px;display:flex;align-items:center;gap:7px}
@@ -696,7 +711,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .share-hint{font-size:.78em;color:var(--text-secondary);line-height:1.5;background:color-mix(in srgb,var(--green) 10%,var(--bg-surface));border:1px solid color-mix(in srgb,var(--green) 30%,transparent);border-radius:var(--radius);padding:8px 12px;margin-bottom:14px}
 .share-revoke-btn{display:block;width:100%;margin-top:8px;padding:7px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:var(--radius);cursor:pointer;font-size:.82em;font-weight:600;font-family:inherit;transition:var(--transition)}
 .share-revoke-btn:hover{background:color-mix(in srgb,var(--red) 10%,transparent)}
-
+/* QR code block */
 .share-qr-section{margin:14px 0 4px;display:flex;flex-direction:column;align-items:center;gap:8px}
 .share-qr-label{font-size:.72em;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.6px}
 .share-qr-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:10px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm)}
@@ -704,7 +719,7 @@ input[type="date"]:focus,input[type="time"]:focus{outline:none;border-color:var(
 .share-qr-download{padding:5px 14px;background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:.78em;font-weight:600;font-family:inherit;transition:var(--transition);display:flex;align-items:center;gap:5px}
 .share-qr-download:hover{background:var(--bg-hover);color:var(--text)}
 .share-qr-spinner{width:120px;height:120px;display:flex;align-items:center;justify-content:center;color:var(--text-light);font-size:.8em}
-
+/* Read-only banner */
 #readonly-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:linear-gradient(90deg,var(--blue),#1558d6);color:#fff;text-align:center;padding:7px 16px;font-size:.85em;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);letter-spacing:.2px}
 body.readonly-mode #readonly-banner{display:block}
 body.readonly-mode #home-view{padding-top:36px}
@@ -751,6 +766,7 @@ body.readonly-mode .week-lesson:hover{transform:none!important;box-shadow:0 1px 
 .gcal-print-btn:hover{background:var(--bg-hover);color:var(--text)}
 .header-actions{display:flex;align-items:center;gap:7px}
 
+/* ── Print preview overlay ── */
 #print-overlay{display:none;position:fixed;inset:0;z-index:4000;background:var(--bg-page);overflow-y:auto;padding:24px}
 #print-overlay.visible{display:block}
 .print-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
@@ -765,6 +781,7 @@ body.readonly-mode .week-lesson:hover{transform:none!important;box-shadow:0 1px 
 .print-mono-toggle:hover{background:var(--bg-hover);color:var(--text)}
 .print-mono-toggle input{width:15px;height:15px;cursor:pointer;accent-color:var(--blue)}
 
+/* Монохромний режим */
 #print-doc.mono .print-doc-header{background:#fff!important;color:#111!important;border-bottom:2px solid #111!important}
 #print-doc.mono .print-cell-lesson{background:transparent!important;border:1.5px solid #333!important}
 #print-doc.mono .print-cell-name{color:#111!important}
@@ -775,6 +792,7 @@ body.readonly-mode .week-lesson:hover{transform:none!important;box-shadow:0 1px 
 #print-doc.mono span[style*="background:"]{background:transparent!important;border:1.5px solid #333!important}
 #print-doc.mono .print-legend{display:none!important}
 
+/* ── Print document ── */
 #print-doc{background:#fff;color:#111;max-width:900px;margin:0 auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)}
 .print-doc-header{background:#1a73e8;color:#fff;padding:16px 22px;display:flex;align-items:center;justify-content:space-between}
 .print-doc-title{font-size:1.2em;font-weight:700;letter-spacing:.2px}
@@ -794,6 +812,7 @@ td.weekend-col{background:#fff8f8}
 .print-empty-cell{color:#bbb;font-size:.72em;text-align:center;font-style:italic}
 .print-footer{padding:10px 22px;font-size:.72em;color:#999;border-top:1px solid #eee;text-align:right}
 
+/* ── @media print: hide everything, show only #print-doc ── */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body>*:not(#print-overlay){display:none!important}
@@ -806,7 +825,11 @@ td.weekend-col{background:#fff8f8}
   #print-doc.mono .print-cell-lesson{background:transparent!important;border:1.5px solid #333!important}
   @page{margin:10mm;size:A4 landscape}
 }
+/* ─────────────────────────────────────────────────────────────────
+   МОБІЛЬНА АДАПТАЦІЯ — повністю переписана
+   ───────────────────────────────────────────────────────────────── */
 
+/* Планшет ≤900px */
 @media(max-width:900px){
   .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;box-shadow:var(--shadow-lg)}
   .sidebar.collapsed{transform:translateX(-100%);width:var(--sidebar-w)}
@@ -826,9 +849,10 @@ td.weekend-col{background:#fff8f8}
   backdrop-filter:blur(2px);animation:fadeIn .2s
 }
 
+/* ── Мобільний ≤640px ───────────────────────────────────────────── */
 @media(max-width:640px){
 
-  
+  /* === ЗАГОЛОВОК КАЛЕНДАРЯ === */
   .gcal-header{
     display:grid;
     grid-template-columns:auto 1fr auto;
@@ -845,7 +869,7 @@ td.weekend-col{background:#fff8f8}
     z-index:10;
   }
 
-  
+  /* Рядок 1: бургер | назва місяця | [порожньо] */
   .header-left{
     grid-column:1/2; grid-row:1;
     display:flex;align-items:center;gap:6px;
@@ -857,9 +881,9 @@ td.weekend-col{background:#fff8f8}
     text-align:center;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     padding:4px 0;
-    
+    /* Назва місяця — добре видна, нікуди не зникає */
   }
-  
+  /* Рядок 2: кнопки керування — повна ширина, по центру */
   .header-actions{
     grid-column:1/4; grid-row:2;
     display:flex;align-items:center;justify-content:space-between;
@@ -876,10 +900,10 @@ td.weekend-col{background:#fff8f8}
   .gcal-view-toggle{display:flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
   .gcal-view-btn{padding:6px 10px;font-size:.78em}
 
-  
+  /* Кнопка Друк — прихована на мобільному */
   #gcal-print-btn{ display:none !important }
 
-  
+  /* Кнопка Поділитись — тільки іконка */
   #share-btn{
     padding:6px 8px;font-size:0;
     width:32px;height:32px;
@@ -891,14 +915,14 @@ td.weekend-col{background:#fff8f8}
     top:50%;left:50%;transform:translate(-50%,-50%);
   }
 
-  
+  /* Sidebar toggle — крупніша зона кліку */
   .sidebar-toggle-btn{
     width:38px;height:38px;font-size:1.3em;
     border-radius:var(--radius);flex-shrink:0;
     background:var(--blue-light);color:var(--blue);
   }
 
-  
+  /* === САЙДБАР === */
   .sidebar{
     width:min(88vw,290px) !important;
     max-width:290px;
@@ -915,7 +939,7 @@ td.weekend-col{background:#fff8f8}
   .sidebar-btn{font-size:.69em;padding:7px 3px}
   .author-footer{font-size:.68em;padding:5px 12px;text-align:center}
 
-  
+  /* === МІСЯЧНИЙ ВИГЛЯД === */
   .gcal-weekday{font-size:.6em;padding:4px 0;letter-spacing:0}
   .gcal-cell-header{padding:2px 3px}
   .gcal-cell-date{width:20px;height:20px;font-size:.72em}
@@ -923,20 +947,20 @@ td.weekend-col{background:#fff8f8}
   .gcal-wk-num{display:none}
   .gcal-lcount{font-size:.52em}
 
-  
+  /* === ТИЖНЕВИЙ ВИГЛЯД === */
   .week-header-day{font-size:.63em}
   .week-header-date{font-size:1.05em}
   .week-header-cell.today .week-header-date{width:30px;height:30px;font-size:.95em}
   .week-lesson{font-size:.65em;padding:2px 3px}
   .week-time-label{font-size:.58em;right:2px}
 
-  
+  /* === FAB КНОПКИ === */
   .fab{width:48px;height:48px;font-size:1.55em}
   .fab-group{bottom:18px;right:14px;gap:8px}
   .fab-add-event{width:36px;height:36px;font-size:1.2em}
   .fab-settings{width:36px;height:36px}
 
-  
+  /* === МОДАЛЬНІ ВІКНА — BOTTOM SHEET СТИЛЬ === */
   .day-modal-overlay{
     align-items:flex-end;
     padding:0;
@@ -951,7 +975,7 @@ td.weekend-col{background:#fff8f8}
   .day-modal-header{
     padding:14px 16px 10px;
     border-radius:16px 16px 0 0;
-    
+    /* "ручка" зверху */
     background:var(--bg-surface);
     border-bottom:1px solid var(--border-light);
     position:relative;
@@ -967,7 +991,7 @@ td.weekend-col{background:#fff8f8}
   .day-modal-lesson{font-size:.82em}
   .dm-slot-time{min-width:72px;font-size:.72em}
 
-  
+  /* Звичайні modal-box → теж bottom sheet */
   .modal-overlay{
     align-items:flex-end;
     padding:0;
@@ -990,7 +1014,7 @@ td.weekend-col{background:#fff8f8}
   .modal-btn{padding:11px 18px;font-size:.88em}
   .modal-actions{gap:8px}
 
-  
+  /* === НАЛАШТУВАННЯ — BOTTOM SHEET === */
   #settings-overlay{
     padding:0 !important;
     align-items:flex-end;
@@ -1007,7 +1031,7 @@ td.weekend-col{background:#fff8f8}
     padding:14px 14px 10px;
     position:relative;
   }
-  
+  /* Ручка */
   .smod-head::before{
     content:'';display:block;
     width:40px;height:4px;
@@ -1021,14 +1045,14 @@ td.weekend-col{background:#fff8f8}
   .smod-sound-row{padding:8px 10px}
   .smod-sound-minutes-row{padding:8px 10px}
 
-  
+  /* === ПОВІДОМЛЕННЯ (toast) === */
   .notification{
     bottom:82px;left:10px;right:10px;
     max-width:none;font-size:.86em;
     border-radius:var(--radius-lg);
   }
 
-  
+  /* === РЕДАКТОР РОЗКЛАДУ (#edit-view) === */
   #edit-view{
     padding:0 !important;
     overflow-y:auto;
@@ -1061,7 +1085,7 @@ td.weekend-col{background:#fff8f8}
     white-space:nowrap;flex-shrink:0;margin-left:10px;
   }
 
-  
+  /* Двоколонний main-grid → одноколонний */
   .main-grid{
     display:flex;flex-direction:column;gap:0;
     padding:0 10px;
@@ -1078,7 +1102,7 @@ td.weekend-col{background:#fff8f8}
   }
   .section h3{font-size:.92em;margin-bottom:8px}
 
-  
+  /* Вкладки класів — горизонтальний скрол */
   .class-tabs{
     display:flex;flex-wrap:nowrap;
     overflow-x:auto;gap:6px;padding-bottom:6px;
@@ -1089,7 +1113,7 @@ td.weekend-col{background:#fff8f8}
   .class-tab{flex-shrink:0;padding:7px 12px;font-size:.8em}
   .selected-class-bar{flex-wrap:wrap;gap:6px}
 
-  
+  /* Дні тижня: 3 стовпці замість 6 */
   .days-grid{grid-template-columns:repeat(4,1fr);gap:6px}
   .day-card{padding:8px 6px}
   .day-label{font-size:.85em;margin-bottom:5px}
@@ -1097,7 +1121,7 @@ td.weekend-col{background:#fff8f8}
   .lesson-toggle .label{font-size:.68em;min-width:44px}
   .day-preview{font-size:.65em}
 
-  
+  /* Розклад дзвінків — таблиця з відповідними розмірами */
   .bell-schedule-grid{gap:6px}
   .bell-row{
     grid-template-columns:22px 1fr 1fr 28px;
@@ -1111,7 +1135,7 @@ td.weekend-col{background:#fff8f8}
   .bell-row-remove{width:28px;height:28px;flex-shrink:0}
   .bell-add-btn{padding:8px;font-size:.82em}
 
-  
+  /* Період і канікули — одна колонка */
   .period-holidays-grid{grid-template-columns:1fr}
   .date-inputs{grid-template-columns:1fr 1fr;gap:6px}
   .date-group label{font-size:.82em}
@@ -1119,28 +1143,28 @@ td.weekend-col{background:#fff8f8}
     font-size:.85em;padding:8px 6px;min-width:0;width:100%;
     box-sizing:border-box;
   }
-  
+  /* Канікули — поля дат у стовпець */
   .holiday-inputs{
     grid-template-columns:1fr 1fr auto;
     gap:5px;
   }
   .btn{padding:8px 10px;font-size:.85em;white-space:nowrap}
 
-  
+  /* Швидкі кнопки — горизонтальний скрол */
   .quick-buttons{gap:6px;margin-bottom:8px}
   .quick-btn{padding:7px 10px;font-size:.8em}
 
-  
+  /* Статистика */
   .stats{grid-template-columns:repeat(3,1fr);gap:5px}
   .stat-card{padding:8px 4px;font-size:.78em}
   .stat-number{font-size:1.3em}
 
-  
+  /* Result textarea */
   #result{font-size:.8em;padding:10px;max-height:220px}
   .action-buttons{gap:7px}
   .action-buttons .btn{flex:1;text-align:center}
 
-  
+  /* Сітка місяців у редакторі */
   .calendar-grid-wrapper{
     grid-template-columns:repeat(2,1fr);
     gap:6px;
@@ -1148,7 +1172,7 @@ td.weekend-col{background:#fff8f8}
   .calendar-month{padding:6px}
   .calendar-month-title{font-size:.78em}
 
-  
+  /* === PRINT OVERLAY === */
   #print-overlay{padding:10px}
   .print-toolbar{
     flex-wrap:wrap;gap:6px;
@@ -1158,8 +1182,9 @@ td.weekend-col{background:#fff8f8}
   .print-hint{width:100%;font-size:.72em;flex:none}
   .print-mono-toggle{font-size:.8em;padding:5px 8px}
   .print-toolbar-btn{padding:8px 12px;font-size:.82em}
-}
+}/* end 640px */
 
+/* ── Дуже малі екрани ≤400px ─────────────────────────────────── */
 @media(max-width:400px){
   .gcal-title{font-size:.95em}
   .gcal-today-btn{padding:5px 7px;font-size:.74em}
@@ -1176,8 +1201,9 @@ td.weekend-col{background:#fff8f8}
   to{transform:translateY(0)}
 }
 
+/* ─── Мобільний тижневий вигляд: бар днів ─────────────── */
 @media(max-width:640px){
-  
+  /* Бар з вкладками днів */
   #mob-day-bar{
     display:flex;align-items:center;
     background:var(--bg-surface);
@@ -1223,16 +1249,16 @@ td.weekend-col{background:#fff8f8}
   .mob-day-tab.active .mob-tab-name{color:var(--blue)}
   .mob-day-tab.active .mob-tab-date{color:var(--blue)}
 
-  
+  /* Тижневий вигляд — збільшені розміри для 1 колонки */
   .week-view.active{flex-direction:column}
-  
+  /* Шапка з днями захована — mob-day-bar вже показує цю інформацію */
   #week-header{display:none}
 
-  
+  /* Часовий стовпець — компактний */
   .week-time-col{min-width:46px;max-width:46px}
   .week-time-label{font-size:.72em;right:4px;color:var(--text-secondary)}
 
-  
+  /* Блок уроку — крупний, зручний */
   .week-lesson{
     left:3px;right:3px;
     border-radius:8px;
@@ -1251,15 +1277,15 @@ td.weekend-col{background:#fff8f8}
     margin-top:2px;
   }
 
-  
+  /* Лінія поточного часу */
   .week-now-label{display:none}
   .week-now-dot{width:9px;height:9px}
 
-  
+  /* Часові позначки — кожну годину чіткіша лінія */
   .week-hour-line{border-top:1px solid var(--border)}
   .week-half-line{border-top:1px dashed var(--border-light)}
 
-  
+  /* Власні події */
   .custom-event-block{
     left:3px;right:3px;
     border-radius:7px;
@@ -1269,6 +1295,7 @@ td.weekend-col{background:#fff8f8}
   .custom-event-block .cev-time{font-size:.9em;font-weight:700}
 }
 
+/* ── Page load blur overlay ─────────────────────────────── */
 #app-loading-overlay{
   position:fixed;inset:0;z-index:99999;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
@@ -1422,6 +1449,7 @@ const MONTH_NAMES_UK_GEN=['\u0441\u0456\u0447\u043d\u044f','\u043b\u044e\u0442\u
 const DAY_HEADERS_UK=['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431','\u041d\u0434'];
 const dayNamesList=['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431','\u041d\u0434'];
 
+// ── Custom Events ────────────────────────────────────────────────
 const CUSTOM_EVENTS_KEY='teacherCalendarCustomEvents';
 const EVENT_NOTES_KEY='teacherCalendarEventNotes';
 const CUSTOM_EVENT_COLOR='#e37400';
@@ -1430,6 +1458,10 @@ let customEvents=[];
 function loadCustomEvents(){try{const s=localStorage.getItem(CUSTOM_EVENTS_KEY);if(s)customEvents=JSON.parse(s)}catch(e){customEvents=[]}}
 function saveCustomEvents(){try{localStorage.setItem(CUSTOM_EVENTS_KEY,JSON.stringify(customEvents))}catch(e){}}
 
+// ── Нотатки до подій ────────────────────────────────────────────
+// eventNotes зберігає нотатку, прив'язану до КОНКРЕТНОЇ дати повторюваної події
+// (аналог lessonNotes). Загальна нотатка "на кожне повторення" зберігається
+// прямо в полі ev.note і синхронізується разом з самою подією.
 let eventNotes={};
 function loadEventNotes(){try{const s=localStorage.getItem(EVENT_NOTES_KEY);if(s)eventNotes=JSON.parse(s)}catch(e){eventNotes={}}}
 function saveEventNotes(){try{localStorage.setItem(EVENT_NOTES_KEY,JSON.stringify(eventNotes))}catch(e){}}
@@ -1440,13 +1472,13 @@ function getEventNoteForDisplay(ev,dk){return getEventOccurrenceNote(ev.id,dk)||
 function eventHasNote(ev,dk){return !!(getEventOccurrenceNote(ev.id,dk)||ev.note)}
 
 function getEventsForDate(dk){
-  
+  // Parse dateKey "YYYY-M-D"
   const parts=dk.split('-');
   const d=new Date(+parts[0],+parts[1],+parts[2]);
-  const wi=(d.getDay()+6)%7; 
+  const wi=(d.getDay()+6)%7; // 0=Пн … 5=Сб
   return customEvents.filter(function(ev){
     if(ev.recurring){
-      
+      // same weekday index AND date is on or after the event's creation date
       const ep=ev.date.split('-');
       const ed=new Date(+ep[0],+ep[1],+ep[2]);
       return (ed.getDay()+6)%7===wi && d>=ed;
@@ -1460,10 +1492,10 @@ function openAddEventModal(dk, existingId, defStartTime, defEndTime){
   const ov=document.createElement('div');ov.className='modal-overlay';
   const b=document.createElement('div');b.className='modal-box';
 
-  
+  // Build date default
   let defDate='';
   if(existing){
-    
+    // existing.date is stored as "YYYY-M-D" (dateKey format), convert to YYYY-MM-DD for <input type="date">
     const ep=existing.date.split('-');
     defDate=String(ep[0]).padStart(4,'0')+'-'+String(parseInt(ep[1])+1).padStart(2,'0')+'-'+String(ep[2]).padStart(2,'0');
   } else if(dk){
@@ -1509,8 +1541,8 @@ function openAddEventModal(dk, existingId, defStartTime, defEndTime){
     if(!startTime||!endTime){showNotification('Вкажіть час!','error');return}
     if(startTime>=endTime){showNotification('Початок має бути раніше кінця!','error');return}
 
-    
-    
+    // Convert date input (YYYY-MM-DD) to dateKey format (YYYY-M-D)
+    // Note: <input type="date"> gives month as 1-12; dateKey uses getMonth() which is 0-11
     const dp=dateVal.split('-');
     const evDk=parseInt(dp[0])+'-'+(parseInt(dp[1])-1)+'-'+parseInt(dp[2]);
 
@@ -1518,19 +1550,19 @@ function openAddEventModal(dk, existingId, defStartTime, defEndTime){
     const isRecurring=recurringCb?recurringCb.checked:false;
 
     if(existing){
-      
+      // Was recurring and still recurring → ask scope (edit all or just this day)
       if(existing.recurring&&isRecurring){
         ov.remove();
         _showEventRecurringEditModal(existing.id,title,evDk,startTime,endTime,'edit');
       } else if(existing.recurring&&!isRecurring){
-        
+        // User turned OFF recurring → convert to single-day event: delete old recurring, add plain event
         const idx=customEvents.findIndex(e=>e.id===existing.id);
         if(idx>=0)customEvents.splice(idx,1);
         customEvents.push({id:'ev_'+Date.now(),title,date:evDk,startTime,endTime,recurring:false});
         saveCustomEvents();ov.remove();_refreshAfterEventChange();
         showNotification('Подію оновлено!','success');
       } else {
-        
+        // Was not recurring — save title/date/time/recurring directly
         existing.title=title;existing.date=evDk;existing.startTime=startTime;existing.endTime=endTime;existing.recurring=isRecurring;
         saveCustomEvents();ov.remove();_refreshAfterEventChange();
         showNotification('Подію оновлено!','success');
@@ -1565,15 +1597,15 @@ function _showEventRecurringEditModal(id,newTitle,newDk,newStart,newEnd,mode){
     const ev=customEvents.find(e=>e.id===id);
     if(!ev)return;
     if(mode==='delete'){
-      
-      
+      // Create a single-day exception: remove recurring, add specific deleted marker
+      // Easiest: add a one-off "deleted" record for this date
       if(!ev._deletedDates)ev._deletedDates=[];
       ev._deletedDates.push(newDk);
       saveCustomEvents();
     } else {
-      
+      // Add a one-off override event for just this date
       customEvents.push({id:'ev_'+Date.now(),title:newTitle,date:newDk,startTime:newStart,endTime:newEnd,recurring:false});
-      
+      // And mark original as deleted on this date
       if(!ev._deletedDates)ev._deletedDates=[];
       ev._deletedDates.push(newDk);
       saveCustomEvents();
@@ -1644,6 +1676,7 @@ function showEventContextMenu(e,evId,dk){
   setTimeout(()=>document.addEventListener('click',closeContextMenu,{once:true}),0);
 }
 
+// Filter out events deleted for specific dates
 function _isEventActiveOnDate(ev,dk){
   return !(ev._deletedDates&&ev._deletedDates.includes(dk));
 }
@@ -1656,12 +1689,12 @@ function _refreshAfterEventChange(){
   if(homeView==='month')renderHomeCalendar();
   else renderWeekView();
   if(typeof renderSidebar==='function')renderSidebar();
-  
+  // Refresh open day modal if present
   const existingModal=document.querySelector('.day-modal');
   if(existingModal){
     const title=existingModal.querySelector('.day-modal-title');
     if(title){
-      
+      // find dk from title text — easier to just re-render event section
       const body=existingModal.querySelector('.day-modal-body');
       const addBtn=body?body.querySelector('.day-modal-add-event-btn'):null;
       if(addBtn&&addBtn.dataset.dk){
@@ -2105,7 +2138,7 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
     a.setAttribute('rel','noopener noreferrer');
     a.addEventListener('click',function(ev){ev.stopPropagation();});
   });
-  
+  // Check height of each note body — if taller than max, clamp and show "more" button
   var LIP_NOTE_MAX=120;
   pop.querySelectorAll('.lip-note-card-body.lip-rich').forEach(function(body){
     if(body.scrollHeight>LIP_NOTE_MAX+10){
@@ -2292,7 +2325,7 @@ function showWeekEmptyContextMenu(e, dk, offsetY){
   if(document.body.classList.contains('readonly-mode'))return;
   closeContextMenu();
 
-  
+  // Розраховуємо час з offsetY відносно колонки
   function calcTimeFromClick(){
     const totalMin=(offsetY/HOUR_HEIGHT+DAY_START_HOUR)*60;
     const snapped=Math.round(totalMin/15)*15;
@@ -2313,7 +2346,7 @@ function showWeekEmptyContextMenu(e, dk, offsetY){
     '<div class="ctx-menu-item" id="ctx-week-reload"><span class="ctx-menu-icon"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span>Оновити сторінку</div>'+
     '<div class="ctx-menu-sep"></div>'+
     '<div class="ctx-menu-item" id="ctx-week-edit"><span class="ctx-menu-icon"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#4285f4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></span>Редагувати розклад</div>';
-  
+  // Позиціювання
   document.body.appendChild(menu);
   const mw=menu.offsetWidth, mh=menu.offsetHeight;
   let x=e.clientX, y=e.clientY;
@@ -2331,6 +2364,7 @@ function showWeekEmptyContextMenu(e, dk, offsetY){
   setTimeout(()=>document.addEventListener('click',closeContextMenu,{once:true}),0);
 }
 
+/* ── Long-press для мобільних (замінює contextmenu на touch) ── */
 function addLongPress(el, handler) {
   let _timer = null;
   let _moved = false;
@@ -2338,9 +2372,9 @@ function addLongPress(el, handler) {
     _moved = false;
     _timer = setTimeout(function() {
       if (_moved) return;
-      
+      // Вібрація якщо підтримується
       if (navigator.vibrate) navigator.vibrate(40);
-      
+      // Емулюємо подію як contextmenu з координатами дотику
       const touch = e.touches[0];
       const fakeEvt = {
         preventDefault: function(){},
@@ -2349,7 +2383,7 @@ function addLongPress(el, handler) {
         clientY: touch.clientY
       };
       handler(fakeEvt);
-      
+      // Блокуємо наступний click щоб не відкрився day modal
       el.addEventListener('click', function stopClick(ev) {
         ev.stopPropagation();
         el.removeEventListener('click', stopClick);
@@ -2416,7 +2450,7 @@ function showDeleteLessonModal(dk,si,lessonName,cid){
     '</div>';
   ov.appendChild(b);document.body.appendChild(ov);
   function delDay(){
-    
+    // Mark this specific date as deleted for this class
     deletedLessons[dk+'|'+cid]=true;
     saveDeletedLessons();
     gdriveSave();
@@ -2428,17 +2462,17 @@ function showDeleteLessonModal(dk,si,lessonName,cid){
     showNotification('Урок видалено на цей день','success');
   }
   function delAll(){
-    
+    // Remove the weekday checkbox from class state in localStorage
     const dayNamesMap=['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
     const dayName=dayNamesMap[wd];
-    
+    // Update stored class state
     const stored=getClassStateFromStorage(cid);
     if(stored&&stored.days&&stored.days[dayName]){
       stored.days[dayName].checked=false;
       try{localStorage.setItem(classKey(cid),JSON.stringify(stored))}catch(e){}
       gdriveSave();
     }
-    
+    // If this is the currently edited class and edit mode is open, update UI checkboxes
     if(cid===currentClass){
       const cb=document.getElementById('cb-'+dayName);
       if(cb){
@@ -2582,7 +2616,7 @@ async function resetAllSettings(){
     'teacherCalendarTodos','teacherCalendarTodoCollapsed'
   ];
   keysToRemove.forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  
+  // Remove all class states
   Object.keys(localStorage).filter(k=>k.startsWith('teacherCalendarClass_')).forEach(k=>{
     try{localStorage.removeItem(k)}catch(e){}
   });
@@ -2645,12 +2679,12 @@ function updateNowLessonPanel(){
     const key=slotArr[si];
     if(key){const p=key.split(':');const cid=p[0];const les=allL.find(l=>l.classId===cid);if(les){lessonName=les.className;lessonColor=classColorMap[cid]||'var(--blue)';lessonClassId=cid;lessonSlotIdx=si;}}
   }
-  
+  // Determine which mode
   const mode=activeSlot?'active':'break';
   const panel=el.querySelector('.now-lesson-panel');
-  
+  // If panel type changed — full redraw
   if(!panel||!panel.classList.contains(mode)){
-    
+    // Build skeleton once
     if(activeSlot){
       el.innerHTML=
         '<div class="now-lesson-panel active">'+
@@ -2673,7 +2707,7 @@ function updateNowLessonPanel(){
         '</div>';
     }
   }
-  
+  // In-place updates every second
   const stEl=document.getElementById('nlp-status');
   const nmEl=document.getElementById('nlp-name');
   const subEl=document.getElementById('nlp-subject');
@@ -2682,7 +2716,7 @@ function updateNowLessonPanel(){
   const cdEl=document.getElementById('nlp-cd');
   const barEl=document.getElementById('nlp-bar');
   if(!stEl||!cdEl||!barEl)return;
-  
+  // Helper: get lesson info for a slot index
   function getLessonAtSlot(si){
     const key2=slotArr[si];
     if(!key2)return{name:'',color:'var(--blue)',classId:''};
@@ -2690,7 +2724,7 @@ function updateNowLessonPanel(){
     const les2=allL.find(l=>l.classId===cid2);
     return les2?{name:les2.className,color:classColorMap[cid2]||'var(--blue)',classId:cid2}:{name:'',color:'var(--blue)',classId:''};
   }
-  
+  // Next lesson panel
   const nextPanelEl=document.getElementById('next-lesson-panel');
   if(nextPanelEl){
     const curIdx=(activeSlot||breakNext).idx;
@@ -2747,7 +2781,7 @@ function updateNowLessonPanel(){
 clearInterval(window._nowPanelTimer);
 window._nowPanelTimer=setInterval(updateNowLessonPanel,1000);
 
-function renderSidebar(){const today=new Date();today.setHours(0,0,0,0);const dk=dateKey(today);if(!cachedAllData)cachedAllData=buildAllClassesData();const dc=(cachedAllData.allDayMap[dk]||[]);const visibleDc=dc.filter(c=>!hiddenClasses.has(c.classId));const el=document.getElementById('today-summary');const dayStr=today.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});const total=visibleDc.length>0?visibleDc.reduce((s,c)=>s+c.lessons,0):0;let h='<div class="today-summary-date">'+dayStr+'</div><div class="today-summary-title">'+(visibleDc.length>0?pluralLesson(total):'\u0412\u0456\u043b\u044c\u043d\u0438\u0439 \u0434\u0435\u043d\u044c')+'</div>';const evsToday2=(typeof getActiveEventsForDate==='function'?getActiveEventsForDate(dk):[]).slice().sort((a,b)=>a.startTime.localeCompare(b.startTime));if(dc.length>0){const allL2=buildDayOrderList(dc);const totalSlots2=Math.max(allL2.length,bellSchedule.length);const slotArr2=getSlotOrder(dk,allL2,totalSlots2);for(let si2=0;si2<totalSlots2;si2++){const key2=slotArr2[si2];if(!key2)continue;const p2=key2.split(':');const cid2=p2[0];const les2=allL2.find(l=>l.classId===cid2&&l.origIdx===parseInt(p2[1],10));if(!les2)continue;if(isLessonDeletedFull(dk,cid2))continue;if(hiddenClasses.has(cid2))continue;const color=cachedAllData.classColorMap[cid2]||'#1a73e8';const bell=getBellForSlot(dk,si2);const wd=(today.getDay()+6)%7;const nd=getLessonNote(dk,cid2,si2);const sideCab2=getLessonCabinet(dk,cid2,si2);const sideCabHtm=sideCab2?'<span class="today-lesson-cabinet"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#9334e6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> '+escapeHtml(sideCab2)+'</span>':'';let ntxt=nd.lessonNote||nd.dayNote||(weekdayNotes[weekdayNoteKey(wd,cid2,si2)]||'');let nhtm='';if(ntxt){const _sd=document.createElement('div');_sd.innerHTML=ntxt;ntxt=_sd.textContent||_sd.innerText||'';if(ntxt.length>25)ntxt=ntxt.substring(0,25)+'...';nhtm='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg> '+escapeHtml(ntxt)+'</span>'}h+='<div class="today-lesson-item"><span class="today-lesson-dot" style="background:'+color+'"></span><span class="today-lesson-time">'+bell.start+'</span><span class="today-lesson-info"><span class="today-lesson-name">'+escapeHtml(les2.className)+'</span><span class="today-lesson-num">Урок '+(si2+1)+'</span>'+sideCabHtm+nhtm+'</span></div>'}}else if(evsToday2.length===0)h+='<div class="today-no-lessons">\u041d\u0435\u043c\u0430\u0454 \u0443\u0440\u043e\u043a\u0456\u0432</div>';evsToday2.forEach(function(ev2){const noteTxt2=getEventNoteForDisplay(ev2,dk);let noteHtm2='';if(noteTxt2){let nt2=noteTxt2;if(nt2.length>25)nt2=nt2.substring(0,25)+'...';noteHtm2='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>'+escapeHtml(nt2)+'</span>'}h+='<div class="today-event-item" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Правий клік для редагування / видалення"><span class="today-event-dot"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></span><span class="today-event-time">'+ev2.startTime+'</span><span class="today-event-info"><span class="today-event-name">'+escapeHtml(ev2.title)+'</span>'+noteHtm2+'</span>'+(ev2.recurring?'<span class="today-event-badge"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>':'')+'<button class="ln-btn today-event-notebtn'+(noteTxt2?' has-note':'')+'" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Нотатка до події"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg></button></div>'});el.innerHTML=h;el.querySelectorAll('.today-event-item').forEach(function(row){row.addEventListener('contextmenu',function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)});addLongPress(row,function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)})});el.querySelectorAll('.today-event-notebtn').forEach(function(btn){btn.addEventListener('mousedown',function(e){e.stopPropagation()});btn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(btn.dataset.evId,btn.dataset.evDk,btn)})});updateNowLessonPanel();const cl=document.getElementById('sidebar-class-list');cl.innerHTML='';
+function renderSidebar(){const today=new Date();today.setHours(0,0,0,0);const dk=dateKey(today);if(!cachedAllData)cachedAllData=buildAllClassesData();const dc=(cachedAllData.allDayMap[dk]||[]);const visibleDc=dc.filter(c=>!hiddenClasses.has(c.classId));const el=document.getElementById('today-summary');const dayStr=today.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});const total=visibleDc.length>0?visibleDc.reduce((s,c)=>s+c.lessons,0):0;let h='<div class="today-summary-date">'+dayStr+'</div><div class="today-summary-title">'+(visibleDc.length>0?pluralLesson(total):'\u0412\u0456\u043b\u044c\u043d\u0438\u0439 \u0434\u0435\u043d\u044c')+'</div>';const evsToday2=(typeof getActiveEventsForDate==='function'?getActiveEventsForDate(dk):[]).slice().sort((a,b)=>a.startTime.localeCompare(b.startTime));if(dc.length>0){const allL2=buildDayOrderList(dc);const totalSlots2=Math.max(allL2.length,bellSchedule.length);const slotArr2=getSlotOrder(dk,allL2,totalSlots2);for(let si2=0;si2<totalSlots2;si2++){const key2=slotArr2[si2];if(!key2)continue;const p2=key2.split(':');const cid2=p2[0];const les2=allL2.find(l=>l.classId===cid2&&l.origIdx===parseInt(p2[1],10));if(!les2)continue;if(isLessonDeletedFull(dk,cid2))continue;if(hiddenClasses.has(cid2))continue;const color=cachedAllData.classColorMap[cid2]||'#1a73e8';const bell=getBellForSlot(dk,si2);const wd=(today.getDay()+6)%7;const nd=getLessonNote(dk,cid2,si2);const sideCab2=getLessonCabinet(dk,cid2,si2);const sideCabHtm=sideCab2?'<span class="today-lesson-cabinet"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#9334e6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> '+escapeHtml(sideCab2)+'</span>':'';let ntxt=nd.lessonNote||nd.dayNote||(weekdayNotes[weekdayNoteKey(wd,cid2,si2)]||'');let nhtm='';if(ntxt){const _sd=document.createElement('div');_sd.innerHTML=ntxt;ntxt=_sd.textContent||_sd.innerText||'';if(ntxt.length>25)ntxt=ntxt.substring(0,25)+'...';nhtm='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg> '+escapeHtml(ntxt)+'</span>'}h+='<div class="today-lesson-item"><span class="today-lesson-dot" style="background:'+color+'"></span><span class="today-lesson-time">'+bell.start+'</span><span class="today-lesson-info"><span class="today-lesson-name">'+escapeHtml(les2.className)+'</span><span class="today-lesson-num">Урок '+(si2+1)+'</span>'+sideCabHtm+nhtm+'</span></div>'}}else if(evsToday2.length===0)h+='<div class="today-no-lessons">\u041d\u0435\u043c\u0430\u0454 \u0443\u0440\u043e\u043a\u0456\u0432</div>';evsToday2.forEach(function(ev2){const noteTxt2=getEventNoteForDisplay(ev2,dk);let noteHtm2='';if(noteTxt2){let nt2=noteTxt2;if(nt2.length>25)nt2=nt2.substring(0,25)+'...';noteHtm2='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>'+escapeHtml(nt2)+'</span>'}h+='<div class="today-event-item" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Правий клік для редагування / видалення"><span class="today-event-dot"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></span><span class="today-event-time">'+ev2.startTime+'</span><span class="today-event-info"><span class="today-event-name">'+escapeHtml(ev2.title)+'</span>'+noteHtm2+'</span>'+(ev2.recurring?'<span class="today-event-badge"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>':'')+'<button class="ln-btn today-event-notebtn'+(noteTxt2?' has-note':'')+'" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Нотатка до події"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg></button></div>'});el.innerHTML=h;el.querySelectorAll('.today-event-item').forEach(function(row){row.addEventListener('contextmenu',function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)});addLongPress(row,function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)})});el.querySelectorAll('.today-event-notebtn').forEach(function(btn){btn.addEventListener('mousedown',function(e){e.stopPropagation()});btn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(btn.dataset.evId,btn.dataset.evDk,btn)})});updateNowLessonPanel();const cl=document.getElementById('sidebar-class-list');cl.innerHTML='';// Calculate per-class weekly hours
 const classHrsMap={};
 let totalWeeklyHrs=0;
 slots.forEach(function(s){
@@ -2777,7 +2811,7 @@ function navigateNext(){animateNavigation('next',_navigateNextCore)}
 function goToToday(){const n=new Date();homeYear=n.getFullYear();homeMonth=n.getMonth();weekStartDate=getMonday(n);cachedAllData=null;if(homeView==='month')renderHomeCalendar();else renderWeekView();updateTitle();renderSidebar()}
 function renderHomeCalendar(){if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;document.getElementById('gcal-month-year').textContent=MONTH_NAMES_UK[homeMonth]+' '+homeYear;const wd=document.getElementById('gcal-weekdays');wd.innerHTML='';wd.style.gridTemplateColumns='repeat(7,1fr)';DAY_HEADERS_UK.forEach((dn,i)=>{const d=document.createElement('div');d.className='gcal-weekday'+(i>=5?' weekend':'');d.textContent=dn;wd.appendChild(d)});const grid=document.getElementById('gcal-grid');grid.innerHTML='';grid.style.gridTemplateColumns='repeat(7,1fr)';const dim=new Date(homeYear,homeMonth+1,0).getDate();const fw=(new Date(homeYear,homeMonth,1).getDay()+6)%7;const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<fw;i++){const d=new Date(homeYear,homeMonth,0).getDate()-fw+1+i;const dt=new Date(homeYear,homeMonth-1,d);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,true,period,allDayMap,classColorMap,today))}for(let d=1;d<=dim;d++){const dt=new Date(homeYear,homeMonth,d);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,false,period,allDayMap,classColorMap,today))}const tc=fw+dim;const target=tc<=35?35:42;for(let i=1;i<=target-tc;i++){const dt=new Date(homeYear,homeMonth+1,i);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,true,period,allDayMap,classColorMap,today))}}
 function createGcalCell(dateObj,outside,period,allDayMap,classColorMap,today){const cell=document.createElement('div');const dk=dateKey(dateObj);const inRange=dateObj>=period.start&&dateObj<=period.end;const wi=(dateObj.getDay()+6)%7;const isWE=wi>=5;const dayC=inRange?(allDayMap[dk]||[]):[];const visibleDayC=dayC.filter(c=>!hiddenClasses.has(c.classId));const isHol=inRange&&isDateInHoliday(dateObj,period.holidays);const isT=dateObj.getTime()===today.getTime();let cls='gcal-cell';if(outside)cls+=' outside';else if(isHol&&visibleDayC.length===0)cls+=' holiday';else if(isWE)cls+=' weekend';if(isT)cls+=' today';cell.className=cls;const hdr=document.createElement('div');hdr.className='gcal-cell-header';const ds=document.createElement('div');ds.className='gcal-cell-date';ds.textContent=dateObj.getDate();hdr.appendChild(ds);if(!outside){const wn=document.createElement('span');wn.className='gcal-wk-num';wn.textContent='W'+getWeek(dateObj);hdr.appendChild(wn)}cell.appendChild(hdr);if(!outside&&visibleDayC.length>0){const lc=document.createElement('span');lc.className='gcal-lcount';lc.textContent=visibleDayC.reduce((s,c)=>s+c.lessons,0)+'\u0443\u0440';hdr.insertBefore(lc,hdr.querySelector('.gcal-wk-num'))}if(Object.keys(weekdayNotes).some(function(k){return k.startsWith(wi+'|')&&weekdayNotes[k]})){const dot=document.createElement('span');dot.className='has-note-dot';cell.appendChild(dot)}if(!outside&&visibleDayC.length>0){const evts=document.createElement('div');evts.className='gcal-events';const MAX=3;const allL=buildDayOrderList(dayC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);const classSlotMap={};slotArr.forEach(function(key,si){if(!key)return;const p=key.split(':');const cid=p[0];if(!classSlotMap[cid])classSlotMap[cid]={first:si,last:si};else classSlotMap[cid].last=si});const vis=visibleDayC.slice(0,MAX);const hidden=visibleDayC.length-MAX;vis.forEach(c=>{const ev=document.createElement('div');ev.className='gcal-event';ev.style.background=classColorMap[c.classId]||'#1a73e8';ev.dataset.dk=dk;ev.dataset.classId=c.classId;const sm=classSlotMap[c.classId];const b1=sm?getBellForSlot(dk,sm.first):null;const b2=sm?getBellForSlot(dk,sm.last):null;const ts=b1?b1.start:'';const te=b2?b2.end:'';const timeRange=(ts&&te)?ts+'\u2013'+te:ts;const firstSi=sm?sm.first:0;ev.innerHTML='<span class="ev-time">'+timeRange+'</span>'+escapeHtml(c.className)+' \u00b7 '+c.lessons+'\u0443\u0440';ev.addEventListener('click',e=>{e.stopPropagation();openDayModal(dk,dateObj)});evts.appendChild(ev)});if(hidden>0){const m=document.createElement('div');m.className='gcal-more';m.textContent='+ \u0449\u0435 '+hidden;m.addEventListener('click',e=>{e.stopPropagation();openDayModal(dk,dateObj)});evts.appendChild(m)}cell.appendChild(evts);cell.addEventListener('click',()=>openDayModal(dk,dateObj))}else if(!outside&&isHol){const evts=document.createElement('div');evts.className='gcal-events';const ev=document.createElement('div');ev.className='gcal-event';ev.style.background='#ea4335';ev.innerHTML='<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> \u041a\u0430\u043d\u0456\u043a\u0443\u043b\u0438';evts.appendChild(ev);cell.appendChild(evts)}else if(!outside)cell.addEventListener('click',()=>openDayModal(dk,dateObj));
-
+// Контекстне меню на порожньому місці місячної клітинки
 if(!outside){
   cell.addEventListener('contextmenu',function(e){
     if(e.target.closest('.gcal-event')||e.target.closest('.gcal-more'))return;
@@ -2786,7 +2820,7 @@ if(!outside){
     showMonthCellContextMenu(e,dk);
   });
 }
-
+// Custom events chips on month cell
 if(!outside){
   const cEvs=getActiveEventsForDate(dk);
   if(cEvs.length>0){
@@ -2814,7 +2848,7 @@ if(!document.body.classList.contains('readonly-mode')&&!dc.classList.contains('_
 }
 (function(){var _nd=getLessonNote(dk,lesson.classId,si);var _wd=(new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2])).getDay()+6)%7;if(weekdayNotes[weekdayNoteKey(_wd,lesson.classId,si)]||_nd.lessonNote){var _i=document.createElement('span');_i.className='week-lesson-note-ind';_i.innerHTML='<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; display:inline-block"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>';les.appendChild(_i)}})();
 dc.appendChild(les);
-})}
+})}// Render custom events for this day column
 (function(){
   const cEvs=getActiveEventsForDate(dk);
   cEvs.forEach(function(ev){
@@ -2837,46 +2871,46 @@ dc.appendChild(les);
     dc.appendChild(el);
   });
 })();
-if(dt.getTime()===today.getTime()){}
-
+if(dt.getTime()===today.getTime()){/* now-line rendered separately as overlay */}
+// Контекстне меню на порожньому полі тижневого вигляду
 dc.addEventListener('contextmenu',function(e){
-  
+  // Показуємо тільки якщо клік не на уроці чи події
   if(e.target.closest('.week-lesson')||e.target.closest('.custom-event-block'))return;
   e.preventDefault();
   e.stopPropagation();
   showWeekEmptyContextMenu(e,dk,e.offsetY);
 });
 gEl.appendChild(dc)}
-
-(function drawNowLine(){const existing=document.getElementById('week-now-line-el');if(existing)existing.remove();const now=new Date();const todayMidnight=new Date();todayMidnight.setHours(0,0,0,0);
+// Draw full-width now-line overlay
+(function drawNowLine(){const existing=document.getElementById('week-now-line-el');if(existing)existing.remove();const now=new Date();const todayMidnight=new Date();todayMidnight.setHours(0,0,0,0);// Check if current week contains today
 let todayColIdx=-1;for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);if(dt.getTime()===todayMidnight.getTime()){todayColIdx=i;break}}if(todayColIdx<0)return;
 const nm=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;const tH=DAY_END_HOUR-DAY_START_HOUR;const top=((nm/60)-DAY_START_HOUR)*HOUR_HEIGHT;if(top<0||top>tH*HOUR_HEIGHT)return;
 const hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0');
-
+// Position overlay relative to week-grid (which is position:relative via week-body)
 const nl=document.createElement('div');nl.id='week-now-line-el';nl.className='week-now-line';nl.style.top=top+'px';
-
+// Label with current time
 const lbl=document.createElement('div');lbl.className='week-now-label';lbl.textContent=hh+':'+mm;nl.appendChild(lbl);
-
+// Dot
 const dot=document.createElement('div');dot.className='week-now-dot';nl.appendChild(dot);
-
+// Bar
 const bar=document.createElement('div');bar.className='week-now-line-bar';nl.appendChild(bar);
 gEl.style.position='relative';gEl.appendChild(nl)})();
-
+// Auto-update now-line every minute
 clearInterval(window._nowLineTimer);window._nowLineTimer=setInterval(function(){const el=document.getElementById('week-now-line-el');if(!el)return;const now=new Date();const todayMidnight=new Date();todayMidnight.setHours(0,0,0,0);let todayColIdx=-1;for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);if(dt.getTime()===todayMidnight.getTime()){todayColIdx=i;break}}if(todayColIdx<0){el.remove();return}const nm=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;const tH=DAY_END_HOUR-DAY_START_HOUR;const top=((nm/60)-DAY_START_HOUR)*HOUR_HEIGHT;if(top<0||top>tH*HOUR_HEIGHT){el.remove();return}el.style.top=top+'px';const lbl=el.querySelector('.week-now-label');if(lbl)lbl.textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')},10000);
 const wb=document.getElementById('week-body');let scrollMin=null;if(bellSchedule&&bellSchedule.length>0){scrollMin=Math.min.apply(null,bellSchedule.map(b=>timeToMinutes(b.start)))}if(scrollMin!==null){wb.scrollTop=Math.max(0,((scrollMin/60)-DAY_START_HOUR-0.5)*HOUR_HEIGHT)}else{const nm=new Date().getHours()*60+new Date().getMinutes();wb.scrollTop=Math.max(0,((nm/60)-DAY_START_HOUR-1)*HOUR_HEIGHT)}}
 function weekSlotTop(idx){const bell=bellSchedule[idx]||bellSchedule[bellSchedule.length-1]||{start:'00:00',end:'00:00'};return ((timeToMinutes(bell.start)/60)-DAY_START_HOUR)*HOUR_HEIGHT}
 function weekSlotHeight(idx){const bell=bellSchedule[idx]||bellSchedule[bellSchedule.length-1]||{start:'00:00',end:'00:00'};return Math.max(((timeToMinutes(bell.end)-timeToMinutes(bell.start))/60)*HOUR_HEIGHT,20)}
-function moveWeekLesson(dk,fromIdx,toIdx){if(fromIdx===toIdx){renderWeekView();return}if(!cachedAllData)cachedAllData=buildAllClassesData();const dC=cachedAllData.allDayMap[dk]||[];const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);if(toIdx<0||toIdx>=totalSlots){renderWeekView();return}const newArr=slotArr.slice();const tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope){renderWeekView();return}if(scope==='day'){
+function moveWeekLesson(dk,fromIdx,toIdx){if(fromIdx===toIdx){renderWeekView();return}if(!cachedAllData)cachedAllData=buildAllClassesData();const dC=cachedAllData.allDayMap[dk]||[];const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);if(toIdx<0||toIdx>=totalSlots){renderWeekView();return}const newArr=slotArr.slice();const tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope){renderWeekView();return}if(scope==='day'){// For day-only move: swap lessonNotes between positions so notes follow the lesson
 const _wd=weekdayFromDateKey(dk);const _kA=slotArr[fromIdx];const _kB=slotArr[toIdx];const _cA=_kA?_kA.split(':')[0]:null;const _cB=_kB?_kB.split(':')[0]:null;
 if(_cA){const _noteA=getLessonNote(dk,_cA,fromIdx);const _wnA=weekdayNotes[weekdayNoteKey(_wd,_cA,fromIdx)]||'';const _effA=_noteA.lessonNote||_wnA;const _newA=getLessonNote(dk,_cA,toIdx);if(!_newA.lessonNote&&_effA){_newA.lessonNote=_effA;}setLessonNote(dk,_cA,toIdx,_newA);if(_noteA.lessonNote){setLessonNote(dk,_cA,fromIdx,{dayNote:_noteA.dayNote||'',lessonNote:''}); }}
 if(_cB){const _noteB=getLessonNote(dk,_cB,toIdx);const _wnB=weekdayNotes[weekdayNoteKey(_wd,_cB,toIdx)]||'';const _effB=_noteB.lessonNote||_wnB;const _newB=getLessonNote(dk,_cB,fromIdx);if(!_newB.lessonNote&&_effB){_newB.lessonNote=_effB;}setLessonNote(dk,_cB,fromIdx,_newB);if(_noteB.lessonNote){setLessonNote(dk,_cB,toIdx,{dayNote:_noteB.dayNote||'',lessonNote:''}); }}
-setDayOrder(dk,newArr)}else if(scope==='all'){
+setDayOrder(dk,newArr)}else if(scope==='all'){// migrate weekly notes AND day-specific lessonNotes for swapped classes
 const wd=weekdayFromDateKey(dk);const keyA=slotArr[fromIdx];const keyB=slotArr[toIdx];const cidA=keyA?keyA.split(':')[0]:null;const cidB=keyB?keyB.split(':')[0]:null;
-
+// Migrate weekdayNotes
 if(cidA){const nkA=weekdayNoteKey(wd,cidA,fromIdx);const nkAto=weekdayNoteKey(wd,cidA,toIdx);const noteA=weekdayNotes[nkA];if(noteA){weekdayNotes[nkAto]=noteA;delete weekdayNotes[nkA];}else{delete weekdayNotes[nkAto];}}
 if(cidB){const nkB=weekdayNoteKey(wd,cidB,toIdx);const nkBto=weekdayNoteKey(wd,cidB,fromIdx);const noteB=weekdayNotes[nkB];if(noteB){weekdayNotes[nkBto]=noteB;delete weekdayNotes[nkB];}else{delete weekdayNotes[nkBto];}}
 saveWeekdayNotes();
-
+// Also migrate lessonNotes for this specific date (e.g. set by a prior day-move)
 if(cidA){const lnA=getLessonNote(dk,cidA,fromIdx);if(lnA.lessonNote){const lnAto=getLessonNote(dk,cidA,toIdx);if(!lnAto.lessonNote){lnAto.lessonNote=lnA.lessonNote;setLessonNote(dk,cidA,toIdx,lnAto);}setLessonNote(dk,cidA,fromIdx,{dayNote:lnA.dayNote||'',lessonNote:''}); }}
 if(cidB){const lnB=getLessonNote(dk,cidB,toIdx);if(lnB.lessonNote){const lnBto=getLessonNote(dk,cidB,fromIdx);if(!lnBto.lessonNote){lnBto.lessonNote=lnB.lessonNote;setLessonNote(dk,cidB,fromIdx,lnBto);}setLessonNote(dk,cidB,toIdx,{dayNote:lnB.dayNote||'',lessonNote:''}); }}
 setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr)}cachedAllData=null;renderWeekView()})}
@@ -3042,7 +3076,7 @@ function closeLnPopup(ov,cb){if(!ov||ov.classList.contains('ln-closing'))return;
 function weekdayNoteKey(wd,cid,si){return wd+'|'+cid+'|'+si}
 function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
   if(document.body.classList.contains('readonly-mode'))return;
-  
+  // Close any existing popup
   const existing=document.querySelector('.ln-popup-overlay');
   if(existing){closeLnPopup(existing);return;}
   const note=getLessonNote(dk,cid,si);
@@ -3050,12 +3084,12 @@ function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
   const wdNoteKey=weekdayNoteKey(wd,cid,si);
   const WD_EVERY=['кожен понеділок','кожен вівторок','кожну середу','кожен четвер','кожну п\'ятницю','кожну суботу','кожну неділю'];
   const wdEvery=WD_EVERY[wd]||'кожен цей день';
-  
+  // Determine initial state: if weekday note exists → weekly mode; else lesson-specific
   const existingWdNote=weekdayNotes[wdNoteKey]||'';
   const existingLesNote=note.lessonNote||'';
-  
+  // Weekly is active if there's a weekday note, OR if there's no lesson note at all yet
   let isWeekly=!!(existingWdNote)||((!existingWdNote&&!existingLesNote));
-  
+  // Prefer lesson-specific if it already has content and weekday note doesn't
   if(!existingWdNote&&existingLesNote)isWeekly=false;
   const ov=document.createElement('div');ov.className='ln-popup-overlay';
   const popup=document.createElement('div');popup.className='ln-popup';
@@ -3162,8 +3196,8 @@ function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
   ov.addEventListener('mousedown',function(e){
     if(linkDialogEl&&!linkDialogEl.contains(e.target)&&e.target!==linkBtn){linkDialogEl.remove();linkDialogEl=null;}
   });
-  
-  
+  // Toggle handler: switch between weekly and lesson-specific modes
+  // Keep current editor text — just change where it gets saved
   weeklyCb.addEventListener('change',function(){
     isWeekly=this.checked;
     weeklyToggleLabel.classList.toggle('active',isWeekly);
@@ -3189,21 +3223,21 @@ function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
       saveWeekdayNotes();
     }
     if(btnEl)btnEl.classList.toggle('has-note',hasNote);
-    
+    // Update <svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>indicator on week tile
     const weekTile=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"]');
     if(weekTile){
       let ind=weekTile.querySelector('.week-lesson-note-ind');
       if(hasNote&&!ind){ind=document.createElement('span');ind.className='week-lesson-note-ind';ind.innerHTML='<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; display:inline-block"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>';weekTile.appendChild(ind);}
       else if(!hasNote&&ind){ind.remove();}
     }
-    
+    // Update <svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>indicator on day-modal card
     const dmCard=document.querySelector('.dm-slot-card[data-slot-idx="'+si+'"]')||document.querySelector('.dm-slot-card[data-class-id="'+cid+'"]');
     if(dmCard){
       let ind=dmCard.querySelector('.week-lesson-note-ind');
       if(hasNote&&!ind){ind=document.createElement('span');ind.className='week-lesson-note-ind';ind.innerHTML='<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; display:inline-block"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>';dmCard.appendChild(ind);}
       else if(!hasNote&&ind){ind.remove();}
     }
-    
+    // Update lesson-info-popup note section if open for this lesson
     const lip=document.getElementById('lesson-info-popup');
     if(lip&&lip.dataset&&(lip.dataset.lipDk===dk&&lip.dataset.lipSi==si&&lip.dataset.lipCid===cid)){
       const noteData2=getLessonNote(dk,cid,si);
@@ -3249,7 +3283,7 @@ function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
   lnCloseBtn.addEventListener('click',function(){save();closeLnPopup(ov);});
   ov.addEventListener('keydown',function(e){if(e.key==='Escape'){save();closeLnPopup(ov);}});
 }
-
+// ── Нотатки до подій (аналог showLessonNotePopup, але для customEvents) ──
 function showEventNotePopup(evId,dk,btnEl){
   if(document.body.classList.contains('readonly-mode'))return;
   const existing=document.querySelector('.ln-popup-overlay');
@@ -3424,8 +3458,8 @@ var totalSlots=Math.max(allL.length,bellSchedule.length);
 var slotArr=getSlotOrder(dk,allL,totalSlots);
 var lastUsed=-1;for(var li0=0;li0<slotArr.length;li0++)if(slotArr[li0])lastUsed=li0;
 function findLesson(key){if(!key)return null;var p=key.split(':');var cid=p[0],oi=parseInt(p[1],10);for(var j=0;j<allL.length;j++){if(allL[j].classId===cid&&allL[j].origIdx===oi)return allL[j]}return null}
-function moveCard(fromIdx,toIdx){if(fromIdx===toIdx||isNaN(fromIdx)||isNaN(toIdx))return;var newArr=slotArr.slice();var tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope)return;if(scope==='day'){
-var _wd=weekdayFromDateKey(dk);var _kA=slotArr[fromIdx];var _kB=slotArr[toIdx];var _cA=_kA?_kA.split(':')[0]:null;var _cB=_kB?_kB.split(':')[0]:null;if(_cA){var _wn=weekdayNotes[weekdayNoteKey(_wd,_cA,fromIdx)];if(_wn){var _c=getLessonNote(dk,_cA,toIdx);if(!_c.lessonNote){_c.lessonNote=_wn;setLessonNote(dk,_cA,toIdx,_c);}}}if(_cB){var _wn2=weekdayNotes[weekdayNoteKey(_wd,_cB,toIdx)];if(_wn2){var _c2=getLessonNote(dk,_cB,fromIdx);if(!_c2.lessonNote){_c2.lessonNote=_wn2;setLessonNote(dk,_cB,fromIdx,_c2);}}}setDayOrder(dk,newArr)}else if(scope==='all'){
+function moveCard(fromIdx,toIdx){if(fromIdx===toIdx||isNaN(fromIdx)||isNaN(toIdx))return;var newArr=slotArr.slice();var tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope)return;if(scope==='day'){// copy weekly notes into per-day lessonNotes for the new positions
+var _wd=weekdayFromDateKey(dk);var _kA=slotArr[fromIdx];var _kB=slotArr[toIdx];var _cA=_kA?_kA.split(':')[0]:null;var _cB=_kB?_kB.split(':')[0]:null;if(_cA){var _wn=weekdayNotes[weekdayNoteKey(_wd,_cA,fromIdx)];if(_wn){var _c=getLessonNote(dk,_cA,toIdx);if(!_c.lessonNote){_c.lessonNote=_wn;setLessonNote(dk,_cA,toIdx,_c);}}}if(_cB){var _wn2=weekdayNotes[weekdayNoteKey(_wd,_cB,toIdx)];if(_wn2){var _c2=getLessonNote(dk,_cB,fromIdx);if(!_c2.lessonNote){_c2.lessonNote=_wn2;setLessonNote(dk,_cB,fromIdx,_c2);}}}setDayOrder(dk,newArr)}else if(scope==='all'){// migrate weekly notes for swapped classes
 var wd=weekdayFromDateKey(dk);var keyA=slotArr[fromIdx];var keyB=slotArr[toIdx];var cidA=keyA?keyA.split(':')[0]:null;var cidB=keyB?keyB.split(':')[0]:null;if(cidA){var nkA=weekdayNoteKey(wd,cidA,fromIdx);var nkAto=weekdayNoteKey(wd,cidA,toIdx);var noteA=weekdayNotes[nkA];if(noteA){weekdayNotes[nkAto]=noteA;delete weekdayNotes[nkA];}else{delete weekdayNotes[nkAto];}}if(cidB){var nkB=weekdayNoteKey(wd,cidB,toIdx);var nkBto=weekdayNoteKey(wd,cidB,fromIdx);var noteB=weekdayNotes[nkB];if(noteB){weekdayNotes[nkBto]=noteB;delete weekdayNotes[nkB];}else{delete weekdayNotes[nkBto];}}saveWeekdayNotes();setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr)}renderDayModalLessons(gridEl,dk,dC,classColorMap)})}
 gridEl.innerHTML='';
 var dragSrc=null,dragFromIdx=null;
@@ -3445,7 +3479,7 @@ const infoDiv=document.createElement('div');infoDiv.className='dm-slot-card-info
 const nameSpan=document.createElement('div');nameSpan.className='dm-slot-card-name';nameSpan.textContent=les.className;infoDiv.appendChild(nameSpan);
 const detDiv=document.createElement('div');detDiv.className='dm-slot-card-detail';detDiv.innerHTML='<span>'+ti.label+'</span>';infoDiv.appendChild(detDiv);
 card.appendChild(infoDiv);
-
+// Cabinet display (right-click to edit)
 (function(capturedDk,capturedCid,capturedLi,capturedSi){
 var cabVal=getLessonCabinet(capturedDk,capturedCid,capturedLi);
 if(cabVal){var cabDisp=document.createElement('div');cabDisp.className='dm-slot-cabinet';cabDisp.innerHTML='<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; display:inline-block; margin-right:4px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'+cabVal;infoDiv.appendChild(cabDisp);}
@@ -3458,7 +3492,7 @@ var _lesClassName=les.className,_lesClassId=les.classId;
 card.addEventListener('touchstart',function(e){if(e.target.tagName==='SELECT')return;_cardLpMoved=false;_cardLpTimer=setTimeout(function(){_cardLpTimer=null;if(_cardLpMoved)return;if(navigator.vibrate)navigator.vibrate(40);var touch=e.touches[0];var fakeEvt={preventDefault:function(){},stopPropagation:function(){},clientX:touch.clientX,clientY:touch.clientY};showContextMenu(fakeEvt,dk,si,_lesClassName,_lesClassId);},500);dragSrc=this;dragFromIdx=parseInt(this.dataset.slotIdx,10);this.classList.add('dragging');e.preventDefault()},{passive:false});
 card.addEventListener('touchmove',function(e){_cardLpMoved=true;if(_cardLpTimer){clearTimeout(_cardLpTimer);_cardLpTimer=null;}if(!dragSrc||dragSrc!==this)return;e.preventDefault();var t=e.touches[0];var el=document.elementFromPoint(t.clientX,t.clientY);var tSlot=el?el.closest('.dm-slot'):null;gridEl.querySelectorAll('.dm-slot').forEach(function(s){s.classList.remove('drag-over')});if(tSlot)tSlot.classList.add('drag-over')},{passive:false});
 card.addEventListener('touchend',function(e){var wasTap=(_cardLpTimer&&!_cardLpMoved);if(_cardLpTimer){clearTimeout(_cardLpTimer);_cardLpTimer=null;}if(!dragSrc||dragSrc!==this)return;this.classList.remove('dragging');var t=e.changedTouches[0];var el=document.elementFromPoint(t.clientX,t.clientY);var tSlot=el?el.closest('.dm-slot'):null;gridEl.querySelectorAll('.dm-slot').forEach(function(s){s.classList.remove('drag-over')});var fi=dragFromIdx;dragSrc=null;dragFromIdx=null;if(_cardLpMoved&&tSlot){moveCard(fi,parseInt(tSlot.dataset.slotIdx,10))}else if(wasTap){var fakeEvt={target:card,clientX:t.clientX,clientY:t.clientY,stopPropagation:function(){}};showLessonInfoPopup(fakeEvt,dk,si,les.className,les.classId,classColorMap[les.classId]||'#1a73e8');}});
-
+// Right-click on card opens context menu
 (function(capturedDk,capturedCid,capturedSi,capturedName){
   if(!document.body.classList.contains('readonly-mode')){
     card.addEventListener('contextmenu',function(e){e.stopPropagation();showContextMenu(e,capturedDk,capturedSi,capturedName,capturedCid);});
@@ -3485,12 +3519,12 @@ slot.addEventListener('dragover',function(e){e.preventDefault();e.dataTransfer.d
 slot.addEventListener('dragleave',function(){this.classList.remove('drag-over')});
 slot.addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drag-over');if(!dragSrc)return;var toIdx=parseInt(this.dataset.slotIdx,10);var fi=dragFromIdx;moveCard(fi,toIdx)});
 gridEl.appendChild(slot)}}
-function openDayModal(dk,dateObj){if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;const dC=allDayMap[dk]||[];const isHol=isDateInHoliday(dateObj,period.holidays);const wi=(dateObj.getDay()+6)%7;const isWE=wi>=5;const dn=dateObj.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long',year:'numeric'});const ov=document.createElement('div');ov.className='day-modal-overlay';ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});const m=document.createElement('div');m.className='day-modal';const hdr=document.createElement('div');hdr.className='day-modal-header';hdr.innerHTML='<div class="day-modal-title">'+dn+'</div>';const cb=document.createElement('button');cb.className='day-modal-close';cb.innerHTML='\u00d7';cb.onclick=()=>ov.remove();hdr.appendChild(cb);m.appendChild(hdr);const body=document.createElement('div');body.className='day-modal-body';if(isHol&&dC.length===0)body.innerHTML='<div class="day-modal-holiday">\u{1f3d6}\ufe0f \u041a\u0430\u043d\u0456\u043a\u0443\u043b\u0438</div>';else if(dC.length===0&&!isWE)body.innerHTML='<div class="day-modal-weekend">\u041d\u0435\u043c\u0430\u0454 \u0443\u0440\u043e\u043a\u0456\u0432</div>';else{const g=document.createElement('div');g.className='dm-lesson-grid';g.id='dm-lesson-grid';body.appendChild(g);renderDayModalLessons(g,dk,dC,classColorMap)}
+function openDayModal(dk,dateObj){if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;const dC=allDayMap[dk]||[];const isHol=isDateInHoliday(dateObj,period.holidays);const wi=(dateObj.getDay()+6)%7;const isWE=wi>=5;const dn=dateObj.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long',year:'numeric'});const ov=document.createElement('div');ov.className='day-modal-overlay';ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});const m=document.createElement('div');m.className='day-modal';const hdr=document.createElement('div');hdr.className='day-modal-header';hdr.innerHTML='<div class="day-modal-title">'+dn+'</div>';const cb=document.createElement('button');cb.className='day-modal-close';cb.innerHTML='\u00d7';cb.onclick=()=>ov.remove();hdr.appendChild(cb);m.appendChild(hdr);const body=document.createElement('div');body.className='day-modal-body';if(isHol&&dC.length===0)body.innerHTML='<div class="day-modal-holiday">\u{1f3d6}\ufe0f \u041a\u0430\u043d\u0456\u043a\u0443\u043b\u0438</div>';else if(dC.length===0&&!isWE)body.innerHTML='<div class="day-modal-weekend">\u041d\u0435\u043c\u0430\u0454 \u0443\u0440\u043e\u043a\u0456\u0432</div>';else{const g=document.createElement('div');g.className='dm-lesson-grid';g.id='dm-lesson-grid';body.appendChild(g);renderDayModalLessons(g,dk,dC,classColorMap)}// Custom events section
 _renderDayModalEvents(body,dk);
 m.appendChild(body);ov.appendChild(m);document.body.appendChild(ov);const esc=e=>{if(e.key==='Escape'){ov.remove();document.removeEventListener('keydown',esc)}};document.addEventListener('keydown',esc)}
 
 function _renderDayModalEvents(body,dk){
-  
+  // Remove existing custom event section if re-rendering
   const old=body.querySelector('.day-modal-events-section');if(old)old.remove();
   const section=document.createElement('div');section.className='day-modal-events-section';
 
@@ -3537,26 +3571,27 @@ function exitEditMode(){saveClassState();savePeriodState();saveBellSchedule();_e
 function cancelEditMode(){restoreEditSnapshot();const ev=document.getElementById('edit-view');ev.classList.add('closing');setTimeout(()=>{ev.style.display='none';ev.classList.remove('closing');const fg3=document.getElementById('fab-group');if(fg3)fg3.style.display='flex';document.body.style.overflow='hidden';cachedAllData=null;if(homeView==='month')renderHomeCalendar();else renderWeekView();renderSidebar();showNotification('\u0421\u043a\u0430\u0441\u043e\u0432\u0430\u043d\u043e','info')},240)}
 function renderDaysGridEdit(){const c=document.getElementById('days-grid-container');if(!c)return;c.innerHTML='';dayNamesList.forEach(d=>{const card=document.createElement('div');card.className='day-card';card.innerHTML='<div class="day-label"><input type="checkbox" id="cb-'+d+'"><span>'+d+'</span></div><div class="lesson-toggle" onclick="cycleLesson(this)" data-type="numerator" title="Кількість уроків у непарний тиждень (0 = пропуск цього тижня)"><span class="label">\u041d\u0435\u043f\u0430\u0440\u043d\u0438\u0439:</span><span class="number">1</span></div><div class="lesson-toggle" onclick="cycleLesson(this)" data-type="denominator" title="Кількість уроків у парний тиждень (0 = пропуск цього тижня)"><span class="label">\u041f\u0430\u0440\u043d\u0438\u0439:</span><span class="number">1</span></div><div class="day-preview"></div>';c.appendChild(card)});dayCheckboxes.forEach(d=>{const cb=document.getElementById('cb-'+d);if(cb)cb.addEventListener('change',()=>{const card=cb.closest('.day-card');card.classList.toggle('is-active',cb.checked);saveClassState();generate();updateDayPreview(card);if(cb.checked)checkBellScheduleSufficiency(cb,null)})});c.querySelectorAll('.day-card').forEach(card=>{const cb=card.querySelector('input[type="checkbox"]');if(cb)card.classList.toggle('is-active',cb.checked)});refreshAllDayPreviews()}
 function cycleLesson(el){const n=el.querySelector('.number');const v=parseInt(n.textContent);const next=v===3?0:v+1;n.textContent=next;const card=el.closest('.day-card');updateDayPreview(card);saveClassState();generate();if(next>0)checkBellScheduleSufficiency(el,v);}
-function getMaxLessonsPerDay(){
+function getMaxLessonsPerDay(){// Sum lessons of ALL classes per weekday, return the maximum total across weekdays
 let maxPerDay=0;dayNamesList.forEach(d=>{let sumNum=0,sumDen=0;slots.forEach(s=>{const state=getClassStateFromStorage(s.id);if(!state||!state.days)return;const ds=state.days[d];if(!ds||!ds.checked)return;sumNum+=ds.numerator||0;sumDen+=ds.denominator||0;});maxPerDay=Math.max(maxPerDay,sumNum,sumDen);});return maxPerDay;}
 let _bellCheckOriginEl=null,_bellCheckOriginVal=0;function checkBellScheduleSufficiency(originEl,prevVal){const maxL=getMaxLessonsPerDay();if(maxL>bellSchedule.length){_bellCheckOriginEl=originEl||null;_bellCheckOriginVal=prevVal||0;showAddMissingBellsModal(bellSchedule.length+1,maxL);}}
-function showAddMissingBellsModal(fromNum,toNum){if(document.getElementById('add-bells-modal-overlay'))return;const ov=document.createElement('div');ov.className='modal-overlay';ov.id='add-bells-modal-overlay';const count=toNum-fromNum+1;const rows=[];for(let i=fromNum;i<=toNum;i++){const prevBell=bellSchedule[bellSchedule.length-1];const prevRows=rows[rows.length-1];let refEnd=prevRows?prevRows.defEnd:(prevBell?prevBell.end:'08:00');const[lh,lm]=refEnd.split(':').map(Number);const sm2=lh*60+lm+10;const sh=Math.floor(sm2/60)%24,sm=sm2%60;const defStart=String(sh).padStart(2,'0')+':'+String(sm).padStart(2,'0');const em2=sm2+45;const eh=Math.floor(em2/60)%24,em=em2%60;const defEnd=String(eh).padStart(2,'0')+':'+String(em).padStart(2,'0');rows.push({num:i,defStart,defEnd});}let rowsHtml=rows.map(r=>'<div class="abm-row"><span class="abm-num">'+r.num+'</span><div class="abm-times"><input type="time" id="abm-s-'+r.num+'" value="'+r.defStart+'"><span class="abm-dash">–</span><input type="time" id="abm-e-'+r.num+'" value="'+r.defEnd+'">'+'</div></div>').join('');const b=document.createElement('div');b.className='modal-box';b.innerHTML='<div class="modal-title"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Не вистачає дзвінків</div><div class="modal-message">У розкладі лише <b>'+bellSchedule.length+'</b> уроків, але налаштовано до <b>'+toNum+'</b>-го уроку.<br>Вкажіть час для '+(count===1?'уроку '+fromNum:'уроків '+fromNum+'–'+toNum)+':</div>'+rowsHtml+'<div class="modal-actions" style="margin-top:14px"><button class="modal-btn modal-btn-cancel" id="abm-cancel">Скасувати</button><button class="modal-btn modal-btn-confirm" id="abm-ok">Додати</button></div>';ov.appendChild(b);document.body.appendChild(ov);b.querySelector('#abm-ok').onclick=function(){for(let i=fromNum;i<=toNum;i++){const start=document.getElementById('abm-s-'+i).value;const end=document.getElementById('abm-e-'+i).value;if(!start||!end){showNotification('Вкажіть час для уроку '+i+'!','error');return;}if(start>=end){showNotification('Початок має бути раніше кінця (урок '+i+')!','error');return;}bellSchedule.push({num:i,start,end});}saveBellSchedule();renderBellScheduleEdit();refreshAllDayPreviews();showNotification('Додано '+(toNum-fromNum+1===1?'1 дзвінок':(toNum-fromNum+1)+' дзвінки')+'!','success');ov.remove();};b.querySelector('#abm-cancel').onclick=()=>{ov.remove();if(typeof _bellCheckOriginEl!=='undefined'&&_bellCheckOriginEl){if(_bellCheckOriginEl.type==='checkbox'){
-_bellCheckOriginEl.checked=false;const card=_bellCheckOriginEl.closest('.day-card');if(card){card.classList.remove('is-active');updateDayPreview(card);}}else{
+function showAddMissingBellsModal(fromNum,toNum){if(document.getElementById('add-bells-modal-overlay'))return;const ov=document.createElement('div');ov.className='modal-overlay';ov.id='add-bells-modal-overlay';const count=toNum-fromNum+1;const rows=[];for(let i=fromNum;i<=toNum;i++){const prevBell=bellSchedule[bellSchedule.length-1];const prevRows=rows[rows.length-1];let refEnd=prevRows?prevRows.defEnd:(prevBell?prevBell.end:'08:00');const[lh,lm]=refEnd.split(':').map(Number);const sm2=lh*60+lm+10;const sh=Math.floor(sm2/60)%24,sm=sm2%60;const defStart=String(sh).padStart(2,'0')+':'+String(sm).padStart(2,'0');const em2=sm2+45;const eh=Math.floor(em2/60)%24,em=em2%60;const defEnd=String(eh).padStart(2,'0')+':'+String(em).padStart(2,'0');rows.push({num:i,defStart,defEnd});}let rowsHtml=rows.map(r=>'<div class="abm-row"><span class="abm-num">'+r.num+'</span><div class="abm-times"><input type="time" id="abm-s-'+r.num+'" value="'+r.defStart+'"><span class="abm-dash">–</span><input type="time" id="abm-e-'+r.num+'" value="'+r.defEnd+'">'+'</div></div>').join('');const b=document.createElement('div');b.className='modal-box';b.innerHTML='<div class="modal-title"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Не вистачає дзвінків</div><div class="modal-message">У розкладі лише <b>'+bellSchedule.length+'</b> уроків, але налаштовано до <b>'+toNum+'</b>-го уроку.<br>Вкажіть час для '+(count===1?'уроку '+fromNum:'уроків '+fromNum+'–'+toNum)+':</div>'+rowsHtml+'<div class="modal-actions" style="margin-top:14px"><button class="modal-btn modal-btn-cancel" id="abm-cancel">Скасувати</button><button class="modal-btn modal-btn-confirm" id="abm-ok">Додати</button></div>';ov.appendChild(b);document.body.appendChild(ov);b.querySelector('#abm-ok').onclick=function(){for(let i=fromNum;i<=toNum;i++){const start=document.getElementById('abm-s-'+i).value;const end=document.getElementById('abm-e-'+i).value;if(!start||!end){showNotification('Вкажіть час для уроку '+i+'!','error');return;}if(start>=end){showNotification('Початок має бути раніше кінця (урок '+i+')!','error');return;}bellSchedule.push({num:i,start,end});}saveBellSchedule();renderBellScheduleEdit();refreshAllDayPreviews();showNotification('Додано '+(toNum-fromNum+1===1?'1 дзвінок':(toNum-fromNum+1)+' дзвінки')+'!','success');ov.remove();};b.querySelector('#abm-cancel').onclick=()=>{ov.remove();if(typeof _bellCheckOriginEl!=='undefined'&&_bellCheckOriginEl){if(_bellCheckOriginEl.type==='checkbox'){// revert checkbox
+_bellCheckOriginEl.checked=false;const card=_bellCheckOriginEl.closest('.day-card');if(card){card.classList.remove('is-active');updateDayPreview(card);}}else{// revert lesson toggle counter
 const n=_bellCheckOriginEl.querySelector('.number');if(n)n.textContent=_bellCheckOriginVal;const card=_bellCheckOriginEl.closest('.day-card');if(card)updateDayPreview(card);}saveClassState();generate();}_bellCheckOriginEl=null;_bellCheckOriginVal=0;};ov.addEventListener('click',e=>{if(e.target===ov){b.querySelector('#abm-cancel').onclick();}});}
 function showAddBellModal(lessonNum,callback){const last=bellSchedule[bellSchedule.length-1];let defStart='08:00',defEnd='08:45';if(last){const[lh,lm]=last.end.split(':').map(Number);const sm2=lh*60+lm+10;const sh=Math.floor(sm2/60)%24,sm=sm2%60;defStart=String(sh).padStart(2,'0')+':'+String(sm).padStart(2,'0');const em2=sm2+45;const eh=Math.floor(em2/60)%24,em=em2%60;defEnd=String(eh).padStart(2,'0')+':'+String(em).padStart(2,'0')}const ov=document.createElement('div');ov.className='modal-overlay';const b=document.createElement('div');b.className='modal-box';b.innerHTML='<div class="modal-title"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Додати урок '+lessonNum+' до розкладу дзвінків</div><div class="modal-message">У розкладі дзвінків лише '+bellSchedule.length+' уроків. Вкажіть час '+lessonNum+'-го уроку:</div><div class="modal-time-row"><label>Початок:</label><input type="time" id="abl-start" value="'+defStart+'"></div><div class="modal-time-row"><label>Кінець:</label><input type="time" id="abl-end" value="'+defEnd+'"></div><div class="modal-actions"><button class="modal-btn modal-btn-cancel" id="abl-cancel">Скасувати</button><button class="modal-btn modal-btn-confirm" id="abl-ok">Додати</button></div>';ov.appendChild(b);document.body.appendChild(ov);function fin(ok){ov.remove();callback(ok)}b.querySelector('#abl-ok').onclick=function(){const start=document.getElementById('abl-start').value;const end=document.getElementById('abl-end').value;if(!start||!end){showNotification('Вкажіть час!','error');return}if(start>=end){showNotification('Початок має бути раніше кінця!','error');return}bellSchedule.push({num:lessonNum,start,end});saveBellSchedule();renderBellScheduleEdit();refreshAllDayPreviews();showNotification('Урок '+lessonNum+' додано до дзвінків!','success');fin(true)};b.querySelector('#abl-cancel').onclick=()=>fin(false);ov.addEventListener('click',e=>{if(e.target===ov)fin(false)})}
-
+// Cache: weekday index (0–5) → array of real slot indices for currentClass
+// Built once per refreshAllDayPreviews call, cleared whenever schedule changes.
 let _dayPreviewSlotCache=null;
 function _buildDayPreviewCache(){
   _dayPreviewSlotCache={};
   const today=new Date();today.setHours(0,0,0,0);
   const period=getPeriodDataFromStorage();
-  
+  // Build allDayMap once for all classes (same logic as buildAllClassesData)
   const allDayMap={};
   slots.forEach(function(slot){
     const{dayMap}=buildLessonDataForClass(slot.id,slot.name,period.start,period.end,period.holidays);
     Object.keys(dayMap).forEach(function(dk){if(!allDayMap[dk])allDayMap[dk]=[];allDayMap[dk].push.apply(allDayMap[dk],dayMap[dk])});
   });
-  
+  // For each weekday find the nearest representative date and resolve slot positions
   const probeWI=(today.getDay()+6)%7;
   for(var wi=0;wi<7;wi++){
     var diff=wi-probeWI;if(diff<0)diff+=7;
@@ -3583,7 +3618,7 @@ function updateDayPreview(card){
   const dayIdx=dayNamesList.indexOf(dayName);
   function getRealSlots(count){
     if(count===0)return[];
-    
+    // Use cache if available; cache may be null meaning "no data for this weekday"
     if(_dayPreviewSlotCache&&_dayPreviewSlotCache[dayIdx]){
       return _dayPreviewSlotCache[dayIdx].slice(0,count);
     }
@@ -3721,11 +3756,11 @@ window.onload=function(){
     renderClassTabs();loadPeriodState();loadViewMode();loadClassState(currentClass);loadDayOrder();loadWeekdayOrder();
     try{migrateWeekdayNotes();}catch(e){console.warn('migrateWeekdayNotes failed',e);}
   } else {
-    
+    // Readonly: мінімальна ініціалізація з дефолтами
     loadBellSchedule();loadSlots();
     const sa=slots[0]?.id;currentClass=sa;
     renderClassTabs();loadViewMode();loadClassState(currentClass);
-    
+    // Прибираємо title сторінки
     document.title='📅 Розклад (перегляд)';
   }
   weekStartDate=getMonday(new Date());
@@ -3735,7 +3770,7 @@ window.onload=function(){
   if(!_isReadonly)updateSoundBtn();
   if(isMobile())closeSidebar();
   if(!_isReadonly)gdriveInit();
-  
+  // PWA: Register Service Worker & init push notifications
   registerServiceWorker().then(()=>{
     if(!_isReadonly&&pushNotifEnabled){
       requestNotificationPermission().then(()=>scheduleNextLessonNotification());
@@ -3743,23 +3778,24 @@ window.onload=function(){
   });
 };
 
+// ── Друк розкладу тижня ──────────────────────────────────────────
 function closePrintOverlay(){
   const ov=document.getElementById('print-overlay');
   if(ov)ov.classList.remove('visible');
 }
 
 function printWeekSchedule(){
-  
+  // Визначаємо тиждень (використовуємо weekStartDate, або поточний якщо місячний вигляд)
   const ws=weekStartDate||getMonday(new Date());
   if(!cachedAllData)cachedAllData=buildAllClassesData();
   const{period,allDayMap,classColorMap}=cachedAllData;
 
-  
+  // Заголовок: діапазон дат тижня
   const we=new Date(ws);we.setDate(we.getDate()+6);
   const fmtD=d=>d.getDate()+' '+['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'][d.getMonth()];
   const weekLabel=fmtD(ws)+' \u2013 '+fmtD(we)+' '+we.getFullYear();
 
-  
+  // Збираємо дані по кожному дню (Пн-Нд)
   const days=[];
   for(let i=0;i<7;i++){
     const dt=new Date(ws);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);
@@ -3774,9 +3810,9 @@ function printWeekSchedule(){
     days.push({dt,dk,dC,allL,totalSlots,slotArr,isHol,isWE,inRange});
   }
 
-  
-  
-  
+  // Визначаємо видимість вихідних:
+  // - субота або неділя показуються якщо мають уроки або події
+  // - але якщо неділя видима — субота теж завжди показується (щоб не було "дірки")
   const satHasContent=days[5]&&(days[5].dC.length>0||getActiveEventsForDate(days[5].dk).length>0);
   const sunHasContent=days[6]&&(days[6].dC.length>0||getActiveEventsForDate(days[6].dk).length>0);
   const showSat=satHasContent||sunHasContent;
@@ -3789,12 +3825,12 @@ function printWeekSchedule(){
     return false;
   });
 
-  
+  // Максимальна кількість слотів — кількість рядків таблиці
   const maxSlots=Math.max(bellSchedule.length,...printDays.map(d=>d.totalSlots),1);
 
   const DAY_NAMES_FULL=['\u041f\u043e\u043d\u0435\u0434\u0456\u043b\u043e\u043a','\u0412\u0456\u0432\u0442\u043e\u0440\u043e\u043a','\u0421\u0435\u0440\u0435\u0434\u0430','\u0427\u0435\u0442\u0432\u0435\u0440','\u041f\u02bc\u044f\u0442\u043d\u0438\u0446\u044f','\u0421\u0443\u0431\u043e\u0442\u0430','\u041d\u0435\u0434\u0456\u043b\u044f'];
 
-  
+  // ── Будуємо HTML таблиці ──
   let thead='<tr><th style="min-width:72px">\u0423\u0440\u043e\u043a</th>';
   printDays.forEach((d,i)=>{
     const wi=(d.dt.getDay()+6)%7;
@@ -3804,10 +3840,10 @@ function printWeekSchedule(){
   });
   thead+='</tr>';
 
-  
+  // Підготовляємо кастомні події для кожного дня (сортовані за часом)
   const dayEventsList=printDays.map(d=>getActiveEventsForDate(d.dk).slice().sort((a,b)=>a.startTime.localeCompare(b.startTime)));
 
-  
+  // Трекер: скільки подій вже вставлено в кожен стовпець
   const evInserted=printDays.map(()=>0);
 
   let tbody='';
@@ -3841,7 +3877,7 @@ function printWeekSchedule(){
             }
           }
         }
-        
+        // Якщо клітинка порожня — вставити наступну невставлену подію
         if(!cell){
           const evs=dayEventsList[di];
           const idx=evInserted[di];
@@ -3862,7 +3898,7 @@ function printWeekSchedule(){
     tbody+=row;
   }
 
-  
+  // Якщо після всіх рядків уроків ще залишились невставлені події — додаємо додаткові рядки
   const hasLeftover=evInserted.some((cnt,di)=>cnt<dayEventsList[di].length);
   if(hasLeftover){
     let maxExtra=0;
@@ -3891,7 +3927,7 @@ function printWeekSchedule(){
     }
   }
 
-  
+  // Легенда класів
   let legend='<div class="print-legend" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px 22px;border-top:1px solid #eee">';
   slots.forEach((slot,idx)=>{
     if(hiddenClasses.has(slot.id))return;
@@ -3905,7 +3941,7 @@ function printWeekSchedule(){
   const printedAt=new Date().toLocaleString('uk',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
 
   const doc=document.getElementById('print-doc');
-  
+  // зберігаємо mono-стан якщо вже був відкритий
   const wasMono=doc.classList.contains('mono');
   doc.innerHTML=
     '<div class="print-doc-header">'+
@@ -3931,18 +3967,21 @@ function togglePrintMono(on){
   if(on)doc.classList.add('mono');
   else doc.classList.remove('mono');
 }
+// ── Кінець блоку друку ───────────────────────────────────────────
 
+// ── Firebase Auth + Firestore Sync ────────────────────────────────
 let fbUser=null;
 let fbSaveTimer=null;
 const FB_DOC_NAME='calendarData';
 const FB_DEVICE_ID=(()=>{let id;try{id=sessionStorage.getItem('tcDeviceId');}catch(e){}if(!id){id=Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem('tcDeviceId',id);}catch(e){}}return id;})();
 let fbRealtimeUnsubscribe=null;
-let fbLastSaveTime=0; 
-let fbLocalPending=false; 
-let fbBlockUntil=0;      
-let fbSaveInFlight=false; 
+let fbLastSaveTime=0; // timestamp останнього власного збереження
+let fbLocalPending=false; // true = є незбережені локальні зміни
+let fbBlockUntil=0;      // ігнорувати listener до цього timestamp
+let fbSaveInFlight=false; // true = запит setDoc() зараз виконується (ще не завершився)
 function _hasUnsavedFbChanges(){return fbLocalPending||fbSaveInFlight;}
 
+// Called by the Firebase module once auth state is known
 function appReady(){
   const ov=document.getElementById('app-loading-overlay');
   if(!ov)return;
@@ -3954,14 +3993,15 @@ window._fbAuthReady=function(user){
   if(user){
     gdriveUser=user.displayName||user.email||'';
     gdriveUpdateBtn(true);
-    gdriveLoad(); 
+    gdriveLoad(); // appReady() called inside gdriveLoad after data is applied
     _setPresence(user.uid,true);
   } else {
     gdriveUpdateBtn(false);
-    appReady(); 
+    appReady(); // не залогінений — дані вже з localStorage, можна показувати
   }
 };
 
+// ── Presence (online tracking) ────────────────────────────────────
 let _presenceUid=null;
 let _presenceUnsubscribe=null;
 function _setPresence(uid,online){
@@ -3972,13 +4012,13 @@ function _setPresence(uid,online){
   if(!db||!setDocFn||!docFn)return;
   _presenceUid=uid;
   if(online){
-    
+    // Маркер присутності (онлайн)
     const presRef=docFn(db,'presence',uid);
     setDocFn(presRef,{uid,lastSeen:serverTs(),lastSeenMs:Date.now(),online:true}).catch(()=>{});
-    
+    // Маркер реєстрації — пишемо один раз у users/{uid} щоб рахувати загальну кількість
     const userRef=docFn(db,'users',uid);
     setDocFn(userRef,{uid,registeredAt:serverTs()},{merge:true}).catch(()=>{});
-    
+    // Оновлюємо presence кожні 60с
     if(window._presenceInterval)clearInterval(window._presenceInterval);
     window._presenceInterval=setInterval(()=>{
       if(_presenceUid){
@@ -4001,14 +4041,15 @@ function _clearPresence(){
 window.addEventListener('beforeunload',(e)=>{
   _clearPresence();
   if(_hasUnsavedFbChanges()){
-    
-    
+    // Показуємо стандартне попередження браузера — точний текст браузери
+    // ігнорують з міркувань безпеки, але сам факт діалогу зупиняє закриття/перезавантаження
     e.preventDefault();
     e.returnValue='Зміни ще не збережено в хмарі. Якщо покинути сторінку зараз, їх може бути втрачено.';
     return e.returnValue;
   }
 });
 
+// ── Site stats ────────────────────────────────────────────────────
 async function loadSiteStats(){
   const db=window._fbDb;
   const colFn=window._fbCollection;
@@ -4025,7 +4066,7 @@ async function loadSiteStats(){
   if(onlineEl)onlineEl.textContent='...';
 
   try{
-    
+    // Total registered users
     const usersSnap=await countFn(colFn(db,'users'));
     if(usersEl)usersEl.textContent=usersSnap.data().count;
   }catch(e){
@@ -4033,7 +4074,7 @@ async function loadSiteStats(){
   }
 
   try{
-    
+    // Online = presence docs updated in last 90s (filter by lastSeenMs numeric field)
     const queryFn=window._fbQuery;
     const whereFn=window._fbWhere;
     const cutoff=Date.now()-90000;
@@ -4046,8 +4087,8 @@ async function loadSiteStats(){
 }
 
 function gdriveInit(){
-  
-  
+  // Auth state is handled via onAuthStateChanged in the module script above
+  // Nothing extra needed here
 }
 
 function gdriveToggle(){
@@ -4061,16 +4102,24 @@ function gdriveToggle(){
 }
 
 function gdriveSignIn(){
-  const auth=window._fbAuth,provider=window._fbProvider,signIn=window._fbSignInWithPopup;
+  const auth=window._fbAuth,provider=window._fbProvider;
   if(!auth){showNotification('Сервіс ще завантажується...','info');return;}
   const btn=document.getElementById('gdrive-btn');
   if(btn)btn.classList.add('fb-auth-loading');
-  signIn(auth,provider).then(result=>{
-    
-  }).catch(err=>{
-    showNotification('Помилка входу: '+err.message,'error');
-    if(btn)btn.classList.remove('fb-auth-loading');
-  });
+  const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(isMobile){
+    window._fbSignInWithRedirect(auth,provider).catch(err=>{
+      showNotification('Помилка входу: '+err.message,'error');
+      if(btn)btn.classList.remove('fb-auth-loading');
+    });
+  } else {
+    window._fbSignInWithPopup(auth,provider).then(()=>{
+      // onAuthStateChanged will fire and call _fbAuthReady
+    }).catch(err=>{
+      showNotification('Помилка входу: '+err.message,'error');
+      if(btn)btn.classList.remove('fb-auth-loading');
+    });
+  }
 }
 
 function gdriveSignOut(){
@@ -4119,7 +4168,7 @@ function gdriveCollectData(){
   slots.forEach(s=>{
     try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v);}catch(e){}
   });
-  
+  // Todos
   try{data.todos=JSON.parse(localStorage.getItem('teacherCalendarTodos')||'[]')}catch(e){data.todos=[];}
   return data;
 }
@@ -4144,7 +4193,7 @@ function gdriveApplyData(d){
   if(d.classStates)Object.keys(d.classStates).forEach(id=>{
     try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]));}catch(e){}
   });
-  
+  // Todos
   if(d.todos){
     try{localStorage.setItem('teacherCalendarTodos',JSON.stringify(d.todos));}catch(e){}
     if(window._todoSetItems)window._todoSetItems(d.todos);
@@ -4157,6 +4206,9 @@ function gdriveApplyData(d){
   if(homeView==='month')renderHomeCalendar();else renderWeekView();
 }
 
+// Firestore helpers — wrap each key-value in a top-level field to avoid
+// Firestore's 1 MiB document limit issues with deeply nested data.
+// We store the whole payload as a single JSON string field.
 async function gdriveLoad(){
   if(!fbUser)return;
   const db=window._fbDb,docFn=window._fbDoc,getDocFn=window._fbGetDoc;
@@ -4172,7 +4224,7 @@ async function gdriveLoad(){
         gdriveApplyData(d);
       }
     } else {
-      
+      // First login — push current local data (but not right after a reset)
       const justReset=sessionStorage.getItem('teacherCalendarJustReset');
       if(justReset){sessionStorage.removeItem('teacherCalendarJustReset')}
       else{await gdriveSave()}
@@ -4197,15 +4249,15 @@ function _startRealtimeListener(){
     const sdata=snap.data();
     const remoteTs=sdata.updatedAt||0;
     const remoteDevice=sdata.deviceId||'';
-    
+    // Ігноруємо власний пристрій
     if(remoteDevice===FB_DEVICE_ID)return;
-    
+    // Ігноруємо якщо є незбережені локальні зміни — вони мають пріоритет
     if(fbLocalPending)return;
-    
+    // Ігноруємо якщо ще діє блокування після нашого збереження
     if(Date.now()<fbBlockUntil)return;
-    
+    // Ігноруємо застарілий snapshot
     if(remoteTs<=fbLastSaveTime)return;
-    
+    // Зовнішня зміна з новішим timestamp — застосовуємо
     try{
       const d=JSON.parse(sdata.payload);
       gdriveApplyData(d);
@@ -4217,7 +4269,7 @@ async function gdriveSave(){
   if(!fbUser)return;
   const db=window._fbDb,docFn=window._fbDoc,setDocFn=window._fbSetDoc;
   if(!db)return;
-  
+  // Знімаємо прапор очікування — зараз фактично зберігаємо
   fbLocalPending=false;
   fbSaveInFlight=true;
   gdriveSetSyncing(true);
@@ -4227,7 +4279,7 @@ async function gdriveSave(){
     const saveTs=Date.now();
     fbLastSaveTime=saveTs;
     await setDocFn(ref,{payload,updatedAt:saveTs,deviceId:FB_DEVICE_ID});
-    
+    // Блокуємо listener на 5с після збереження, щоб не отримати власний snapshot назад
     fbBlockUntil=Date.now()+5000;
   }catch(e){
     console.error('Firebase save error',e);
@@ -4238,15 +4290,16 @@ async function gdriveSave(){
 
 function gdriveScheduleSave(){
   if(!fbUser)return;
-  
+  // Одразу позначаємо що є локальні зміни — listener не перезапише їх до збереження
   fbLocalPending=true;
-  
-  
+  // Вмикаємо анімацію "завантаження" одразу при зміні — вона триватиме,
+  // поки не відбудеться реальне збереження в Firebase (через 3с тиші)
   gdriveSetSyncing(true);
   clearTimeout(fbSaveTimer);
   fbSaveTimer=setTimeout(gdriveSave,3000);
 }
 
+// Патчимо всі функції збереження щоб тригерити синк
 const _origSaveSlots=saveSlots;
 saveSlots=function(){_origSaveSlots();gdriveScheduleSave();};
 const _origSaveBellSchedule=saveBellSchedule;
@@ -4279,7 +4332,8 @@ const _origSaveLessonNotes=saveLessonNotes;
 saveLessonNotes=function(){_origSaveLessonNotes();gdriveScheduleSave();};
 const _origSavePeriodState=savePeriodState;
 savePeriodState=function(){_origSavePeriodState();gdriveScheduleSave();};
-
+// Патч ToDo: хукаємо Firebase-збереження через window._todoFirebaseSave
+// Встановлюємо після того як Todo IIFE вже запустився
 setTimeout(function(){window._todoFirebaseSave=function(){gdriveScheduleSave();};},0);
 function toggleIEMenu(e){e.stopPropagation();const m=document.getElementById('ie-menu');m.classList.toggle('open');if(m.classList.contains('open')){const close=()=>{m.classList.remove('open');document.removeEventListener('click',close)};setTimeout(()=>document.addEventListener('click',close),0)}}
 function closeIEMenu(){document.getElementById('ie-menu').classList.remove('open')}
@@ -4323,11 +4377,12 @@ async function setTheme(t){
 const _origSaveClassState=saveClassState;
 saveClassState=function(){_origSaveClassState();gdriveScheduleSave();};
 
+// ── Публічне посилання (Share) ────────────────────────────────────
 const SHARE_TOKEN_KEY='teacherCalendarShareToken';
 let currentShareToken=null;
 
 function generateShareToken(){
-  
+  // 16 random hex bytes = 32-char token
   const arr=new Uint8Array(16);
   crypto.getRandomValues(arr);
   return Array.from(arr).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -4342,10 +4397,10 @@ async function openShareModal(){
     showNotification('Увійдіть в акаунт, щоб створити посилання','error');
     return;
   }
-  
+  // Load or create token
   let token=null;
   try{token=localStorage.getItem(SHARE_TOKEN_KEY);}catch(e){}
-  
+  // Show modal immediately with spinner
   const ov=document.createElement('div');ov.className='share-modal-overlay';ov.id='share-modal-overlay';
   const box=document.createElement('div');box.className='share-modal-box';
   box.innerHTML=
@@ -4366,12 +4421,12 @@ async function openShareModal(){
     try{localStorage.setItem(SHARE_TOKEN_KEY,token);}catch(e){}
   }
   currentShareToken=token;
-  
+  // Push public data
   await pushPublicData(token);
   const inp=document.getElementById('share-link-input');
   const url=getShareUrl(token);
   if(inp)inp.value=url;
-  
+  // Generate QR code
   generateShareQR(url);
 }
 
@@ -4384,7 +4439,7 @@ function generateShareQR(url){
     wrap.appendChild(container);
     try{
       new QRCode(container,{text:url,width:160,height:160,colorDark:'#202124',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
-      
+      // qrcodejs appends canvas or img — wait a tick then show download btn
       setTimeout(function(){
         const btn=document.getElementById('share-qr-download-btn');
         if(btn)btn.style.display='flex';
@@ -4463,6 +4518,8 @@ async function revokeShareLink(){
   showNotification('Доступ скасовано','success');
 }
 
+// Патч gdriveScheduleSave: після звичайного збереження також оновлюємо публічні дані
+// Використовуємо window щоб уникнути конфлікту hoisting
 (function(){
   const _orig=gdriveScheduleSave;
   gdriveScheduleSave=function(){
@@ -4476,16 +4533,17 @@ async function revokeShareLink(){
   };
 })();
 
+// ── Read-only режим (якщо URL містить ?share=TOKEN) ───────────────
 (async function initReadonlyMode(){
   const params=new URLSearchParams(window.location.search);
   const shareToken=params.get('share');
   if(!shareToken)return;
 
-  
+  // Позначаємо body як readonly
   document.body.classList.add('readonly-mode');
 
-  
-  
+  // Завантажуємо публічні дані з Firestore
+  // (чекаємо поки firebase модуль ініціалізується)
   let attempts=0;
   const tryLoad=async()=>{
     const db=window._fbDb,docFn=window._fbDoc,getDocFn=window._fbGetDoc;
@@ -4498,7 +4556,7 @@ async function revokeShareLink(){
         const raw=snap.data().payload;
         if(raw){
           const d=JSON.parse(raw);
-          
+          // Застосовуємо дані без авторизації
           applyReadonlyData(d);
         }
       } else {
@@ -4526,7 +4584,7 @@ function applyReadonlyData(d){
   if(d.customLessonTimes){customLessonTimes=d.customLessonTimes;}
   if(d.deletedLessons){deletedLessons=d.deletedLessons;}
   if(d.holidays){
-    
+    // Restore period from holidays state (startDate, endDate, holidays list)
     const st=d.holidays;
     if(st.startDate)document.getElementById('start-date').value=st.startDate;
     if(st.endDate)document.getElementById('end-date').value=st.endDate;
@@ -4544,9 +4602,10 @@ function applyReadonlyData(d){
   if(homeView==='month')renderHomeCalendar();else renderWeekView();
   showNotification('Розклад завантажено (перегляд)','success');
 }
-
+// ── Кінець share-блоку ────────────────────────────────────────────
 </script>
 
+<!-- Solid colour picker overlay -->
 <div id="solid-color-picker-overlay">
   <div id="solid-color-picker-box">
     <h3>&#127756; Однотонний режим — оберіть колір тайлів</h3>
@@ -4562,6 +4621,7 @@ function applyReadonlyData(d){
   </div>
 </div>
 
+<!-- Dark-solid colour picker overlay -->
 <div id="dark-solid-color-picker-overlay">
   <div id="dark-solid-color-picker-box">
     <h3>&#11835; Темна однотонна — оберіть колір тайлів</h3>
@@ -4584,7 +4644,7 @@ function applyReadonlyData(d){
   const SOLID_SWATCHES=['#1a73e8','#34a853','#ea4335','#fbbc04','#a142f4','#009688','#e8710a','#f538a0','#5f6368','#185abc','#1e8e3e','#c5221f'];
   const DARK_SOLID_SWATCHES=['#8ab4f8','#81c995','#f28b82','#fdd663','#c58af9','#4dd0e1','#ffb74d','#f48fb1','#9aa0a6','#669df6','#5bb974','#ff8a65'];
 
-  
+  // ── Build light-solid swatch grid ──────────────────────────
   const grid=document.getElementById('solid-swatch-grid');
   SOLID_SWATCHES.forEach(hex=>{
     const s=document.createElement('div');
@@ -4602,7 +4662,7 @@ function applyReadonlyData(d){
     document.querySelectorAll('#solid-swatch-grid .solid-swatch').forEach(sw=>sw.classList.remove('selected'));
   });
 
-  
+  // ── Build dark-solid swatch grid ───────────────────────────
   const darkGrid=document.getElementById('dark-solid-swatch-grid');
   DARK_SOLID_SWATCHES.forEach(hex=>{
     const s=document.createElement('div');
@@ -4620,7 +4680,7 @@ function applyReadonlyData(d){
     document.querySelectorAll('#dark-solid-swatch-grid .solid-swatch').forEach(sw=>sw.classList.remove('selected'));
   });
 
-  
+  // ── Light-solid picker ──────────────────────────────────────
   window._pendingSolidResolve=null;
 
   window.openSolidPicker=function(){
@@ -4653,7 +4713,7 @@ function applyReadonlyData(d){
     if(e.target===this) closeSolidPicker(false);
   });
 
-  
+  // ── Dark-solid picker ───────────────────────────────────────
   window._pendingDarkSolidResolve=null;
 
   window.openDarkSolidPicker=function(){
@@ -4686,7 +4746,7 @@ function applyReadonlyData(d){
     if(e.target===this) closeDarkSolidPicker(false);
   });
 
-  
+  // ── Solid color getters ─────────────────────────────────────
   window.getSolidTileColor=function(){
     const theme=document.documentElement.getAttribute('data-theme');
     if(theme==='solid'){
@@ -4698,7 +4758,7 @@ function applyReadonlyData(d){
     return null;
   };
 
-  
+  // ── Override loadTheme ──────────────────────────────────────
   const _origLoadTheme=window.loadTheme;
   function applySolidVars(){
     const theme=document.documentElement.getAttribute('data-theme');
@@ -4731,8 +4791,8 @@ function applyReadonlyData(d){
     updateThemeBtn();
   };
 
-  
-  
+  // ── Override toggleTheme ────────────────────────────────────
+  // Cycle: light → dark → solid → dark-solid → light
   window.toggleTheme=async function(){
     const cur=document.documentElement.getAttribute('data-theme')||'light';
 
@@ -4752,7 +4812,7 @@ function applyReadonlyData(d){
 
     } else if(cur==='dark'){
       const color=await openSolidPicker();
-      if(color===null) return; 
+      if(color===null) return; // cancelled — stay on dark
       document.documentElement.setAttribute('data-theme','solid');
       try{localStorage.setItem(THEME_KEY,'solid')}catch(e){}
       updateThemeBtn();
@@ -4760,14 +4820,14 @@ function applyReadonlyData(d){
 
     } else if(cur==='solid'){
       const color=await openDarkSolidPicker();
-      if(color===null) return; 
+      if(color===null) return; // cancelled — stay on solid
       document.documentElement.setAttribute('data-theme','dark-solid');
       try{localStorage.setItem(THEME_KEY,'dark-solid')}catch(e){}
       updateThemeBtn();
       rerender();
 
     } else {
-      
+      // dark-solid → light
       document.documentElement.removeAttribute('data-theme');
       try{localStorage.setItem(THEME_KEY,'light')}catch(e){}
       updateThemeBtn();
@@ -4779,16 +4839,16 @@ function applyReadonlyData(d){
     const btn=document.getElementById('theme-btn');
     if(!btn) return;
     const cur=document.documentElement.getAttribute('data-theme')||'light';
-    if(cur==='dark')       btn.textContent='\u2600\ufe0f \u0422\u0435\u043c\u0430';   
-    else if(cur==='solid') btn.textContent='\u25a0 \u0422\u0435\u043c\u0430';         
-    else if(cur==='dark-solid') btn.textContent='\u25aa\ufe0f \u0422\u0435\u043c\u0430'; 
-    else                   btn.textContent='\u263e \u0422\u0435\u043c\u0430';          
+    if(cur==='dark')       btn.textContent='\u2600\ufe0f \u0422\u0435\u043c\u0430';   // ☀️ Тема
+    else if(cur==='solid') btn.textContent='\u25a0 \u0422\u0435\u043c\u0430';         // ■ Тема
+    else if(cur==='dark-solid') btn.textContent='\u25aa\ufe0f \u0422\u0435\u043c\u0430'; // ▪️ Тема
+    else                   btn.textContent='\u263e \u0422\u0435\u043c\u0430';          // ☾ Тема
   }
 
   document.addEventListener('DOMContentLoaded',updateThemeBtn);
   setTimeout(updateThemeBtn, 200);
 
-  
+  // ── Patch buildAllClassesData to inject solid colour ───────
   const _origBuildAllClassesData=window.buildAllClassesData;
   window.buildAllClassesData=function(){
     const result=_origBuildAllClassesData();
@@ -4800,6 +4860,7 @@ function applyReadonlyData(d){
   };
 })();
 
+// ── Sidebar Classes Section Toggle ─────────────────────────────────
 (function(){
   const CLASSES_COLLAPSED_KEY='teacherCalendarClassesCollapsed';
   function applyClassesSection(collapsed,animate){
@@ -4810,7 +4871,7 @@ function applyReadonlyData(d){
     if(collapsed){
       if(!animate){body.style.transition='none'}
       body.style.maxHeight=body.scrollHeight+'px';
-      body.offsetHeight; 
+      body.offsetHeight; // force reflow
       body.style.transition='';
       body.style.maxHeight='0px';
       body.style.opacity='0';
@@ -4837,13 +4898,13 @@ function applyReadonlyData(d){
   function initClassesSection(){
     const body=document.getElementById('sidebar-classes-body');
     if(!body)return;
-    
+    // Set initial max-height so transition works
     body.style.maxHeight='none';
     let collapsed=false;
     try{collapsed=localStorage.getItem(CLASSES_COLLAPSED_KEY)==='1'}catch(e){}
     applyClassesSection(collapsed,false);
   }
-  
+  // Also re-apply after renderSidebar (content changes height)
   const _origRenderSidebar=window.renderSidebar;
   if(typeof _origRenderSidebar==='function'){
     window.renderSidebar=function(){
@@ -4856,6 +4917,7 @@ function applyReadonlyData(d){
   if(document.readyState!=='loading')initClassesSection();
 })();
 
+// ── Sidebar ToDo List ────────────────────────────────────────────────
 (function(){
   const TODO_KEY='teacherCalendarTodos';
   const TODO_COLLAPSED_KEY='teacherCalendarTodoCollapsed';
@@ -4867,7 +4929,7 @@ function applyReadonlyData(d){
     try{localStorage.setItem(TODO_KEY,JSON.stringify(todos))}catch(e){}
     if(window._todoFirebaseSave)window._todoFirebaseSave();
   }
-  
+  // Дозволяємо gdriveApplyData встановити todos безпосередньо
   window._todoSetItems=function(items){
     todos=Array.isArray(items)?items:[];
     try{localStorage.setItem(TODO_KEY,JSON.stringify(todos))}catch(e){}
@@ -4930,7 +4992,7 @@ function applyReadonlyData(d){
     if(collapsed){
       if(!animate){body.style.transition='none'}
       body.style.maxHeight=body.scrollHeight+'px';
-      body.offsetHeight; 
+      body.offsetHeight; // force reflow
       body.style.transition='';
       body.style.maxHeight='0px';
       body.style.opacity='0';
@@ -4968,16 +5030,17 @@ function applyReadonlyData(d){
   if(document.readyState!=='loading')initTodoSection();
 })();
 
+// ── Settings Modal ─────────────────────────────────────────────────
 function openSettingsModal(){
   const ov=document.getElementById('settings-overlay');
   if(!ov)return;
   updateThemeCards();
-  
+  // sync sound toggle
   const tog=document.getElementById('smod-sound-toggle');
   if(tog)tog.checked=!!soundEnabled;
   const sel=document.getElementById('smod-sound-minutes');
   if(sel)sel.value=soundMinutesBefore;
-  
+  // sync push notification toggle
   const ptog=document.getElementById('smod-push-toggle');
   if(ptog)ptog.checked=!!pushNotifEnabled;
   updatePushNotifStatus();
@@ -5013,6 +5076,7 @@ function setSoundMinutes(val){
   lastSoundPlayedFor=null;
 }
 
+// ── Push / Local Notifications (PWA) ─────────────────────────────
 let pushNotifEnabled=false;
 const PUSH_NOTIF_KEY='teacherCalendarPushNotif';
 let _swRegistration=null;
@@ -5029,10 +5093,10 @@ async function registerServiceWorker(){
   if(!('serviceWorker' in navigator))return;
   try{
     _swRegistration=await navigator.serviceWorker.register('./sw.js');
-    
+    // Слухаємо повідомлення від SW
     navigator.serviceWorker.addEventListener('message',ev=>{
       if(ev.data&&ev.data.type==='NOTIFICATION_FIRED'){
-        
+        // SW показав сповіщення — плануємо наступне
         scheduleNextLessonNotification();
       }
     });
@@ -5069,7 +5133,7 @@ async function togglePushNotifFromSettings(on){
   }else{
     pushNotifEnabled=false;
     savePushNotifState();
-    
+    // Скасовуємо заплановане сповіщення
     if(_swRegistration&&_swRegistration.active){
       _swRegistration.active.postMessage({type:'SCHEDULE_NOTIFICATION',delayMs:-1});
     }
@@ -5103,7 +5167,7 @@ function scheduleNextLessonNotification(){
   const nm=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
   const todayDk=dateKey(now);
 
-  
+  // Знаходимо найближчий урок
   let bestDelay=Infinity,bestTitle='',bestTime='';
 
   if(bellSchedule&&bellSchedule.length>0){
@@ -5114,7 +5178,7 @@ function scheduleNextLessonNotification(){
       if(alertMin>nm){
         const delay=(alertMin-nm)*60*1000;
         if(delay<bestDelay){
-          
+          // Знаходимо назву уроку
           let lessonName='';
           if(cachedAllData){
             const dc=cachedAllData.allDayMap[todayDk]||[];
@@ -5132,14 +5196,14 @@ function scheduleNextLessonNotification(){
           bestTitle=lessonName?('Урок: '+lessonName):('Урок '+(si+1));
           bestTime=bell.start;
         }
-        break; 
+        break; // беремо перший майбутній урок
       }
     }
   }
 
   if(bestDelay<Infinity){
     const tag='lesson-'+todayDk+'-'+bestTime;
-    if(tag===_lastScheduledNotifTag)return; 
+    if(tag===_lastScheduledNotifTag)return; // вже заплановано
     _lastScheduledNotifTag=tag;
     _swRegistration.active.postMessage({
       type:'SCHEDULE_NOTIFICATION',
@@ -5151,18 +5215,22 @@ function scheduleNextLessonNotification(){
   }
 }
 
+
+/* ─────────────────────────────────────────────────────────
+   МОБІЛЬНИЙ ТИЖНЕВИЙ ВИГЛЯД — показує 1 день з перемикачем
+   ───────────────────────────────────────────────────────── */
 (function(){
   var MOBILE_BP = 640;
-  var _mobileDayIdx = null; 
+  var _mobileDayIdx = null; // 0=Пн … 6=Нд, null=авто (сьогодні або Пн)
 
   function isMobile(){ return window.innerWidth <= MOBILE_BP; }
 
-  
+  // Повертає індекс сьогоднішнього дня у тижні (0=Пн)
   function todayWeekIdx(){
     return (new Date().getDay() + 6) % 7;
   }
 
-  
+  // Ін'єкція мобільного бару з днями тижня
   function injectMobileDayBar(){
     if(document.getElementById('mob-day-bar')) return;
     var wv = document.getElementById('week-view');
@@ -5176,7 +5244,7 @@ function scheduleNextLessonNotification(){
     wv.insertBefore(bar, wv.firstChild);
   }
 
-  
+  // Оновлює вкладки днів
   function updateMobileDayTabs(){
     var tabs = document.getElementById('mob-day-tabs');
     if(!tabs || !weekStartDate) return;
@@ -5199,12 +5267,12 @@ function scheduleNextLessonNotification(){
     }
   }
 
-  
+  // Показати тільки колонку вибраного дня
   function applyMobileDayFilter(){
     if(!isMobile()) return;
     var idx = _mobileDayIdx !== null ? _mobileDayIdx : 0;
 
-    
+    // Шапка тижня: сховати всі крім idx+1 (0 — стовпець часу)
     var hEl = document.getElementById('week-header');
     if(hEl){
       var cells = hEl.children;
@@ -5214,7 +5282,7 @@ function scheduleNextLessonNotification(){
       hEl.style.gridTemplateColumns = '46px 1fr';
     }
 
-    
+    // Тіло тижня: сховати всі day-col крім потрібного
     var gEl = document.getElementById('week-grid');
     if(gEl){
       var cols = gEl.querySelectorAll('.week-day-col');
@@ -5222,14 +5290,14 @@ function scheduleNextLessonNotification(){
         col.style.display = (i===idx) ? '' : 'none';
       });
       gEl.style.gridTemplateColumns = '46px 1fr';
-      
+      // Часовий стовпець — завжди видимий
       var tCol = gEl.querySelector('.week-time-col');
       if(tCol) tCol.style.display = '';
     }
 
     updateMobileDayTabs();
 
-    
+    // Оновити заголовок — показати конкретну дату
     if(weekStartDate){
       var dt = new Date(weekStartDate);
       dt.setDate(dt.getDate()+idx);
@@ -5251,7 +5319,7 @@ function scheduleNextLessonNotification(){
     }
   }
 
-  
+  // Публічні функції навігації по днях
   window.mobGoDay = function(idx){
     if(_mobileDayIdx === idx) return;
     _mobileDayIdx = idx;
@@ -5265,7 +5333,7 @@ function scheduleNextLessonNotification(){
       applyMobileDayFilter();
       animateMobDayChange();
     } else {
-      
+      // Перейти на попередній тиждень, останній день
       _mobileDayIdx = 6;
       if(typeof navigatePrev === 'function') navigatePrev();
     }
@@ -5277,22 +5345,22 @@ function scheduleNextLessonNotification(){
       applyMobileDayFilter();
       animateMobDayChange();
     } else {
-      
+      // Перейти на наступний тиждень, перший день
       _mobileDayIdx = 0;
       if(typeof navigateNext === 'function') navigateNext();
     }
   };
 
-  
+  // Перехоплюємо renderWeekView
   var _origRenderWeekView = null;
   function patchRenderWeekView(){
     if(typeof renderWeekView !== 'function') return;
-    if(_origRenderWeekView) return; 
+    if(_origRenderWeekView) return; // вже пропатчено
     _origRenderWeekView = renderWeekView;
     window.renderWeekView = function(){
       _origRenderWeekView.apply(this, arguments);
       if(!isMobile()) return;
-      
+      // Вибрати поточний день якщо не встановлено
       if(_mobileDayIdx === null){
         _mobileDayIdx = todayWeekIdx();
       }
@@ -5301,7 +5369,7 @@ function scheduleNextLessonNotification(){
     };
   }
 
-  
+  // Патчимо _navigatePrevCore/_navigateNextCore щоб скидати день
   function patchNavigation(){
     if(typeof _navigatePrevCore === 'function' && !_navigatePrevCore._mobPatched){
       var op = _navigatePrevCore;
@@ -5332,7 +5400,7 @@ function scheduleNextLessonNotification(){
       window.goToToday = function(){
         og.apply(this, arguments);
         if(isMobile() && homeView==='week'){
-          
+          // Завжди скидаємо на сьогоднішній день
           _mobileDayIdx = todayWeekIdx();
           injectMobileDayBar();
           applyMobileDayFilter();
@@ -5342,7 +5410,7 @@ function scheduleNextLessonNotification(){
     }
   }
 
-  
+  // При зміні розміру — перезавантажити сторінку (з debounce)
   var _resizeTimer=null;
   var _resizeInitW=window.innerWidth;
   window.addEventListener('resize', function(){
@@ -5354,14 +5422,14 @@ function scheduleNextLessonNotification(){
     }, 400);
   });
 
-  
+  // Запуск після завантаження сторінки
   document.addEventListener('DOMContentLoaded', function(){
     setTimeout(function(){
       patchRenderWeekView();
       patchNavigation();
     }, 100);
   });
-  
+  // Якщо DOMContentLoaded вже пройшов
   if(document.readyState !== 'loading'){
     setTimeout(function(){
       patchRenderWeekView();
@@ -5372,6 +5440,7 @@ function scheduleNextLessonNotification(){
 
 </script>
 
+<!-- ── Settings Modal ────────────────────────────────────────────── -->
 <div id="settings-overlay" onclick="if(event.target===this)closeSettingsModal()">
   <div id="settings-modal">
     <div class="smod-head">
@@ -5383,7 +5452,7 @@ function scheduleNextLessonNotification(){
     </div>
     <div class="smod-body">
 
-      
+      <!-- ТЕМА -->
       <div class="smod-section">
         <div class="smod-section-title">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -5411,7 +5480,7 @@ function scheduleNextLessonNotification(){
 
       <div class="smod-divider"></div>
 
-      
+      <!-- ДАНІ -->
       <div class="smod-section">
         <div class="smod-section-title">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
@@ -5459,7 +5528,7 @@ function scheduleNextLessonNotification(){
 
       <div class="smod-divider"></div>
 
-      
+      <!-- ЗВУК -->
       <div class="smod-section">
         <div class="smod-section-title">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
@@ -5499,7 +5568,7 @@ function scheduleNextLessonNotification(){
         </div>
       </div>
 
-        
+        <!-- Push-сповіщення -->
         <div class="smod-sound-row" style="margin-top:8px">
           <div class="smod-row-icon" style="background:color-mix(in srgb,var(--blue) 12%,var(--bg-surface));color:var(--blue)">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
