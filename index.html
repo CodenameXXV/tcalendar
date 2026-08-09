@@ -86,9 +86,12 @@
   getRedirectResult(auth).then(result => {
     // redirect sign-in handled automatically by onAuthStateChanged
   }).catch(err => {
-    if (err && err.code && err.code !== 'auth/popup-closed-by-user') {
-      if (window.showNotification) window.showNotification('Помилка входу: ' + err.message, 'error');
-    }
+    if (!err) return;
+    const ignore = ['auth/popup-closed-by-user','auth/cancelled-popup-request'];
+    const msg = (err.message||'').toLowerCase();
+    if (ignore.includes(err.code)) return;
+    if (msg.includes('closing') || msg.includes('hidden') || msg.includes('terminated')) return;
+    if (window.showNotification) window.showNotification('Помилка входу: ' + err.message, 'error');
   });
 </script>
 <style>
@@ -4106,20 +4109,23 @@ function gdriveSignIn(){
   if(!auth){showNotification('Сервіс ще завантажується...','info');return;}
   const btn=document.getElementById('gdrive-btn');
   if(btn)btn.classList.add('fb-auth-loading');
-  const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  if(isMobile){
-    window._fbSignInWithRedirect(auth,provider).catch(err=>{
+  window._fbSignInWithPopup(auth,provider).then(()=>{
+    // onAuthStateChanged fires
+  }).catch(err=>{
+    if(err.code==='auth/popup-blocked'||err.code==='auth/cancelled-popup-request'){
+      // popup заблоковано браузером — fallback на redirect
+      window._fbSignInWithRedirect(auth,provider).catch(err2=>{
+        showNotification('Помилка входу: '+err2.message,'error');
+        if(btn)btn.classList.remove('fb-auth-loading');
+      });
+    } else if(err.code==='auth/popup-closed-by-user'){
+      // користувач сам закрив — просто прибираємо лоадер
+      if(btn)btn.classList.remove('fb-auth-loading');
+    } else {
       showNotification('Помилка входу: '+err.message,'error');
       if(btn)btn.classList.remove('fb-auth-loading');
-    });
-  } else {
-    window._fbSignInWithPopup(auth,provider).then(()=>{
-      // onAuthStateChanged will fire and call _fbAuthReady
-    }).catch(err=>{
-      showNotification('Помилка входу: '+err.message,'error');
-      if(btn)btn.classList.remove('fb-auth-loading');
-    });
-  }
+    }
+  });
 }
 
 function gdriveSignOut(){
