@@ -1717,6 +1717,7 @@ function minutesToTime(m){return String(Math.floor(m/60)).padStart(2,'0')+':'+St
 let notifTO=null;
 function showNotification(msg,type){document.querySelectorAll('.notification').forEach(n=>n.remove());const n=document.createElement('div');n.className='notification';const icon=type==='success'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':type==='info'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';n.innerHTML='<span>'+icon+'</span><span>'+msg+'</span>';n.style.backgroundColor=type==='success'?'#34a853':type==='info'?'#5f6368':'#ea4335';document.body.appendChild(n);if(notifTO)clearTimeout(notifTO);notifTO=setTimeout(()=>{n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(()=>n.remove(),300)},2500)}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function linkify(s){if(!s)return'';const d=document.createElement('div');d.innerHTML=s;const w=function(n){if(n.nodeType===3){const t=n.nodeValue;if(/(https?:\/\/[^\s<]+)/.test(t)){const p=document.createElement('span');p.innerHTML=escapeHtml(t).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');n.parentNode.replaceChild(p,n);}}else if(n.nodeType===1&&n.nodeName!=='A'){Array.from(n.childNodes).forEach(w);}};w(d);return d.innerHTML;}
 function loadTheme(){try{const t=localStorage.getItem(THEME_KEY);if(t==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}}
 function toggleTheme(){const d=document.documentElement.getAttribute('data-theme')==='dark';if(d){document.documentElement.removeAttribute('data-theme');try{localStorage.setItem(THEME_KEY,'light')}catch(e){}}else{document.documentElement.setAttribute('data-theme','dark');try{localStorage.setItem(THEME_KEY,'dark')}catch(e){}}}
 function loadNotes(){try{const s=localStorage.getItem(NOTES_KEY);if(s)dayNotes=JSON.parse(s)}catch(e){dayNotes={}}}
@@ -2069,7 +2070,7 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
     const cardId='lip-nc-'+(++_ncIdxLip);
     return '<div class="lip-note-card">'+
       '<div class="lip-note-card-lbl">'+labelText+'</div>'+
-      '<div class="lip-note-card-body lip-rich" id="'+cardId+'">'+html+'</div>'+
+      '<div class="lip-note-card-body lip-rich" id="'+cardId+'">'+linkify(html)+'</div>'+
       '<button class="lip-note-card-more" id="'+cardId+'-more" style="display:none" data-target="'+cardId+'">Показати більше &#9662;</button>'+
       '<button class="lip-note-card-edit" title="Редагувати">'+
         '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'+
@@ -2198,7 +2199,7 @@ function showEventInfoPopup(e,ev,dk){
     const cardId='lip-ev-nc-'+(++_ncIdxLip);
     return '<div class="lip-note-card">'+
       '<div class="lip-note-card-lbl">'+labelText+'</div>'+
-      '<div class="lip-note-card-body lip-rich" id="'+cardId+'">'+html+'</div>'+
+      '<div class="lip-note-card-body lip-rich" id="'+cardId+'">'+linkify(html)+'</div>'+
       '<button class="lip-note-card-more" id="'+cardId+'-more" style="display:none" data-target="'+cardId+'">Показати більше &#9662;</button>'+
       '<button class="lip-note-card-edit" title="Редагувати">'+
         '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'+
