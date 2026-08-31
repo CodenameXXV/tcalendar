@@ -4655,7 +4655,9 @@ async function pushPublicData(token){
     return false;
   }
   try{
-    const payload=JSON.stringify(gdriveCollectData());
+    const allData=gdriveCollectData();
+    const {weekdayLessonInfo,weekdayNotes,lessonNotes,eventNotes,dayNotes,...publicData}=allData;
+    const payload=JSON.stringify(publicData);
     const ref=docFn(db,'public',token);
     await setDocFn(ref,{payload,updatedAt:Date.now(),owner:fbUser.uid});
     return true;
