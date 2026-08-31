@@ -419,6 +419,15 @@ body.readonly-mode .fab-add-event{display:none!important}
 #lesson-info-popup .lip-note-card-edit:hover{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--bg-surface));color:var(--orange)}
 #lesson-info-popup .lip-note-edit-all{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:14px;background:var(--bg-surface);color:var(--text-secondary);font-size:.77em;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .15s,color .15s,background .15s;align-self:flex-start;margin-top:2px}
 #lesson-info-popup .lip-note-edit-all:hover{border-color:var(--orange);color:var(--orange);background:color-mix(in srgb,var(--orange) 7%,var(--bg-surface))}
+#lesson-info-popup .lip-info-section{margin:0 12px 8px;padding:10px 12px;background:linear-gradient(135deg,color-mix(in srgb,var(--green) 6%,var(--bg-surface)),color-mix(in srgb,var(--green) 3%,var(--bg-surface)));border:1px solid color-mix(in srgb,var(--green) 18%,var(--border-light));border-radius:10px}
+#lesson-info-popup .lip-info-header{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+#lesson-info-popup .lip-info-label{font-size:.68em;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.04em}
+#lesson-info-popup .lip-info-badge{font-size:.65em;font-weight:600;color:var(--green);background:color-mix(in srgb,var(--green) 10%,transparent);padding:2px 8px;border-radius:10px;margin-left:auto}
+#lesson-info-popup .lip-info-edit{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--bg-surface);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s,color .15s;flex-shrink:0}
+#lesson-info-popup .lip-info-edit:hover{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--bg-surface));color:var(--orange)}
+#lesson-info-popup .lip-info-card{background:var(--bg-surface);border:1px solid var(--border-light);border-radius:8px;padding:8px 10px 8px 12px;position:relative}
+#lesson-info-popup .lip-info-card-body{font-size:.84em;color:var(--text);line-height:1.5;word-break:break-word;padding-right:4px}
+#lesson-info-popup .lip-info-card-body.lip-rich{white-space:normal}
 @media(max-width:640px){
   #lip-overlay { display:block; }
   #lesson-info-popup {
@@ -443,6 +452,10 @@ body.readonly-mode .fab-add-event{display:none!important}
   #lesson-info-popup .lip-note-card-body { font-size: 0.95em; }
   #lesson-info-popup .lip-note-card-edit { top: 14px; right: 14px; width: 36px; height: 36px; }
   #lesson-info-popup .lip-add-note-btn { padding: 14px 20px; font-size: 1.05em; width: 100%; justify-content: center; }
+  #lesson-info-popup .lip-info-section{margin:0 16px 10px;padding:14px 16px}
+  #lesson-info-popup .lip-info-card{padding:12px 14px 12px 16px}
+  #lesson-info-popup .lip-info-card-body{font-size:.95em}
+  #lesson-info-popup .lip-info-edit{width:36px;height:36px}
   @keyframes lip-slide-up { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
   @keyframes lip-slide-down { 0% { transform: translateY(0); } 100% { transform: translateY(100%); } }
   #lip-backdrop { display:none !important; }
@@ -1442,9 +1455,9 @@ function updateSoundBtn(){
     b.style.borderColor='var(--border)';
   }
 }
-let holidays=[],currentPeriod='semester1',slots=[],currentClass=null,homeYear=new Date().getFullYear(),homeMonth=new Date().getMonth(),homeView='month',weekStartDate=null,cachedAllData=null,hiddenClasses=new Set(),dayNotes={},lessonNotes={},lessonTypes={},lessonCabinets={},weekdayCabinets={},lessonDayOrder={},lessonWeekdayOrder={},customLessonTimes={},deletedLessons={},weekdayNotes={};
+let holidays=[],currentPeriod='semester1',slots=[],currentClass=null,homeYear=new Date().getFullYear(),homeMonth=new Date().getMonth(),homeView='month',weekStartDate=null,cachedAllData=null,hiddenClasses=new Set(),dayNotes={},lessonNotes={},lessonTypes={},lessonCabinets={},weekdayCabinets={},lessonDayOrder={},lessonWeekdayOrder={},customLessonTimes={},deletedLessons={},weekdayNotes={},weekdayLessonInfo={};
 const CLASS_COLORS=['#1a73e8','#34a853','#fbbc04','#ea4335','#a142f4','#009688','#e8710a','#9334e6','#f538a0','#185abc'];
-const BELL_KEY='teacherCalendarBellSchedule',NOTES_KEY='teacherCalendarNotes',LESSON_NOTES_KEY='teacherCalendarLessonNotes',TYPES_KEY='teacherCalendarLessonTypes',CABINETS_KEY='teacherCalendarLessonCabinets',WEEKDAY_CABINETS_KEY='teacherCalendarWeekdayCabinets',HIDDEN_KEY='teacherCalendarHiddenClasses',THEME_KEY='teacherCalendarTheme',DAY_ORDER_KEY='teacherCalendarDayOrder',WEEKDAY_ORDER_KEY='teacherCalendarWeekdayOrder',CUSTOM_TIME_KEY='teacherCalendarCustomTimes',DELETED_KEY='teacherCalendarDeletedLessons',WEEKDAY_NOTES_KEY='teacherCalendarWeekdayNotes';
+const BELL_KEY='teacherCalendarBellSchedule',NOTES_KEY='teacherCalendarNotes',LESSON_NOTES_KEY='teacherCalendarLessonNotes',TYPES_KEY='teacherCalendarLessonTypes',CABINETS_KEY='teacherCalendarLessonCabinets',WEEKDAY_CABINETS_KEY='teacherCalendarWeekdayCabinets',HIDDEN_KEY='teacherCalendarHiddenClasses',THEME_KEY='teacherCalendarTheme',DAY_ORDER_KEY='teacherCalendarDayOrder',WEEKDAY_ORDER_KEY='teacherCalendarWeekdayOrder',CUSTOM_TIME_KEY='teacherCalendarCustomTimes',DELETED_KEY='teacherCalendarDeletedLessons',WEEKDAY_NOTES_KEY='teacherCalendarWeekdayNotes',WEEKDAY_LESSON_INFO_KEY='teacherCalendarWeekdayLessonInfo';
 const DEFAULT_BELL=[{num:1,start:'08:30',end:'09:15'},{num:2,start:'09:25',end:'10:10'},{num:3,start:'10:20',end:'11:05'},{num:4,start:'11:20',end:'12:05'},{num:5,start:'12:15',end:'13:00'},{num:6,start:'13:10',end:'13:55'},{num:7,start:'14:05',end:'14:50'},{num:8,start:'15:00',end:'15:45'}];
 let bellSchedule=[];
 const MONTH_NAMES_UK=['\u0421\u0456\u0447\u0435\u043d\u044c','\u041b\u044e\u0442\u0438\u0439','\u0411\u0435\u0440\u0435\u0437\u0435\u043d\u044c','\u041a\u0432\u0456\u0442\u0435\u043d\u044c','\u0422\u0440\u0430\u0432\u0435\u043d\u044c','\u0427\u0435\u0440\u0432\u0435\u043d\u044c','\u041b\u0438\u043f\u0435\u043d\u044c','\u0421\u0435\u0440\u043f\u0435\u043d\u044c','\u0412\u0435\u0440\u0435\u0441\u0435\u043d\u044c','\u0416\u043e\u0432\u0442\u0435\u043d\u044c','\u041b\u0438\u0441\u0442\u043e\u043f\u0430\u0434','\u0413\u0440\u0443\u0434\u0435\u043d\u044c'];
@@ -1717,7 +1730,7 @@ function minutesToTime(m){return String(Math.floor(m/60)).padStart(2,'0')+':'+St
 let notifTO=null;
 function showNotification(msg,type){document.querySelectorAll('.notification').forEach(n=>n.remove());const n=document.createElement('div');n.className='notification';const icon=type==='success'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':type==='info'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';n.innerHTML='<span>'+icon+'</span><span>'+msg+'</span>';n.style.backgroundColor=type==='success'?'#34a853':type==='info'?'#5f6368':'#ea4335';document.body.appendChild(n);if(notifTO)clearTimeout(notifTO);notifTO=setTimeout(()=>{n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(()=>n.remove(),300)},2500)}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function linkify(s){if(!s)return'';const d=document.createElement('div');d.innerHTML=s;const w=function(n){if(n.nodeType===3){const t=n.nodeValue;if(/(https?:\/\/[^\s<]+)/.test(t)){const p=document.createElement('span');p.innerHTML=escapeHtml(t).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');n.parentNode.replaceChild(p,n);}}else if(n.nodeType===1&&n.nodeName!=='A'){Array.from(n.childNodes).forEach(w);}};w(d);return d.innerHTML;}
+function linkify(s){if(!s)return'';const d=document.createElement('div');d.innerHTML=s;const PHONE_RE=/(\+?\d{1,3}[\s\-]?\(?\d{2,4}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2})/g;const URL_RE=/(https?:\/\/[^\s<]+)/g;const w=function(n){if(n.nodeType===3){const t=n.nodeValue;if(URL_RE.test(t)||PHONE_RE.test(t)){const p=document.createElement('span');let h=escapeHtml(t);URL_RE.lastIndex=0;h=h.replace(URL_RE,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');PHONE_RE.lastIndex=0;h=h.replace(PHONE_RE,function(m){const num=m.replace(/[\s\-\(\)]/g,'');return '<a href="tel:'+num+'">'+m+'</a>';});p.innerHTML=h;n.parentNode.replaceChild(p,n);}}else if(n.nodeType===1&&n.nodeName!=='A'){Array.from(n.childNodes).forEach(w);}};w(d);return d.innerHTML;}
 function loadTheme(){try{const t=localStorage.getItem(THEME_KEY);if(t==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}}
 function toggleTheme(){const d=document.documentElement.getAttribute('data-theme')==='dark';if(d){document.documentElement.removeAttribute('data-theme');try{localStorage.setItem(THEME_KEY,'light')}catch(e){}}else{document.documentElement.setAttribute('data-theme','dark');try{localStorage.setItem(THEME_KEY,'dark')}catch(e){}}}
 function loadNotes(){try{const s=localStorage.getItem(NOTES_KEY);if(s)dayNotes=JSON.parse(s)}catch(e){dayNotes={}}}
@@ -1732,6 +1745,10 @@ function saveLessonNotes(){try{localStorage.setItem(LESSON_NOTES_KEY,JSON.string
 function lessonNoteKey(dk,cid,si){return dk+'|'+cid+'|'+si}
 function getLessonNote(dk,cid,si){return lessonNotes[lessonNoteKey(dk,cid,si)]||{dayNote:'',lessonNote:''}}
 function setLessonNote(dk,cid,si,note){const k=lessonNoteKey(dk,cid,si);if(!note.dayNote&&!note.lessonNote)delete lessonNotes[k];else lessonNotes[k]=note;saveLessonNotes()}
+function loadWeekdayLessonInfo(){try{const s=localStorage.getItem(WEEKDAY_LESSON_INFO_KEY);if(s)weekdayLessonInfo=JSON.parse(s)}catch(e){weekdayLessonInfo={}}}
+function saveWeekdayLessonInfo(){try{localStorage.setItem(WEEKDAY_LESSON_INFO_KEY,JSON.stringify(weekdayLessonInfo))}catch(e){}}
+function getWeekdayLessonInfo(wd,cid,si){return weekdayLessonInfo[weekdayNoteKey(wd,cid,si)]||''}
+function setWeekdayLessonInfo(wd,cid,si,html){const k=weekdayNoteKey(wd,cid,si);if(!html)delete weekdayLessonInfo[k];else weekdayLessonInfo[k]=html;saveWeekdayLessonInfo()}
 function loadLessonTypes(){try{const s=localStorage.getItem(TYPES_KEY);if(s)lessonTypes=JSON.parse(s)}catch(e){lessonTypes={}}}
 function saveLessonTypes(){try{localStorage.setItem(TYPES_KEY,JSON.stringify(lessonTypes))}catch(e){}}
 function getLessonType(dk,cid,li){return lessonTypes[dk+'|'+cid+'|'+li]||'lesson'}
@@ -2061,8 +2078,10 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
   if(type!=='lesson')metaHtml+='<div class="lip-row"><span class="lip-row-icon">🏷️</span><span class="lip-row-text">'+escapeHtml(typeInfo.label)+'</span></div>';
   function _sH(h){if(!h)return'';const _d=document.createElement('div');_d.innerHTML=h;return _d.textContent||_d.innerText||'';}
   const wdNoteVal=weekdayNotes[wdNoteKey]||'';
+  const lessonInfoVal=getWeekdayLessonInfo(wd,classId,si)||'';
   const lesNoteVal=noteData.lessonNote||'';
   const hasWdNote=!!(_sH(wdNoteVal).trim());
+  const hasLessonInfo=!!(_sH(lessonInfoVal).trim());
   const hasLesNote=!!(_sH(lesNoteVal).trim());
   const hasAnyNote=hasWdNote||hasLesNote;
   let _ncIdxLip=0;
@@ -2079,10 +2098,35 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
   }
 
   let notesHtml='';
-  if(hasAnyNote){
+  let infoHtml='';
+  if(hasLessonInfo){
+    const cardId='lip-info-1';
+    infoHtml='<div class="lip-info-section">'+
+      '<div class="lip-info-header">'+
+        '<span class="lip-info-label">Відомості про урок</span>'+
+        '<span class="lip-info-badge">'+escapeHtml(wdEvery.charAt(0).toUpperCase()+wdEvery.slice(1))+'</span>'+
+        '<button class="lip-info-edit" title="Редагувати">'+
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'+
+        '</button>'+
+      '</div>'+
+      '<div class="lip-info-card">'+
+        '<div class="lip-info-card-body lip-rich" id="'+cardId+'">'+linkify(lessonInfoVal)+'</div>'+
+      '</div>'+
+    '</div>';
+  } else if(!document.body.classList.contains('readonly-mode')){
+    infoHtml='<div class="lip-info-section">'+
+      '<div class="lip-info-header">'+
+        '<span class="lip-info-label">Відомості про урок</span>'+
+        '<button class="lip-info-edit" title="Додати">'+
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'+
+        '</button>'+
+      '</div>'+
+    '</div>';
+  }
+  if(hasWdNote||hasLesNote){
     notesHtml='<div class="lip-notes-section">';
     if(hasWdNote) notesHtml+=makeNoteCard('<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> '+escapeHtml(wdEvery.charAt(0).toUpperCase()+wdEvery.slice(1)),wdNoteVal);
-    if(hasLesNote) notesHtml+=makeNoteCard('<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg> Цей урок',lesNoteVal);
+    if(hasLesNote) notesHtml+=makeNoteCard('Нотатки',lesNoteVal);
     notesHtml+='</div>';
   } else if(!document.body.classList.contains('readonly-mode')){
     notesHtml='<div class="lip-notes-empty">'+
@@ -2101,7 +2145,7 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
       '<button class="lip-close" id="lip-close-btn" title="Закрити">✕</button>'+
     '</div>'+
     '<div class="lip-meta">'+metaHtml+'</div>'+
-    notesHtml;
+    infoHtml+notesHtml;
   document.body.appendChild(pop);
   const tile=e.target.closest('.week-lesson') || e.target.closest('.dm-slot-card') || e.target.closest('.day-modal-custom-event');
   const rect=tile?tile.getBoundingClientRect():{right:e.clientX,left:e.clientX,top:e.clientY};
@@ -2135,6 +2179,17 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
   pop.querySelectorAll('.lip-note-card-edit').forEach(function(btn){
     btn.addEventListener('mousedown',function(ev){ev.stopPropagation();});
     btn.addEventListener('click',openNoteEditor);
+  });
+  // Info section edit button → open lesson info editor
+  function openInfoEditor(ev){
+    ev.stopPropagation();
+    closeLessonInfoPopup(function(){
+      showLessonInfoEditor(dk,classId,si,lessonName);
+    });
+  }
+  pop.querySelectorAll('.lip-info-edit').forEach(function(btn){
+    btn.addEventListener('mousedown',function(ev){ev.stopPropagation();});
+    btn.addEventListener('click',openInfoEditor);
   });
   // Open links in new tab, stop propagation so popup doesn't close
   pop.querySelectorAll('.lip-rich a').forEach(function(a){
@@ -2531,7 +2586,7 @@ function setWeekdayOrder(wi,order){if(!order||order.length===0||!order.some(func
 function isMobile(){return window.innerWidth<=900}
 function closeSidebar(){document.getElementById('sidebar').classList.add('collapsed');document.getElementById('sidebar-overlay').style.display='none'}
 function toggleSidebar(){const sb=document.getElementById('sidebar');const ov=document.getElementById('sidebar-overlay');const isCollapsed=sb.classList.toggle('collapsed');if(isMobile()){ov.style.display=isCollapsed?'none':'block'}}
-function exportData(){const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,lessonTypes,lessonCabinets,weekdayCabinets,lessonDayOrder,lessonWeekdayOrder,customLessonTimes,deletedLessons,customEvents:[...customEvents],eventNotes,classStates:{}};try{data.todos=JSON.parse(localStorage.getItem('teacherCalendarTodos')||'[]')}catch(e){data.todos=[]}slots.forEach(s=>{try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v)}catch(e){}});const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='calendar_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);showNotification('Експортовано!','success')}
+function exportData(){const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,weekdayLessonInfo,lessonTypes,lessonCabinets,weekdayCabinets,lessonDayOrder,lessonWeekdayOrder,customLessonTimes,deletedLessons,customEvents:[...customEvents],eventNotes,classStates:{}};try{data.todos=JSON.parse(localStorage.getItem('teacherCalendarTodos')||'[]')}catch(e){data.todos=[]}slots.forEach(s=>{try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v)}catch(e){}});const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='calendar_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);showNotification('Експортовано!','success')}
 
 function exportToGoogleCalendar(){
   if(!cachedAllData)cachedAllData=buildAllClassesData();
@@ -2593,7 +2648,7 @@ function exportToGoogleCalendar(){
   },400);
   showNotification('Файл .ics готовий!','success');
 }
-function importData(){const inp=document.getElementById('import-file-input');inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.slots){slots=d.slots;saveSlots()}if(d.bellSchedule){bellSchedule=d.bellSchedule;saveBellSchedule()}if(d.hiddenClasses){hiddenClasses=new Set(d.hiddenClasses);saveHiddenClasses()}if(d.dayNotes){dayNotes=d.dayNotes;saveNotes()}if(d.weekdayNotes){weekdayNotes=d.weekdayNotes;saveWeekdayNotes()}if(d.lessonNotes){lessonNotes=d.lessonNotes;saveLessonNotes()}if(d.lessonTypes){lessonTypes=d.lessonTypes;saveLessonTypes()}if(d.lessonCabinets){lessonCabinets=d.lessonCabinets;saveLessonCabinets()}if(d.weekdayCabinets){weekdayCabinets=d.weekdayCabinets;saveWeekdayCabinets()}if(d.lessonDayOrder){lessonDayOrder=d.lessonDayOrder;saveDayOrder()}if(d.lessonWeekdayOrder){lessonWeekdayOrder=d.lessonWeekdayOrder;saveWeekdayOrder()}if(d.customLessonTimes){customLessonTimes=d.customLessonTimes;saveCustomTimes()}if(d.deletedLessons){deletedLessons=d.deletedLessons;saveDeletedLessons()}if(d.customEvents){customEvents=d.customEvents;saveCustomEvents()}if(d.eventNotes){eventNotes=d.eventNotes;saveEventNotes()}if(d.holidays)applyPeriodState(d.holidays);if(d.classStates)Object.keys(d.classStates).forEach(id=>{try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]))}catch(e){}});if(d.todos){try{localStorage.setItem('teacherCalendarTodos',JSON.stringify(d.todos))}catch(e){}if(window.reloadTodosFromStorage)window.reloadTodosFromStorage()}cachedAllData=null;renderSidebar();if(homeView==='month')renderHomeCalendar();else renderWeekView();showNotification('\u0406\u043c\u043f\u043e\u0440\u0442\u043e\u0432\u0430\u043d\u043e!','success')}catch(err){showNotification('\u041f\u043e\u043c\u0438\u043b\u043a\u0430!','error')}};r.readAsText(f);inp.value=''};inp.click()}
+function importData(){const inp=document.getElementById('import-file-input');inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.slots){slots=d.slots;saveSlots()}if(d.bellSchedule){bellSchedule=d.bellSchedule;saveBellSchedule()}if(d.hiddenClasses){hiddenClasses=new Set(d.hiddenClasses);saveHiddenClasses()}if(d.dayNotes){dayNotes=d.dayNotes;saveNotes()}if(d.weekdayNotes){weekdayNotes=d.weekdayNotes;saveWeekdayNotes()}if(d.lessonNotes){lessonNotes=d.lessonNotes;saveLessonNotes()}if(d.weekdayLessonInfo){weekdayLessonInfo=d.weekdayLessonInfo;saveWeekdayLessonInfo()}if(d.lessonTypes){lessonTypes=d.lessonTypes;saveLessonTypes()}if(d.lessonCabinets){lessonCabinets=d.lessonCabinets;saveLessonCabinets()}if(d.weekdayCabinets){weekdayCabinets=d.weekdayCabinets;saveWeekdayCabinets()}if(d.lessonDayOrder){lessonDayOrder=d.lessonDayOrder;saveDayOrder()}if(d.lessonWeekdayOrder){lessonWeekdayOrder=d.lessonWeekdayOrder;saveWeekdayOrder()}if(d.customLessonTimes){customLessonTimes=d.customLessonTimes;saveCustomTimes()}if(d.deletedLessons){deletedLessons=d.deletedLessons;saveDeletedLessons()}if(d.customEvents){customEvents=d.customEvents;saveCustomEvents()}if(d.eventNotes){eventNotes=d.eventNotes;saveEventNotes()}if(d.holidays)applyPeriodState(d.holidays);if(d.classStates)Object.keys(d.classStates).forEach(id=>{try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]))}catch(e){}});if(d.todos){try{localStorage.setItem('teacherCalendarTodos',JSON.stringify(d.todos))}catch(e){}if(window.reloadTodosFromStorage)window.reloadTodosFromStorage()}cachedAllData=null;renderSidebar();if(homeView==='month')renderHomeCalendar();else renderWeekView();showNotification('\u0406\u043c\u043f\u043e\u0440\u0442\u043e\u0432\u0430\u043d\u043e!','success')}catch(err){showNotification('\u041f\u043e\u043c\u0438\u043b\u043a\u0430!','error')}};r.readAsText(f);inp.value=''};inp.click()}
 async function resetAllSettings(){
   closeSettingsModal();
   const ok=await showConfirmModal({
@@ -2612,7 +2667,7 @@ async function resetAllSettings(){
   const keysToRemove=[
     BELL_KEY,NOTES_KEY,LESSON_NOTES_KEY,TYPES_KEY,HIDDEN_KEY,THEME_KEY,
     CABINETS_KEY,WEEKDAY_CABINETS_KEY,
-    DAY_ORDER_KEY,WEEKDAY_ORDER_KEY,CUSTOM_TIME_KEY,DELETED_KEY,WEEKDAY_NOTES_KEY,
+    DAY_ORDER_KEY,WEEKDAY_ORDER_KEY,CUSTOM_TIME_KEY,DELETED_KEY,WEEKDAY_NOTES_KEY,WEEKDAY_LESSON_INFO_KEY,
     CUSTOM_EVENTS_KEY,EVENT_NOTES_KEY,PERIOD_KEY,'teacherCalendarSlots','teacherCalendarActiveClass',
     'teacherCalendarSound','teacherCalendarSoundMinutes','teacherCalendarHomeView',
     'teacherCalendarViewMode','teacherCalendarShareToken',
@@ -2785,7 +2840,7 @@ function updateNowLessonPanel(){
 clearInterval(window._nowPanelTimer);
 window._nowPanelTimer=setInterval(updateNowLessonPanel,1000);
 
-function renderSidebar(){const today=new Date();today.setHours(0,0,0,0);const dk=dateKey(today);if(!cachedAllData)cachedAllData=buildAllClassesData();const dc=(cachedAllData.allDayMap[dk]||[]);const visibleDc=dc.filter(c=>!hiddenClasses.has(c.classId));const el=document.getElementById('today-summary');const dayStr=today.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});const total=visibleDc.length>0?visibleDc.reduce((s,c)=>s+c.lessons,0):0;let h='<div class="today-summary-date">'+dayStr+'</div><div class="today-summary-title">'+(visibleDc.length>0?pluralLesson(total):'\u0412\u0456\u043b\u044c\u043d\u0438\u0439 \u0434\u0435\u043d\u044c')+'</div>';const evsToday2=(typeof getActiveEventsForDate==='function'?getActiveEventsForDate(dk):[]).slice().sort((a,b)=>a.startTime.localeCompare(b.startTime));if(dc.length>0){const allL2=buildDayOrderList(dc);const totalSlots2=Math.max(allL2.length,bellSchedule.length);const slotArr2=getSlotOrder(dk,allL2,totalSlots2);for(let si2=0;si2<totalSlots2;si2++){const key2=slotArr2[si2];if(!key2)continue;const p2=key2.split(':');const cid2=p2[0];const les2=allL2.find(l=>l.classId===cid2&&l.origIdx===parseInt(p2[1],10));if(!les2)continue;if(isLessonDeletedFull(dk,cid2))continue;if(hiddenClasses.has(cid2))continue;const color=cachedAllData.classColorMap[cid2]||'#1a73e8';const bell=getBellForSlot(dk,si2);const wd=(today.getDay()+6)%7;const nd=getLessonNote(dk,cid2,si2);const sideCab2=getLessonCabinet(dk,cid2,si2);const sideCabHtm=sideCab2?'<span class="today-lesson-cabinet"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#9334e6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> '+escapeHtml(sideCab2)+'</span>':'';let ntxt=nd.lessonNote||nd.dayNote||(weekdayNotes[weekdayNoteKey(wd,cid2,si2)]||'');let nhtm='';if(ntxt){const _sd=document.createElement('div');_sd.innerHTML=ntxt;ntxt=_sd.textContent||_sd.innerText||'';if(ntxt.length>25)ntxt=ntxt.substring(0,25)+'...';nhtm='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg> '+escapeHtml(ntxt)+'</span>'}h+='<div class="today-lesson-item"><span class="today-lesson-dot" style="background:'+color+'"></span><span class="today-lesson-time">'+bell.start+'</span><span class="today-lesson-info"><span class="today-lesson-name">'+escapeHtml(les2.className)+'</span><span class="today-lesson-num">Урок '+(si2+1)+'</span>'+sideCabHtm+nhtm+'</span></div>'}}else if(evsToday2.length===0)h+='<div class="today-no-lessons">\u041d\u0435\u043c\u0430\u0454 \u0443\u0440\u043e\u043a\u0456\u0432</div>';evsToday2.forEach(function(ev2){const noteTxt2=getEventNoteForDisplay(ev2,dk);let noteHtm2='';if(noteTxt2){let nt2=noteTxt2;if(nt2.length>25)nt2=nt2.substring(0,25)+'...';noteHtm2='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>'+escapeHtml(nt2)+'</span>'}h+='<div class="today-event-item" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Правий клік для редагування / видалення"><span class="today-event-dot"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></span><span class="today-event-time">'+ev2.startTime+'</span><span class="today-event-info"><span class="today-event-name">'+escapeHtml(ev2.title)+'</span>'+noteHtm2+'</span>'+(ev2.recurring?'<span class="today-event-badge"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>':'')+'<button class="ln-btn today-event-notebtn'+(noteTxt2?' has-note':'')+'" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Нотатка до події"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg></button></div>'});el.innerHTML=h;el.querySelectorAll('.today-event-item').forEach(function(row){row.addEventListener('contextmenu',function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)});addLongPress(row,function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)})});el.querySelectorAll('.today-event-notebtn').forEach(function(btn){btn.addEventListener('mousedown',function(e){e.stopPropagation()});btn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(btn.dataset.evId,btn.dataset.evDk,btn)})});updateNowLessonPanel();const cl=document.getElementById('sidebar-class-list');cl.innerHTML='';// Calculate per-class weekly hours
+function renderSidebar(){const today=new Date();today.setHours(0,0,0,0);const dk=dateKey(today);if(!cachedAllData)cachedAllData=buildAllClassesData();const dc=(cachedAllData.allDayMap[dk]||[]);const visibleDc=dc.filter(c=>!hiddenClasses.has(c.classId));const el=document.getElementById('today-summary');const dayStr=today.toLocaleDateString('uk',{weekday:'long',day:'numeric',month:'long'});const total=visibleDc.length>0?visibleDc.reduce((s,c)=>s+c.lessons,0):0;let h='<div class="today-summary-date">'+dayStr+'</div><div class="today-summary-title">'+(visibleDc.length>0?pluralLesson(total):'\u0412\u0456\u043b\u044c\u043d\u0438\u0439 \u0434\u0435\u043d\u044c')+'</div>';const evsToday2=(typeof getActiveEventsForDate==='function'?getActiveEventsForDate(dk):[]).slice().sort((a,b)=>a.startTime.localeCompare(b.startTime));if(dc.length>0){const allL2=buildDayOrderList(dc);const totalSlots2=Math.max(allL2.length,bellSchedule.length);const slotArr2=getSlotOrder(dk,allL2,totalSlots2);for(let si2=0;si2<totalSlots2;si2++){const key2=slotArr2[si2];if(!key2)continue;const p2=key2.split(':');const cid2=p2[0];const les2=allL2.find(l=>l.classId===cid2&&l.origIdx===parseInt(p2[1],10));if(!les2)continue;if(isLessonDeletedFull(dk,cid2))continue;if(hiddenClasses.has(cid2))continue;const color=cachedAllData.classColorMap[cid2]||'#1a73e8';const bell=getBellForSlot(dk,si2);const wd=(today.getDay()+6)%7;const nd=getLessonNote(dk,cid2,si2);const sideCab2=getLessonCabinet(dk,cid2,si2);const sideCabHtm=sideCab2?'<span class="today-lesson-cabinet"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#9334e6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> '+escapeHtml(sideCab2)+'</span>':'';let ntxt=nd.lessonNote||nd.dayNote||(weekdayNotes[weekdayNoteKey(wd,cid2,si2)]||'')||(weekdayLessonInfo[weekdayNoteKey(wd,cid2,si2)]||'');let nhtm='';if(ntxt){const _sd=document.createElement('div');_sd.innerHTML=ntxt;ntxt=_sd.textContent||_sd.innerText||'';if(ntxt.length>25)ntxt=ntxt.substring(0,25)+'...';nhtm='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg> '+escapeHtml(ntxt)+'</span>'}h+='<div class="today-lesson-item"><span class="today-lesson-dot" style="background:'+color+'"></span><span class="today-lesson-time">'+bell.start+'</span><span class="today-lesson-info"><span class="today-lesson-name">'+escapeHtml(les2.className)+'</span><span class="today-lesson-num">Урок '+(si2+1)+'</span>'+sideCabHtm+nhtm+'</span></div>'}}else if(evsToday2.length===0)h+='<div class="today-no-lessons">\u041d\u0435\u043c\u0430\u0454 \u0443\u0440\u043e\u043a\u0456\u0432</div>';evsToday2.forEach(function(ev2){const noteTxt2=getEventNoteForDisplay(ev2,dk);let noteHtm2='';if(noteTxt2){let nt2=noteTxt2;if(nt2.length>25)nt2=nt2.substring(0,25)+'...';noteHtm2='<span class="today-lesson-note" style="font-size:0.85em;color:var(--text-light);display:block;margin-top:2px;"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>'+escapeHtml(nt2)+'</span>'}h+='<div class="today-event-item" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Правий клік для редагування / видалення"><span class="today-event-dot"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></span><span class="today-event-time">'+ev2.startTime+'</span><span class="today-event-info"><span class="today-event-name">'+escapeHtml(ev2.title)+'</span>'+noteHtm2+'</span>'+(ev2.recurring?'<span class="today-event-badge"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>':'')+'<button class="ln-btn today-event-notebtn'+(noteTxt2?' has-note':'')+'" data-ev-id="'+ev2.id+'" data-ev-dk="'+dk+'" title="Нотатка до події"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg></button></div>'});el.innerHTML=h;el.querySelectorAll('.today-event-item').forEach(function(row){row.addEventListener('contextmenu',function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)});addLongPress(row,function(e){showEventContextMenu(e,row.dataset.evId,row.dataset.evDk)})});el.querySelectorAll('.today-event-notebtn').forEach(function(btn){btn.addEventListener('mousedown',function(e){e.stopPropagation()});btn.addEventListener('click',function(e){e.stopPropagation();showEventNotePopup(btn.dataset.evId,btn.dataset.evDk,btn)})});updateNowLessonPanel();const cl=document.getElementById('sidebar-class-list');cl.innerHTML='';// Calculate per-class weekly hours
 const classHrsMap={};
 let totalWeeklyHrs=0;
 slots.forEach(function(s){
@@ -2814,7 +2869,7 @@ function navigatePrev(){animateNavigation('prev',_navigatePrevCore)}
 function navigateNext(){animateNavigation('next',_navigateNextCore)}
 function goToToday(){const n=new Date();homeYear=n.getFullYear();homeMonth=n.getMonth();weekStartDate=getMonday(n);cachedAllData=null;if(homeView==='month')renderHomeCalendar();else renderWeekView();updateTitle();renderSidebar()}
 function renderHomeCalendar(){if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;document.getElementById('gcal-month-year').textContent=MONTH_NAMES_UK[homeMonth]+' '+homeYear;const wd=document.getElementById('gcal-weekdays');wd.innerHTML='';wd.style.gridTemplateColumns='repeat(7,1fr)';DAY_HEADERS_UK.forEach((dn,i)=>{const d=document.createElement('div');d.className='gcal-weekday'+(i>=5?' weekend':'');d.textContent=dn;wd.appendChild(d)});const grid=document.getElementById('gcal-grid');grid.innerHTML='';grid.style.gridTemplateColumns='repeat(7,1fr)';const dim=new Date(homeYear,homeMonth+1,0).getDate();const fw=(new Date(homeYear,homeMonth,1).getDay()+6)%7;const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<fw;i++){const d=new Date(homeYear,homeMonth,0).getDate()-fw+1+i;const dt=new Date(homeYear,homeMonth-1,d);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,true,period,allDayMap,classColorMap,today))}for(let d=1;d<=dim;d++){const dt=new Date(homeYear,homeMonth,d);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,false,period,allDayMap,classColorMap,today))}const tc=fw+dim;const target=tc<=35?35:42;for(let i=1;i<=target-tc;i++){const dt=new Date(homeYear,homeMonth+1,i);dt.setHours(0,0,0,0);grid.appendChild(createGcalCell(dt,true,period,allDayMap,classColorMap,today))}}
-function createGcalCell(dateObj,outside,period,allDayMap,classColorMap,today){const cell=document.createElement('div');const dk=dateKey(dateObj);const inRange=dateObj>=period.start&&dateObj<=period.end;const wi=(dateObj.getDay()+6)%7;const isWE=wi>=5;const dayC=inRange?(allDayMap[dk]||[]):[];const visibleDayC=dayC.filter(c=>!hiddenClasses.has(c.classId));const isHol=inRange&&isDateInHoliday(dateObj,period.holidays);const isT=dateObj.getTime()===today.getTime();let cls='gcal-cell';if(outside)cls+=' outside';else if(isHol&&visibleDayC.length===0)cls+=' holiday';else if(isWE)cls+=' weekend';if(isT)cls+=' today';cell.className=cls;const hdr=document.createElement('div');hdr.className='gcal-cell-header';const ds=document.createElement('div');ds.className='gcal-cell-date';ds.textContent=dateObj.getDate();hdr.appendChild(ds);if(!outside){const wn=document.createElement('span');wn.className='gcal-wk-num';wn.textContent='W'+getWeek(dateObj);hdr.appendChild(wn)}cell.appendChild(hdr);if(!outside&&visibleDayC.length>0){const lc=document.createElement('span');lc.className='gcal-lcount';lc.textContent=visibleDayC.reduce((s,c)=>s+c.lessons,0)+'\u0443\u0440';hdr.insertBefore(lc,hdr.querySelector('.gcal-wk-num'))}if(Object.keys(weekdayNotes).some(function(k){return k.startsWith(wi+'|')&&weekdayNotes[k]})){const dot=document.createElement('span');dot.className='has-note-dot';cell.appendChild(dot)}if(!outside&&visibleDayC.length>0){const evts=document.createElement('div');evts.className='gcal-events';const MAX=3;const allL=buildDayOrderList(dayC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);const classSlotMap={};slotArr.forEach(function(key,si){if(!key)return;const p=key.split(':');const cid=p[0];if(!classSlotMap[cid])classSlotMap[cid]={first:si,last:si};else classSlotMap[cid].last=si});const vis=visibleDayC.slice(0,MAX);const hidden=visibleDayC.length-MAX;vis.forEach(c=>{const ev=document.createElement('div');ev.className='gcal-event';ev.style.background=classColorMap[c.classId]||'#1a73e8';ev.dataset.dk=dk;ev.dataset.classId=c.classId;const sm=classSlotMap[c.classId];const b1=sm?getBellForSlot(dk,sm.first):null;const b2=sm?getBellForSlot(dk,sm.last):null;const ts=b1?b1.start:'';const te=b2?b2.end:'';const timeRange=(ts&&te)?ts+'\u2013'+te:ts;const firstSi=sm?sm.first:0;ev.innerHTML='<span class="ev-time">'+timeRange+'</span>'+escapeHtml(c.className)+' \u00b7 '+c.lessons+'\u0443\u0440';ev.addEventListener('click',e=>{e.stopPropagation();openDayModal(dk,dateObj)});evts.appendChild(ev)});if(hidden>0){const m=document.createElement('div');m.className='gcal-more';m.textContent='+ \u0449\u0435 '+hidden;m.addEventListener('click',e=>{e.stopPropagation();openDayModal(dk,dateObj)});evts.appendChild(m)}cell.appendChild(evts);cell.addEventListener('click',()=>openDayModal(dk,dateObj))}else if(!outside&&isHol){const evts=document.createElement('div');evts.className='gcal-events';const ev=document.createElement('div');ev.className='gcal-event';ev.style.background='#ea4335';ev.innerHTML='<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> \u041a\u0430\u043d\u0456\u043a\u0443\u043b\u0438';evts.appendChild(ev);cell.appendChild(evts)}else if(!outside)cell.addEventListener('click',()=>openDayModal(dk,dateObj));
+function createGcalCell(dateObj,outside,period,allDayMap,classColorMap,today){const cell=document.createElement('div');const dk=dateKey(dateObj);const inRange=dateObj>=period.start&&dateObj<=period.end;const wi=(dateObj.getDay()+6)%7;const isWE=wi>=5;const dayC=inRange?(allDayMap[dk]||[]):[];const visibleDayC=dayC.filter(c=>!hiddenClasses.has(c.classId));const isHol=inRange&&isDateInHoliday(dateObj,period.holidays);const isT=dateObj.getTime()===today.getTime();let cls='gcal-cell';if(outside)cls+=' outside';else if(isHol&&visibleDayC.length===0)cls+=' holiday';else if(isWE)cls+=' weekend';if(isT)cls+=' today';cell.className=cls;const hdr=document.createElement('div');hdr.className='gcal-cell-header';const ds=document.createElement('div');ds.className='gcal-cell-date';ds.textContent=dateObj.getDate();hdr.appendChild(ds);if(!outside){const wn=document.createElement('span');wn.className='gcal-wk-num';wn.textContent='W'+getWeek(dateObj);hdr.appendChild(wn)}cell.appendChild(hdr);if(!outside&&visibleDayC.length>0){const lc=document.createElement('span');lc.className='gcal-lcount';lc.textContent=visibleDayC.reduce((s,c)=>s+c.lessons,0)+'\u0443\u0440';hdr.insertBefore(lc,hdr.querySelector('.gcal-wk-num'))}if(Object.keys(weekdayNotes).some(function(k){return k.startsWith(wi+'|')&&weekdayNotes[k]})||Object.keys(weekdayLessonInfo).some(function(k){return k.startsWith(wi+'|')&&weekdayLessonInfo[k]})){const dot=document.createElement('span');dot.className='has-note-dot';cell.appendChild(dot)}if(!outside&&visibleDayC.length>0){const evts=document.createElement('div');evts.className='gcal-events';const MAX=3;const allL=buildDayOrderList(dayC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);const classSlotMap={};slotArr.forEach(function(key,si){if(!key)return;const p=key.split(':');const cid=p[0];if(!classSlotMap[cid])classSlotMap[cid]={first:si,last:si};else classSlotMap[cid].last=si});const vis=visibleDayC.slice(0,MAX);const hidden=visibleDayC.length-MAX;vis.forEach(c=>{const ev=document.createElement('div');ev.className='gcal-event';ev.style.background=classColorMap[c.classId]||'#1a73e8';ev.dataset.dk=dk;ev.dataset.classId=c.classId;const sm=classSlotMap[c.classId];const b1=sm?getBellForSlot(dk,sm.first):null;const b2=sm?getBellForSlot(dk,sm.last):null;const ts=b1?b1.start:'';const te=b2?b2.end:'';const timeRange=(ts&&te)?ts+'\u2013'+te:ts;const firstSi=sm?sm.first:0;ev.innerHTML='<span class="ev-time">'+timeRange+'</span>'+escapeHtml(c.className)+' \u00b7 '+c.lessons+'\u0443\u0440';ev.addEventListener('click',e=>{e.stopPropagation();openDayModal(dk,dateObj)});evts.appendChild(ev)});if(hidden>0){const m=document.createElement('div');m.className='gcal-more';m.textContent='+ \u0449\u0435 '+hidden;m.addEventListener('click',e=>{e.stopPropagation();openDayModal(dk,dateObj)});evts.appendChild(m)}cell.appendChild(evts);cell.addEventListener('click',()=>openDayModal(dk,dateObj))}else if(!outside&&isHol){const evts=document.createElement('div');evts.className='gcal-events';const ev=document.createElement('div');ev.className='gcal-event';ev.style.background='#ea4335';ev.innerHTML='<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> \u041a\u0430\u043d\u0456\u043a\u0443\u043b\u0438';evts.appendChild(ev);cell.appendChild(evts)}else if(!outside)cell.addEventListener('click',()=>openDayModal(dk,dateObj));
 // Контекстне меню на порожньому місці місячної клітинки
 if(!outside){
   cell.addEventListener('contextmenu',function(e){
@@ -2850,7 +2905,7 @@ if(!document.body.classList.contains('readonly-mode')&&!dc.classList.contains('_
 } else {
   les.style.cursor='default';
 }
-(function(){var _nd=getLessonNote(dk,lesson.classId,si);var _wd=(new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2])).getDay()+6)%7;if(weekdayNotes[weekdayNoteKey(_wd,lesson.classId,si)]||_nd.lessonNote){var _i=document.createElement('span');_i.className='week-lesson-note-ind';_i.innerHTML='<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; display:inline-block"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>';les.appendChild(_i)}})();
+(function(){var _nd=getLessonNote(dk,lesson.classId,si);var _wd=(new Date(parseInt(dk.split('-')[0]),parseInt(dk.split('-')[1]),parseInt(dk.split('-')[2])).getDay()+6)%7;if(weekdayLessonInfo[weekdayNoteKey(_wd,lesson.classId,si)]||weekdayNotes[weekdayNoteKey(_wd,lesson.classId,si)]||_nd.lessonNote){var _i=document.createElement('span');_i.className='week-lesson-note-ind';_i.innerHTML='<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; display:inline-block"><path d="M2 22h20"/><path d="M16 2l4 4-12 12H4v-4L16 2z"/></svg>';les.appendChild(_i)}})();
 dc.appendChild(les);
 })}// Render custom events for this day column
 (function(){
@@ -3246,35 +3301,41 @@ function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
     if(lip&&lip.dataset&&(lip.dataset.lipDk===dk&&lip.dataset.lipSi==si&&lip.dataset.lipCid===cid)){
       const noteData2=getLessonNote(dk,cid,si);
       const wdNoteVal2=weekdayNotes[wdNoteKey]||'';
+      const lessonInfoVal2=getWeekdayLessonInfo(wd2,cid,si)||'';
       const lesNoteVal2=noteData2.lessonNote||'';
       function _sH2(h){if(!h)return'';const d=document.createElement('div');d.innerHTML=h;return d.textContent||d.innerText||'';}
       const hasWd2=!!(_sH2(wdNoteVal2).trim());
+      const hasLessonInfo2=!!(_sH2(lessonInfoVal2).trim());
       const hasLes2=!!(_sH2(lesNoteVal2).trim());
-      let notesEl=lip.querySelector('.lip-notes-section,.lip-notes-empty');
-      if(notesEl)notesEl.remove();
+      lip.querySelectorAll('.lip-notes-section,.lip-notes-empty,.lip-info-section').forEach(function(el){el.remove();});
       const WD_EVERY2=['кожен понеділок','кожен вівторок','кожну середу','кожен четвер','кожну п\'ятницю','кожну суботу','кожну неділю'];
       const wd2=weekdayFromDateKey(dk);
       const wdEvery2=WD_EVERY2[wd2]||'кожен цей день';
-      let _ncIdx2=0;
-      function makeNC2(lbl,html){const cId='lip-lnc2-'+(++_ncIdx2);return'<div class="lip-note-card"><div class="lip-note-card-lbl">'+lbl+'</div><div class="lip-note-card-body lip-rich" id="'+cId+'">'+html+'</div><button class="lip-note-card-edit" title="Редагувати"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div>';}
       const metaEl=lip.querySelector('.lip-meta');
-      if(hasWd2||hasLes2){
+      function _insertAfter(newEl){if(metaEl)metaEl.after(newEl);else lip.appendChild(newEl);}
+      if(hasLessonInfo2){
+        const infoSec=document.createElement('div');infoSec.className='lip-info-section';
+        infoSec.innerHTML='<div class="lip-info-header"><span class="lip-info-label">Відомості про урок</span><span class="lip-info-badge">'+escapeHtml(wdEvery2.charAt(0).toUpperCase()+wdEvery2.slice(1))+'</span><button class="lip-info-edit" title="Редагувати"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div><div class="lip-info-card"><div class="lip-info-card-body lip-rich">'+linkify(lessonInfoVal2)+'</div></div>';
+        infoSec.querySelectorAll('.lip-info-edit').forEach(function(btn){btn.addEventListener('mousedown',function(ev){ev.stopPropagation();});btn.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){showLessonInfoEditor(dk,cid,si,lessonName);});});});
+        infoSec.querySelectorAll('.lip-rich a').forEach(function(a){a.target='_blank';a.rel='noopener noreferrer';a.addEventListener('click',function(ev){ev.stopPropagation();});});
+        _insertAfter(infoSec);
+      }else if(!document.body.classList.contains('readonly-mode')){
+        const infoSec=document.createElement('div');infoSec.className='lip-info-section';
+        infoSec.innerHTML='<div class="lip-info-header"><span class="lip-info-label">Відомості про урок</span><button class="lip-info-edit" title="Додати"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>';
+        infoSec.querySelectorAll('.lip-info-edit').forEach(function(btn){btn.addEventListener('mousedown',function(ev){ev.stopPropagation();});btn.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){showLessonInfoEditor(dk,cid,si,lessonName);});});});
+        _insertAfter(infoSec);
+      }
+      if(hasLes2){
         const sec=document.createElement('div');sec.className='lip-notes-section';
-        let h2='';
-        if(hasWd2)h2+=makeNC2('<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> '+escapeHtml(wdEvery2.charAt(0).toUpperCase()+wdEvery2.slice(1)),wdNoteVal2);
-        if(hasLes2)h2+=makeNC2('<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg> Цей урок',lesNoteVal2);
-        sec.innerHTML=h2;
-        sec.querySelectorAll('.lip-note-card-edit').forEach(function(btn){
-          btn.addEventListener('mousedown',function(ev){ev.stopPropagation();});
-          btn.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){const tileEl=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"]');const lnBtn=tileEl?tileEl.querySelector('.ln-btn'):null;showLessonNotePopup(dk,cid,si,lessonName,lnBtn);});});
-        });
+        sec.innerHTML='<div class="lip-note-card"><div class="lip-note-card-lbl">Нотатки</div><div class="lip-note-card-body lip-rich" id="lip-nc-r">'+linkify(lesNoteVal2)+'</div><button class="lip-note-card-more" id="lip-nc-r-more" style="display:none" data-target="lip-nc-r">Показати більше &#9662;</button><button class="lip-note-card-edit" title="Редагувати"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div>';
+        sec.querySelectorAll('.lip-note-card-edit').forEach(function(btn){btn.addEventListener('mousedown',function(ev){ev.stopPropagation();});btn.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){const tileEl=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"]');const lnBtn=tileEl?tileEl.querySelector('.ln-btn'):null;showLessonNotePopup(dk,cid,si,lessonName,lnBtn);});});});
         sec.querySelectorAll('.lip-rich a').forEach(function(a){a.target='_blank';a.rel='noopener noreferrer';a.addEventListener('click',function(ev){ev.stopPropagation();});});
-        if(metaEl)metaEl.after(sec); else lip.appendChild(sec);
-      } else if(!document.body.classList.contains('readonly-mode')){
+        _insertAfter(sec);
+      }else if(!document.body.classList.contains('readonly-mode')){
         const emp=document.createElement('div');emp.className='lip-notes-empty';
         emp.innerHTML='<button class="lip-add-note-btn" id="lip-edit-note-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Нотатки</button>';
         emp.querySelector('#lip-edit-note-btn').addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){const tileEl=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"]');const lnBtn=tileEl?tileEl.querySelector('.ln-btn'):null;showLessonNotePopup(dk,cid,si,lessonName,lnBtn);});});
-        if(metaEl)metaEl.after(emp); else lip.appendChild(emp);
+        _insertAfter(emp);
       }
     }
     gdriveScheduleSave();
@@ -3288,6 +3349,137 @@ function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
   ov.addEventListener('keydown',function(e){if(e.key==='Escape'){save();closeLnPopup(ov);}});
 }
 // ── Нотатки до подій (аналог showLessonNotePopup, але для customEvents) ──
+function showLessonInfoEditor(dk,cid,si,lessonName,btnEl){
+  if(document.body.classList.contains('readonly-mode'))return;
+  const existing=document.querySelector('.ln-popup-overlay');
+  if(existing){closeLnPopup(existing);return;}
+  const wd=weekdayFromDateKey(dk);
+  const wdInfoKey=weekdayNoteKey(wd,cid,si);
+  const WD_EVERY=['кожен понеділок','кожен вівторок','кожну середу','кожен четвер','кожну п\'ятницю','кожну суботу','кожну неділю'];
+  const wdEvery=WD_EVERY[wd]||'кожен цей день';
+  const existingInfo=getWeekdayLessonInfo(wd,cid,si)||'';
+  const ov=document.createElement('div');ov.className='ln-popup-overlay';
+  const popup=document.createElement('div');popup.className='ln-popup';
+  popup.innerHTML=
+    '<div class="ln-popup-header">'+
+      '<div class="ln-popup-title"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>'+escapeHtml(lessonName)+' · Урок '+(si+1)+'</div>'+
+      '<div class="ln-popup-header-right">'+
+        '<span style="font-size:.78em;color:var(--green);font-weight:600">'+escapeHtml(wdEvery.charAt(0).toUpperCase()+wdEvery.slice(1))+'</span>'+
+        '<button class="ln-popup-close" id="ln-close"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="2,7 5.5,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="ln-popup-body">'+
+      '<div class="ln-field">'+
+        '<div class="ln-editor-wrap">'+
+          '<div class="ln-toolbar" id="ln-toolbar">'+
+            '<button class="ln-tb-btn" data-cmd="bold" title="Жирний (Ctrl+B)"><svg viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="italic" title="Курсив (Ctrl+I)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="underline" title="Підкреслений (Ctrl+U)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg></button>'+
+            '<div class="ln-toolbar-sep"></div>'+
+            '<button class="ln-tb-btn" data-cmd="justifyLeft" title="По лівому краю"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="justifyCenter" title="По центру"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>'+
+            '<button class="ln-tb-btn" data-cmd="justifyRight" title="По правому краю"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg></button>'+
+            '<div class="ln-toolbar-sep"></div>'+
+            '<button class="ln-tb-btn" id="ln-link-btn" title="Вставити посилання"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>'+
+          '</div>'+
+          '<div class="ln-editor" id="ln-note" contenteditable="true" data-placeholder="Відомості про урок (кл. керівник, завуч, посилання на Meet...)"></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="ln-weekly-hint" style="background:color-mix(in srgb,var(--green) 8%,transparent);border-color:color-mix(in srgb,var(--green) 20%,var(--border))"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Ця інформація відображатиметься '+escapeHtml(wdEvery)+' на уроці '+(si+1)+'</div>'+
+    '</div>';
+  ov.appendChild(popup);document.body.appendChild(ov);
+  const noteEditor=popup.querySelector('#ln-note');
+  function setEditorContent(html){
+    if(!html){noteEditor.innerHTML='';return;}
+    if(!/<[a-z]/i.test(html)){
+      noteEditor.innerHTML=html.split('\n').map(function(l){return l?'<p>'+escapeHtml(l)+'</p>':'<p><br></p>';}).join('');
+    } else {
+      noteEditor.innerHTML=html;
+    }
+  }
+  setEditorContent(existingInfo);
+  function getEditorContent(){return noteEditor.innerHTML.trim();}
+  function save(){
+    const html=getEditorContent();
+    setWeekdayLessonInfo(wd,cid,si,html);
+    // Update info popup if open
+    const lip=document.getElementById('lesson-info-popup');
+    if(lip&&lip.dataset&&(lip.dataset.lipDk===dk&&lip.dataset.lipSi==si&&lip.dataset.lipCid===cid)){
+      lip.querySelectorAll('.lip-info-section,.lip-notes-section,.lip-notes-empty').forEach(function(el){el.remove();});
+      const metaEl=lip.querySelector('.lip-meta');
+      const _sH2=function(h){if(!h)return'';const d=document.createElement('div');d.innerHTML=h;return d.textContent||d.innerText||'';};
+      const newInfo=getWeekdayLessonInfo(wd,cid,si)||'';
+      const hasNewInfo=!!(_sH2(newInfo).trim());
+      const noteData2=getLessonNote(dk,cid,si);
+      const wdNoteVal2=weekdayNotes[weekdayNoteKey(wd,cid,si)]||'';
+      const lesNoteVal2=noteData2.lessonNote||'';
+      const hasWd2=!!(_sH2(wdNoteVal2).trim());
+      const hasLes2=!!(_sH2(lesNoteVal2).trim());
+      function _insertAfter(newEl){if(metaEl)metaEl.after(newEl);else lip.appendChild(newEl);}
+      if(hasNewInfo){
+        const infoSec=document.createElement('div');infoSec.className='lip-info-section';
+        infoSec.innerHTML='<div class="lip-info-header"><span class="lip-info-label">Відомості про урок</span><span class="lip-info-badge">'+escapeHtml(wdEvery.charAt(0).toUpperCase()+wdEvery.slice(1))+'</span><button class="lip-info-edit" title="Редагувати"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div><div class="lip-info-card"><div class="lip-info-card-body lip-rich">'+linkify(newInfo)+'</div></div>';
+        infoSec.querySelectorAll('.lip-info-edit').forEach(function(b){b.addEventListener('mousedown',function(ev){ev.stopPropagation();});b.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){showLessonInfoEditor(dk,cid,si,lessonName);});});});
+        infoSec.querySelectorAll('.lip-rich a').forEach(function(a){a.target='_blank';a.rel='noopener noreferrer';a.addEventListener('click',function(ev){ev.stopPropagation();});});
+        _insertAfter(infoSec);
+      }else if(!document.body.classList.contains('readonly-mode')){
+        const infoSec=document.createElement('div');infoSec.className='lip-info-section';
+        infoSec.innerHTML='<div class="lip-info-header"><span class="lip-info-label">Відомості про урок</span><button class="lip-info-edit" title="Додати"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>';
+        infoSec.querySelectorAll('.lip-info-edit').forEach(function(b){b.addEventListener('mousedown',function(ev){ev.stopPropagation();});b.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){showLessonInfoEditor(dk,cid,si,lessonName);});});});
+        _insertAfter(infoSec);
+      }
+      if(hasWd2||hasLes2){
+        const sec=document.createElement('div');sec.className='lip-notes-section';
+        let h2='';
+        if(hasWd2)h2+='<div class="lip-note-card"><div class="lip-note-card-lbl"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> '+escapeHtml(wdEvery.charAt(0).toUpperCase()+wdEvery.slice(1))+'</div><div class="lip-note-card-body lip-rich" id="lip-lnc2-1">'+linkify(wdNoteVal2)+'</div></div>';
+        if(hasLes2)h2+='<div class="lip-note-card"><div class="lip-note-card-lbl">Нотатки</div><div class="lip-note-card-body lip-rich" id="lip-lnc2-2">'+linkify(lesNoteVal2)+'</div></div>';
+        sec.innerHTML=h2;
+        sec.querySelectorAll('.lip-rich a').forEach(function(a){a.target='_blank';a.rel='noopener noreferrer';a.addEventListener('click',function(ev){ev.stopPropagation();});});
+        _insertAfter(sec);
+      }else if(!document.body.classList.contains('readonly-mode')){
+        const emp=document.createElement('div');emp.className='lip-notes-empty';
+        emp.innerHTML='<button class="lip-add-note-btn" id="lip-edit-note-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Нотатки</button>';
+        emp.querySelector('#lip-edit-note-btn').addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){showLessonNotePopup(dk,cid,si,lessonName);});});
+        _insertAfter(emp);
+      }
+    }
+    gdriveScheduleSave();
+    renderSidebar();
+  }
+  // Toolbar commands
+  popup.querySelector('#ln-toolbar').addEventListener('mousedown',function(e){e.preventDefault();});
+  popup.querySelector('#ln-toolbar').addEventListener('click',function(e){
+    const btn=e.target.closest('.ln-tb-btn');
+    if(!btn)return;
+    const cmd=btn.dataset.cmd;
+    if(cmd)document.execCommand(cmd,false,null);
+    noteEditor.focus();
+  });
+  // Link button
+  const linkBtn=popup.querySelector('#ln-link-btn');
+  if(linkBtn){
+    linkBtn.addEventListener('click',function(e){
+      e.preventDefault();
+      const url=prompt('URL посилання:','https://');
+      if(url)document.execCommand('createLink',false,url);
+      noteEditor.focus();
+    });
+  }
+  let saveTO;
+  noteEditor.addEventListener('input',function(){clearTimeout(saveTO);saveTO=setTimeout(save,400);updateToolbarState();});
+  function updateToolbarState(){
+    popup.querySelectorAll('.ln-tb-btn[data-cmd]').forEach(function(btn){
+      const cmd=btn.dataset.cmd;
+      if(cmd&&(cmd==='bold'||cmd==='italic'||cmd==='underline')){
+        try{if(document.queryCommandState(cmd))btn.classList.add('active');else btn.classList.remove('active');}catch(ex){}
+      }
+    });
+  }
+  const lnCloseBtn=popup.querySelector('#ln-close');
+  lnCloseBtn.addEventListener('mousedown',function(e){e.preventDefault();});
+  lnCloseBtn.addEventListener('click',function(){save();closeLnPopup(ov);});
+  ov.addEventListener('keydown',function(e){if(e.key==='Escape'){save();closeLnPopup(ov);}});
+}
 function showEventNotePopup(evId,dk,btnEl){
   if(document.body.classList.contains('readonly-mode'))return;
   const existing=document.querySelector('.ln-popup-overlay');
@@ -3754,7 +3946,7 @@ window.onload=function(){
   loadTheme();
   if(window.applySolidVars)window.applySolidVars();
   if(!_isReadonly){
-    loadNotes();loadWeekdayNotes();loadLessonNotes();loadLessonTypes();loadLessonCabinets();loadCustomTimes();loadDeletedLessons();loadHiddenClasses();loadSlots();loadBellSchedule();loadSoundState();loadCustomEvents();loadEventNotes();loadPushNotifState();
+    loadNotes();loadWeekdayNotes();loadLessonNotes();loadWeekdayLessonInfo();loadLessonTypes();loadLessonCabinets();loadCustomTimes();loadDeletedLessons();loadHiddenClasses();loadSlots();loadBellSchedule();loadSoundState();loadCustomEvents();loadEventNotes();loadPushNotifState();
     const sa=localStorage.getItem('teacherCalendarActiveClass');
     currentClass=slots.some(s=>s.id===sa)?sa:slots[0].id;
     renderClassTabs();loadPeriodState();loadViewMode();loadClassState(currentClass);loadDayOrder();loadWeekdayOrder();
@@ -4172,7 +4364,7 @@ function gdriveSetSyncing(on){
 }
 
 function gdriveCollectData(){
-  const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,lessonTypes,lessonCabinets,weekdayCabinets,lessonDayOrder,lessonWeekdayOrder,customLessonTimes,deletedLessons,customEvents:[...customEvents],eventNotes,classStates:{}};
+  const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,weekdayLessonInfo,lessonTypes,lessonCabinets,weekdayCabinets,lessonDayOrder,lessonWeekdayOrder,customLessonTimes,deletedLessons,customEvents:[...customEvents],eventNotes,classStates:{}};
   slots.forEach(s=>{
     try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v);}catch(e){}
   });
@@ -4188,6 +4380,7 @@ function gdriveApplyData(d){
   if(d.dayNotes){dayNotes=d.dayNotes;saveNotes();}
   if(d.weekdayNotes){weekdayNotes=d.weekdayNotes;saveWeekdayNotes();}
   if(d.lessonNotes){lessonNotes=d.lessonNotes;saveLessonNotes();}
+  if(d.weekdayLessonInfo){weekdayLessonInfo=d.weekdayLessonInfo;saveWeekdayLessonInfo();}
   if(d.lessonTypes){lessonTypes=d.lessonTypes;saveLessonTypes();}
   if(d.lessonCabinets){lessonCabinets=d.lessonCabinets;saveLessonCabinets();}
   if(d.weekdayCabinets){weekdayCabinets=d.weekdayCabinets;saveWeekdayCabinets();}
@@ -4316,6 +4509,8 @@ const _origSaveNotes=saveNotes;
 saveNotes=function(){_origSaveNotes();gdriveScheduleSave();};
 const _origSaveWeekdayNotes=saveWeekdayNotes;
 saveWeekdayNotes=function(){_origSaveWeekdayNotes();gdriveScheduleSave();};
+const _origSaveWeekdayLessonInfo=saveWeekdayLessonInfo;
+saveWeekdayLessonInfo=function(){_origSaveWeekdayLessonInfo();gdriveScheduleSave();};
 const _origSaveLessonTypes=saveLessonTypes;
 saveLessonTypes=function(){_origSaveLessonTypes();gdriveScheduleSave();};
 const _origSaveLessonCabinets=saveLessonCabinets;
@@ -4429,13 +4624,15 @@ async function openShareModal(){
     try{localStorage.setItem(SHARE_TOKEN_KEY,token);}catch(e){}
   }
   currentShareToken=token;
-  // Push public data
-  await pushPublicData(token);
+  const pushOk=await pushPublicData(token);
   const inp=document.getElementById('share-link-input');
   const url=getShareUrl(token);
   if(inp)inp.value=url;
-  // Generate QR code
   generateShareQR(url);
+  if(!pushOk){
+    const banner=document.getElementById('readonly-banner');
+    if(banner)banner.textContent='⚠ Дані не опубліковано — посилання може не працювати';
+  }
 }
 
 function generateShareQR(url){
@@ -4484,14 +4681,20 @@ function downloadShareQR(){
 
 async function pushPublicData(token){
   const db=window._fbDb,docFn=window._fbDoc,setDocFn=window._fbSetDoc;
-  if(!db||!fbUser)return;
+  if(!db||!fbUser){
+    showNotification('Помилка: база даних або акаунт недоступні','error');
+    return false;
+  }
   try{
     const payload=JSON.stringify(gdriveCollectData());
     const ref=docFn(db,'public',token);
     await setDocFn(ref,{payload,updatedAt:Date.now(),owner:fbUser.uid});
+    return true;
   }catch(e){
     console.error('Share push error',e);
-    showNotification('Помилка публікації даних','error');
+    const msg=e&&e.message?e.message:String(e);
+    showNotification('Помилка публікації даних: '+msg,'error');
+    return false;
   }
 }
 
@@ -4573,7 +4776,12 @@ async function revokeShareLink(){
       }
     }catch(e){
       console.error('Readonly load error',e);
-      showNotification('Помилка завантаження розкладу','error');
+      const msg=e&&e.message?e.message:String(e);
+      if(msg.includes('permission')||msg.includes('Permission')){
+        showNotification('Помилка доступу: перевірте правила Firestore для колекції "public"','error');
+      }else{
+        showNotification('Помилка завантаження розкладу: '+msg,'error');
+      }
     }
   };
   setTimeout(tryLoad,300);
@@ -4587,6 +4795,7 @@ function applyReadonlyData(d){
   if(d.dayNotes){dayNotes=d.dayNotes;}
   if(d.weekdayNotes){weekdayNotes=d.weekdayNotes;}
   if(d.lessonNotes){lessonNotes=d.lessonNotes;}
+  if(d.weekdayLessonInfo){weekdayLessonInfo=d.weekdayLessonInfo;}
   if(d.lessonTypes){lessonTypes=d.lessonTypes;}
   if(d.lessonCabinets){lessonCabinets=d.lessonCabinets;}
   if(d.weekdayCabinets){weekdayCabinets=d.weekdayCabinets;}
