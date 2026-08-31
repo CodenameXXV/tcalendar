@@ -3760,11 +3760,12 @@ window.onload=function(){
     renderClassTabs();loadPeriodState();loadViewMode();loadClassState(currentClass);loadDayOrder();loadWeekdayOrder();
     try{migrateWeekdayNotes();}catch(e){console.warn('migrateWeekdayNotes failed',e);}
   } else {
-    // Readonly: мінімальна ініціалізація з дефолтами
-    loadBellSchedule();loadSlots();
-    const sa=slots[0]?.id;currentClass=sa;
-    renderClassTabs();loadViewMode();loadClassState(currentClass);
-    // Прибираємо title сторінки
+    // Readonly: якщо applyReadonlyData вже завантажив дані з Firestore — не перезаписуємо
+    if(!window._sharedDataApplied){
+      loadBellSchedule();loadSlots();
+      const sa=slots[0]?.id;currentClass=sa;
+      renderClassTabs();loadViewMode();loadClassState(currentClass);
+    }
     document.title='📅 Розклад (перегляд)';
   }
   weekStartDate=getMonday(new Date());
@@ -4579,6 +4580,7 @@ async function revokeShareLink(){
 })();
 
 function applyReadonlyData(d){
+  window._sharedDataApplied=true;
   if(d.slots){slots=d.slots;}
   if(d.bellSchedule){bellSchedule=d.bellSchedule;}
   if(d.hiddenClasses){hiddenClasses=new Set(d.hiddenClasses);}
@@ -4586,10 +4588,14 @@ function applyReadonlyData(d){
   if(d.weekdayNotes){weekdayNotes=d.weekdayNotes;}
   if(d.lessonNotes){lessonNotes=d.lessonNotes;}
   if(d.lessonTypes){lessonTypes=d.lessonTypes;}
+  if(d.lessonCabinets){lessonCabinets=d.lessonCabinets;}
+  if(d.weekdayCabinets){weekdayCabinets=d.weekdayCabinets;}
   if(d.lessonDayOrder){lessonDayOrder=d.lessonDayOrder;}
   if(d.lessonWeekdayOrder){lessonWeekdayOrder=d.lessonWeekdayOrder;}
   if(d.customLessonTimes){customLessonTimes=d.customLessonTimes;}
   if(d.deletedLessons){deletedLessons=d.deletedLessons;}
+  if(d.customEvents){customEvents=d.customEvents;}
+  if(d.eventNotes){eventNotes=d.eventNotes;}
   if(d.holidays){
     // Restore period from holidays state (startDate, endDate, holidays list)
     const st=d.holidays;
@@ -4602,6 +4608,9 @@ function applyReadonlyData(d){
   if(d.classStates)Object.keys(d.classStates).forEach(id=>{
     try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]));}catch(e){}
   });
+  if(d.todos){
+    try{localStorage.setItem('teacherCalendarTodos',JSON.stringify(d.todos));}catch(e){}
+  }
   cachedAllData=null;
   const sa=slots[0]?.id;
   currentClass=sa;
