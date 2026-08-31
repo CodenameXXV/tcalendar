@@ -4198,6 +4198,10 @@ window._fbAuthReady=function(user){
     gdriveUpdateBtn(true);
     gdriveLoad(); // appReady() called inside gdriveLoad after data is applied
     _setPresence(user.uid,true);
+    // Примусово перезаписуємо публічні дані без нотаток
+    let shareToken=null;
+    try{shareToken=localStorage.getItem(SHARE_TOKEN_KEY);}catch(e){}
+    if(shareToken) setTimeout(()=>pushPublicData(shareToken),3000);
   } else {
     gdriveUpdateBtn(false);
     appReady(); // не залогінений — дані вже з localStorage, можна показувати
