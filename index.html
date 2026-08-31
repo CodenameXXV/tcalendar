@@ -2806,10 +2806,10 @@ function updateNowLessonPanel(){
   }
   if(activeSlot){
     const remain=activeSlot.end-nm;
-    const remM=Math.floor(remain),remS=Math.floor((remain-remM)*60);
     const elapsed=nm-activeSlot.start,total=activeSlot.end-activeSlot.start;
     const pct=Math.min(100,Math.max(0,(elapsed/total)*100));
-    const countdown=remM>0?(remM+'хв '+(remS>0?remS+'с':'')):(remS+'с');
+    const remSec=Math.floor(remain*60);
+    const countdown=remSec>=3600?(Math.floor(remSec/3600)+'год '+(Math.floor((remSec%3600)/60)>0?Math.floor((remSec%3600)/60)+'хв':'')):remSec>=60?(Math.floor(remSec/60)+'хв '+(remSec%60>0?remSec%60+'с':'')):(remSec+'с');
     const activeCab=lessonClassId?getLessonCabinet(dk,lessonClassId,lessonSlotIdx):'';
     stEl.textContent='Зараз урок '+(activeSlot.idx+1);
     if(nmEl){nmEl.textContent=lessonName;nmEl.style.display=lessonName?'':'none'}
@@ -2825,8 +2825,8 @@ function updateNowLessonPanel(){
       lastSoundPlayedFor = dk+'-'+breakNext.idx;
       lessonAudio.play().catch(e=>{});
     }
-    const waitM=Math.floor(wait),waitS=Math.floor((wait-waitM)*60);
-    const countdown=waitM>0?(waitM+'хв '+(waitS>0?waitS+'с':'')):(waitS+'с');
+    const waitSec=Math.floor(wait*60);
+    const countdown=waitSec>=3600?(Math.floor(waitSec/3600)+'год '+(Math.floor((waitSec%3600)/60)>0?Math.floor((waitSec%3600)/60)+'хв':'')):waitSec>=60?(Math.floor(waitSec/60)+'хв '+(waitSec%60>0?waitSec%60+'с':'')):(waitSec+'с');
     const breakCab=lessonClassId?getLessonCabinet(dk,lessonClassId,lessonSlotIdx):'';
     stEl.textContent='Перерва';
     if(nmEl){nmEl.textContent=lessonName?'Далі: '+lessonName:'';nmEl.style.display=lessonName?'':'none'}
