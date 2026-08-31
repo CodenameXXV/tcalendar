@@ -4767,10 +4767,6 @@ function applyReadonlyData(d){
   if(d.slots){slots=d.slots;}
   if(d.bellSchedule){bellSchedule=d.bellSchedule;}
   if(d.hiddenClasses){hiddenClasses=new Set(d.hiddenClasses);}
-  if(d.dayNotes){dayNotes=d.dayNotes;}
-  if(d.weekdayNotes){weekdayNotes=d.weekdayNotes;}
-  if(d.lessonNotes){lessonNotes=d.lessonNotes;}
-  if(d.weekdayLessonInfo){weekdayLessonInfo=d.weekdayLessonInfo;}
   if(d.lessonTypes){lessonTypes=d.lessonTypes;}
   if(d.lessonCabinets){lessonCabinets=d.lessonCabinets;}
   if(d.weekdayCabinets){weekdayCabinets=d.weekdayCabinets;}
@@ -4779,7 +4775,6 @@ function applyReadonlyData(d){
   if(d.customLessonTimes){customLessonTimes=d.customLessonTimes;}
   if(d.deletedLessons){deletedLessons=d.deletedLessons;}
   if(d.customEvents){customEvents=d.customEvents;}
-  if(d.eventNotes){eventNotes=d.eventNotes;}
   if(d.holidays){
     // Restore period from holidays state (startDate, endDate, holidays list)
     const st=d.holidays;
