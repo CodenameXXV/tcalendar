@@ -2827,7 +2827,7 @@ function updateNowLessonPanel(){
     barEl.style.background='linear-gradient(90deg,'+lessonColor+',color-mix(in srgb,'+lessonColor+' 60%,#8ab4f8))';
   } else if(breakNext){
     const wait=breakNext.start-nm;
-    if(soundEnabled && wait > 0 && wait <= soundMinutesBefore && lastSoundPlayedFor !== dk+'-'+breakNext.idx){
+    if(soundEnabled && wait > 0 && wait <= soundMinutesBefore && lastSoundPlayedFor !== dk+'-'+breakNext.idx && lessonName){
       lastSoundPlayedFor = dk+'-'+breakNext.idx;
       lessonAudio.play().catch(e=>{});
     }
