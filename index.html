@@ -3063,7 +3063,56 @@ const bar=document.createElement('div');bar.className='week-now-line-bar';nl.app
 gEl.style.position='relative';gEl.appendChild(nl)})();
 // Auto-update now-line every minute
 clearInterval(window._nowLineTimer);window._nowLineTimer=setInterval(function(){const el=document.getElementById('week-now-line-el');if(!el)return;const now=new Date();const todayMidnight=new Date();todayMidnight.setHours(0,0,0,0);let todayColIdx=-1;for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);if(dt.getTime()===todayMidnight.getTime()){todayColIdx=i;break}}if(todayColIdx<0){el.remove();return}const nm=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;const tH=DAY_END_HOUR-DAY_START_HOUR;const top=((nm/60)-DAY_START_HOUR)*HOUR_HEIGHT;if(top<0||top>tH*HOUR_HEIGHT){el.remove();return}el.style.top=top+'px';const lbl=el.querySelector('.week-now-label');if(lbl)lbl.textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')},10000);
-const wb=document.getElementById('week-body');let scrollMin=null;if(bellSchedule&&bellSchedule.length>0){scrollMin=Math.min.apply(null,bellSchedule.map(b=>timeToMinutes(b.start)))}if(scrollMin!==null){wb.scrollTop=Math.max(0,((scrollMin/60)-DAY_START_HOUR-0.5)*HOUR_HEIGHT)}else{const nm=new Date().getHours()*60+new Date().getMinutes();wb.scrollTop=Math.max(0,((nm/60)-DAY_START_HOUR-1)*HOUR_HEIGHT)}}
+const wb=document.getElementById('week-body');let scrollMin=null;if(bellSchedule&&bellSchedule.length>0){scrollMin=Math.min.apply(null,bellSchedule.map(b=>timeToMinutes(b.start)))}if(scrollMin!==null){wb.scrollTop=Math.max(0,((scrollMin/60)-DAY_START_HOUR-0.5)*HOUR_HEIGHT)}else{const nm=new Date().getHours()*60+new Date().getMinutes();wb.scrollTop=Math.max(0,((nm/60)-DAY_START_HOUR-1)*HOUR_HEIGHT)}
+if(!_weekDragReady)_initWeekDrag()}
+var _weekDragReady=false;
+function _initWeekDrag(){
+  if(_weekDragReady)return;
+  _weekDragReady=true;
+  var _mdsx=0,_mdsy=0,_mdst=0,_mdok=false,_mdmoved=false;
+  document.addEventListener('mousedown',function(e){
+    if(homeView!=='week')return;
+    var wb=document.getElementById('week-body');
+    if(!wb||!wb.contains(e.target))return;
+    if(e.target.closest('.week-lesson')||e.target.closest('.custom-event-block'))return;
+    _mdsx=e.clientX;_mdsy=e.clientY;_mdst=Date.now();_mdok=true;_mdmoved=false;
+    wb.style.cursor='grabbing';
+    wb.style.userSelect='none';
+    wb.style.transition='none';
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!_mdok)return;
+    var dx=e.clientX-_mdsx;
+    if(Math.abs(dx)>5)_mdmoved=true;
+    var wb=document.getElementById('week-body');
+    if(!wb)return;
+    var gEl=document.getElementById('week-grid');
+    if(!gEl)return;
+    var maxShift=150;
+    var shift=Math.max(-maxShift,Math.min(maxShift,dx));
+    var opacity=1-Math.abs(shift)/maxShift*0.15;
+    gEl.style.transform='translateX('+shift+'px)';
+    gEl.style.opacity=opacity;
+  });
+  document.addEventListener('mouseup',function(e){
+    if(!_mdok)return;
+    _mdok=false;
+    var wb=document.getElementById('week-body');
+    if(wb){wb.style.cursor='';wb.style.userSelect='';}
+    var gEl=document.getElementById('week-grid');
+    if(gEl){
+      gEl.style.transition='transform .2s ease-out, opacity .2s ease-out';
+      gEl.style.transform='translateX(0)';
+      gEl.style.opacity='1';
+      setTimeout(function(){gEl.style.transition='';},220);
+    }
+    var dx=e.clientX-_mdsx;
+    var dy=e.clientY-_mdsy;
+    if(Math.abs(dx)>80&&Math.abs(dy)<50&&Date.now()-_mdst<800){
+      if(dx>0)navigatePrev();else navigateNext();
+    }
+  });
+}
 function weekSlotTop(idx){const bell=bellSchedule[idx]||bellSchedule[bellSchedule.length-1]||{start:'00:00',end:'00:00'};return ((timeToMinutes(bell.start)/60)-DAY_START_HOUR)*HOUR_HEIGHT}
 function weekSlotHeight(idx){const bell=bellSchedule[idx]||bellSchedule[bellSchedule.length-1]||{start:'00:00',end:'00:00'};return Math.max(((timeToMinutes(bell.end)-timeToMinutes(bell.start))/60)*HOUR_HEIGHT,20)}
 function moveWeekLesson(dk,fromIdx,toIdx){if(fromIdx===toIdx){renderWeekView();return}if(!cachedAllData)cachedAllData=buildAllClassesData();const dC=cachedAllData.allDayMap[dk]||[];const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);if(toIdx<0||toIdx>=totalSlots){renderWeekView();return}const newArr=slotArr.slice();const tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope){renderWeekView();return}
