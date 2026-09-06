@@ -423,6 +423,12 @@ body.readonly-mode .fab-add-event{display:none!important}
 #lesson-info-popup .lip-rich a:hover{opacity:.8}
 #lesson-info-popup .lip-note-card-edit{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--bg-surface);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s,color .15s}
 #lesson-info-popup .lip-note-card-edit:hover{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--bg-surface));color:var(--orange)}
+#lesson-info-popup .lip-footer{display:flex;gap:8px;padding:10px 16px 14px;border-top:1px solid var(--border-light)}
+#lesson-info-popup .lip-footer-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 12px;border-radius:10px;font-size:.82em;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+#lesson-info-popup .lip-footer-btn.note{border:1.5px dashed var(--border);background:transparent;color:var(--text-secondary)}
+#lesson-info-popup .lip-footer-btn.note:hover{border-color:var(--orange);color:var(--orange);background:color-mix(in srgb,var(--orange) 7%,var(--bg-surface))}
+#lesson-info-popup .lip-footer-btn.edit{border:1.5px dashed var(--border);background:transparent;color:var(--text-secondary)}
+#lesson-info-popup .lip-footer-btn.edit:hover{border-color:var(--blue);color:var(--blue);background:color-mix(in srgb,var(--blue) 7%,var(--bg-surface))}
 #lesson-info-popup .lip-note-edit-all{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:14px;background:var(--bg-surface);color:var(--text-secondary);font-size:.77em;font-weight:600;font-family:inherit;cursor:pointer;transition:border-color .15s,color .15s,background .15s;align-self:flex-start;margin-top:2px}
 #lesson-info-popup .lip-note-edit-all:hover{border-color:var(--orange);color:var(--orange);background:color-mix(in srgb,var(--orange) 7%,var(--bg-surface))}
 #lesson-info-popup .lip-info-section{margin:0 12px 8px;padding:10px 12px;background:linear-gradient(135deg,color-mix(in srgb,var(--green) 6%,var(--bg-surface)),color-mix(in srgb,var(--green) 3%,var(--bg-surface)));border:1px solid color-mix(in srgb,var(--green) 18%,var(--border-light));border-radius:10px}
@@ -1461,9 +1467,9 @@ function updateSoundBtn(){
     b.style.borderColor='var(--border)';
   }
 }
-let holidays=[],currentPeriod='semester1',slots=[],currentClass=null,homeYear=new Date().getFullYear(),homeMonth=new Date().getMonth(),homeView='month',weekStartDate=null,cachedAllData=null,hiddenClasses=new Set(),dayNotes={},lessonNotes={},lessonTypes={},lessonCabinets={},weekdayCabinets={},lessonDayOrder={},lessonWeekdayOrder={},customLessonTimes={},deletedLessons={},weekdayNotes={},weekdayLessonInfo={};
+let holidays=[],currentPeriod='semester1',slots=[],currentClass=null,homeYear=new Date().getFullYear(),homeMonth=new Date().getMonth(),homeView='month',weekStartDate=null,cachedAllData=null,hiddenClasses=new Set(),dayNotes={},lessonNotes={},lessonTypes={},lessonCabinets={},weekdayCabinets={},lessonDayOrder={},lessonWeekdayOrder={},customLessonTimes={},deletedLessons={},weekdayNotes={},weekdayLessonInfo={},lessonMoves={};
 const CLASS_COLORS=['#1a73e8','#34a853','#fbbc04','#ea4335','#a142f4','#009688','#e8710a','#9334e6','#f538a0','#185abc'];
-const BELL_KEY='teacherCalendarBellSchedule',NOTES_KEY='teacherCalendarNotes',LESSON_NOTES_KEY='teacherCalendarLessonNotes',TYPES_KEY='teacherCalendarLessonTypes',CABINETS_KEY='teacherCalendarLessonCabinets',WEEKDAY_CABINETS_KEY='teacherCalendarWeekdayCabinets',HIDDEN_KEY='teacherCalendarHiddenClasses',THEME_KEY='teacherCalendarTheme',DAY_ORDER_KEY='teacherCalendarDayOrder',WEEKDAY_ORDER_KEY='teacherCalendarWeekdayOrder',CUSTOM_TIME_KEY='teacherCalendarCustomTimes',DELETED_KEY='teacherCalendarDeletedLessons',WEEKDAY_NOTES_KEY='teacherCalendarWeekdayNotes',WEEKDAY_LESSON_INFO_KEY='teacherCalendarWeekdayLessonInfo';
+const LESSON_MOVES_KEY='teacherCalendarLessonMoves',BELL_KEY='teacherCalendarBellSchedule',NOTES_KEY='teacherCalendarNotes',LESSON_NOTES_KEY='teacherCalendarLessonNotes',TYPES_KEY='teacherCalendarLessonTypes',CABINETS_KEY='teacherCalendarLessonCabinets',WEEKDAY_CABINETS_KEY='teacherCalendarWeekdayCabinets',HIDDEN_KEY='teacherCalendarHiddenClasses',THEME_KEY='teacherCalendarTheme',DAY_ORDER_KEY='teacherCalendarDayOrder',WEEKDAY_ORDER_KEY='teacherCalendarWeekdayOrder',CUSTOM_TIME_KEY='teacherCalendarCustomTimes',DELETED_KEY='teacherCalendarDeletedLessons',WEEKDAY_NOTES_KEY='teacherCalendarWeekdayNotes',WEEKDAY_LESSON_INFO_KEY='teacherCalendarWeekdayLessonInfo';
 const DEFAULT_BELL=[{num:1,start:'08:30',end:'09:15'},{num:2,start:'09:25',end:'10:10'},{num:3,start:'10:20',end:'11:05'},{num:4,start:'11:20',end:'12:05'},{num:5,start:'12:15',end:'13:00'},{num:6,start:'13:10',end:'13:55'},{num:7,start:'14:05',end:'14:50'},{num:8,start:'15:00',end:'15:45'}];
 let bellSchedule=[];
 const MONTH_NAMES_UK=['\u0421\u0456\u0447\u0435\u043d\u044c','\u041b\u044e\u0442\u0438\u0439','\u0411\u0435\u0440\u0435\u0437\u0435\u043d\u044c','\u041a\u0432\u0456\u0442\u0435\u043d\u044c','\u0422\u0440\u0430\u0432\u0435\u043d\u044c','\u0427\u0435\u0440\u0432\u0435\u043d\u044c','\u041b\u0438\u043f\u0435\u043d\u044c','\u0421\u0435\u0440\u043f\u0435\u043d\u044c','\u0412\u0435\u0440\u0435\u0441\u0435\u043d\u044c','\u0416\u043e\u0432\u0442\u0435\u043d\u044c','\u041b\u0438\u0441\u0442\u043e\u043f\u0430\u0434','\u0413\u0440\u0443\u0434\u0435\u043d\u044c'];
@@ -1551,7 +1557,6 @@ function openAddEventModal(dk, existingId, defStartTime, defEndTime){
   const inp=b.querySelector('#cev-title');inp.focus();
 
   b.querySelector('#cev-cancel').onclick=()=>ov.remove();
-  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
 
   b.querySelector('#cev-ok').onclick=function(){
     const title=document.getElementById('cev-title').value.trim();
@@ -1598,7 +1603,7 @@ function openAddEventModal(dk, existingId, defStartTime, defEndTime){
   };
 }
 
-function _showEventRecurringEditModal(id,newTitle,newDk,newStart,newEnd,mode){
+function _showEventRecurringEditModal(id,newTitle,newDk,newStart,newEnd,mode,sourceDk){
   const ov=document.createElement('div');ov.className='modal-overlay';
   const b=document.createElement('div');b.className='modal-box';
   const actionLabel=mode==='delete'?'Видалити':'Змінити';
@@ -1627,9 +1632,9 @@ function _showEventRecurringEditModal(id,newTitle,newDk,newStart,newEnd,mode){
     } else {
       // Add a one-off override event for just this date
       customEvents.push({id:'ev_'+Date.now(),title:newTitle,date:newDk,startTime:newStart,endTime:newEnd,recurring:false});
-      // And mark original as deleted on this date
+      // And mark original as deleted on the SOURCE date (where the event was moved from)
       if(!ev._deletedDates)ev._deletedDates=[];
-      ev._deletedDates.push(newDk);
+      ev._deletedDates.push(sourceDk||newDk);
       saveCustomEvents();
     }
     _refreshAfterEventChange();
@@ -1644,11 +1649,27 @@ function _showEventRecurringEditModal(id,newTitle,newDk,newStart,newEnd,mode){
       customEvents.splice(idx,1);
     } else {
       customEvents[idx].title=newTitle;
-      customEvents[idx].date=newDk;
+      if(newDk){
+        try{
+          const origP=(customEvents[idx].date||newDk).split('-');
+          const origD=new Date(+origP[0],+origP[1],+origP[2]);
+          const origWi=(origD.getDay()+6)%7;
+          const newP=newDk.split('-');
+          const newD=new Date(+newP[0],+newP[1],+newP[2]);
+          const newWi=(newD.getDay()+6)%7;
+          const diff=newWi-origWi;
+          origD.setDate(origD.getDate()+diff);
+          customEvents[idx].date=dateKey(origD);
+        }catch(e){
+          customEvents[idx].date=newDk;
+        }
+      }
       customEvents[idx].startTime=newStart;
       customEvents[idx].endTime=newEnd;
+      customEvents[idx]._deletedDates=[];
     }
     saveCustomEvents();
+    if(typeof gdriveScheduleSave==='function')gdriveScheduleSave();
     _refreshAfterEventChange();
     showNotification(mode==='delete'?'Всі повторення видалено':'Всі повторення змінено','success');
   };
@@ -1731,6 +1752,15 @@ function dateKey(d){return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()}
 function getWeek(date){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()+4-(d.getDay()||7));const y=new Date(d.getFullYear(),0,1);return Math.ceil(((d-y)/864e5+1)/7)}
 function getMonday(d){const date=new Date(d);const day=date.getDay();date.setDate(date.getDate()-day+(day===0?-6:1));date.setHours(0,0,0,0);return date}
 function fmt(d){return new Date(d).toLocaleDateString('uk')}
+function _dateKeyToDate(dk){var p=dk.split('-');return new Date(+p[0],+p[1],+p[2])}
+function _addDays(dk,n){var d=_dateKeyToDate(dk);d.setDate(d.getDate()+n);return dateKey(d)}
+function _findLessonOrSlot(allL,cid,oi){
+  var found=allL.find(function(l){return l.classId===cid&&l.origIdx===oi});
+  if(found)return found;
+  var slot=slots.find(function(s){return s.id===cid});
+  if(slot)return{classId:cid,className:slot.name,origIdx:oi};
+  return null;
+}
 function timeToMinutes(t){const[h,m]=t.split(':').map(Number);return h*60+m}
 function minutesToTime(m){return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
 let notifTO=null;
@@ -1779,6 +1809,8 @@ function loadWeekdayOrder(){try{const s=localStorage.getItem(WEEKDAY_ORDER_KEY);
 
 function loadDeletedLessons(){try{const s=localStorage.getItem(DELETED_KEY);if(s)deletedLessons=JSON.parse(s)}catch(e){deletedLessons={}}}
 function saveDeletedLessons(){try{localStorage.setItem(DELETED_KEY,JSON.stringify(deletedLessons))}catch(e){}}
+function loadLessonMoves(){try{const s=localStorage.getItem(LESSON_MOVES_KEY);if(s)lessonMoves=JSON.parse(s)}catch(e){lessonMoves={}}}
+function saveLessonMoves(){try{localStorage.setItem(LESSON_MOVES_KEY,JSON.stringify(lessonMoves))}catch(e){}}
 function isLessonDeletedFull(dk,cid){return !!(deletedLessons[dk+'|'+cid]);}
 
 function loadCustomTimes(){try{const s=localStorage.getItem(CUSTOM_TIME_KEY);if(s)customLessonTimes=JSON.parse(s)}catch(e){customLessonTimes={}}}
@@ -2134,13 +2166,6 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
     if(hasWdNote) notesHtml+=makeNoteCard('<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#34a853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> '+escapeHtml(wdEvery.charAt(0).toUpperCase()+wdEvery.slice(1)),wdNoteVal);
     if(hasLesNote) notesHtml+=makeNoteCard('Нотатки',lesNoteVal);
     notesHtml+='</div>';
-  } else if(!document.body.classList.contains('readonly-mode')){
-    notesHtml='<div class="lip-notes-empty">'+
-      '<button class="lip-add-note-btn" id="lip-edit-note-btn">'+
-        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'+
-        'Нотатки'+
-      '</button>'+
-    '</div>';
   }
 
   pop.innerHTML=
@@ -2151,7 +2176,17 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
       '<button class="lip-close" id="lip-close-btn" title="Закрити">✕</button>'+
     '</div>'+
     '<div class="lip-meta">'+metaHtml+'</div>'+
-    infoHtml+notesHtml;
+    infoHtml+notesHtml+
+    (!document.body.classList.contains('readonly-mode')?
+      '<div class="lip-footer">'+
+        '<button class="lip-footer-btn note" id="lip-footer-note-btn">'+
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Нотатки'+
+        '</button>'+
+        '<button class="lip-footer-btn edit" id="lip-footer-edit-btn">'+
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>Редагувати'+
+        '</button>'+
+      '</div>'
+    :'');
   document.body.appendChild(pop);
   const tile=e.target.closest('.week-lesson') || e.target.closest('.dm-slot-card') || e.target.closest('.day-modal-custom-event');
   const rect=tile?tile.getBoundingClientRect():{right:e.clientX,left:e.clientX,top:e.clientY};
@@ -2168,6 +2203,12 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
     (left<rect.left?'right':'left'):'left';
   pop.style.transformOrigin=originX+' top';
   pop.querySelector('#lip-close-btn').addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup();});
+  // Footer note button
+  const footerNoteBtn=pop.querySelector('#lip-footer-note-btn');
+  if(footerNoteBtn){footerNoteBtn.addEventListener('mousedown',function(ev){ev.stopPropagation();});footerNoteBtn.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){const tileEl=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"]');const lnBtn=tileEl?tileEl.querySelector('.ln-btn'):null;showLessonNotePopup(dk,classId,si,lessonName,lnBtn);});});}
+  // Footer edit button
+  const footerEditBtn=pop.querySelector('#lip-footer-edit-btn');
+  if(footerEditBtn){footerEditBtn.addEventListener('mousedown',function(ev){ev.stopPropagation();});footerEditBtn.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){enterEditMode();});});}
   // Note edit button(s) → open full note editor popup
   function openNoteEditor(ev){
     ev.stopPropagation();
@@ -2277,13 +2318,6 @@ function showEventInfoPopup(e,ev,dk){
       if(hasEveryNote||hasOnceNote) notesHtml+=makeNoteCard('<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg> Нотатка до події',onceNoteVal||everyNoteVal);
     }
     notesHtml+='</div>';
-  } else if(!document.body.classList.contains('readonly-mode')){
-    notesHtml='<div class="lip-notes-empty">'+
-      '<button class="lip-add-note-btn" id="lip-edit-note-btn">'+
-        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'+
-        'Нотатки'+
-      '</button>'+
-    '</div>';
   }
   pop.innerHTML=
     '<div class="lip-band" style="background:#e37400"></div>'+
@@ -2292,7 +2326,17 @@ function showEventInfoPopup(e,ev,dk){
       '<button class="lip-close" id="lip-close-btn" title="Закрити">✕</button>'+
     '</div>'+
     '<div class="lip-meta">'+metaHtml+'</div>'+
-    notesHtml;
+    notesHtml+
+    (!document.body.classList.contains('readonly-mode')?
+      '<div class="lip-footer">'+
+        '<button class="lip-footer-btn note" id="lip-footer-note-btn">'+
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Нотатки'+
+        '</button>'+
+        '<button class="lip-footer-btn edit" id="lip-footer-edit-btn">'+
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>Редагувати'+
+        '</button>'+
+      '</div>'
+    :'');
   document.body.appendChild(pop);
   const tile=e.target.closest('.custom-event-block') || e.target.closest('.day-modal-custom-event');
   const rect=tile?tile.getBoundingClientRect():{right:e.clientX,left:e.clientX,top:e.clientY};
@@ -2308,6 +2352,12 @@ function showEventInfoPopup(e,ev,dk){
   const originX=(left===rect.right+10||left===rect.left-pw-10&&left>=8)?(left<rect.left?'right':'left'):'left';
   pop.style.transformOrigin=originX+' top';
   pop.querySelector('#lip-close-btn').addEventListener('click',function(ev2){ev2.stopPropagation();closeLessonInfoPopup();});
+  // Footer note button
+  const footerNoteBtn2=pop.querySelector('#lip-footer-note-btn');
+  if(footerNoteBtn2){footerNoteBtn2.addEventListener('mousedown',function(ev2){ev2.stopPropagation();});footerNoteBtn2.addEventListener('click',function(ev2){ev2.stopPropagation();closeLessonInfoPopup(function(){showEventNotePopup(ev.id,dk,null);});});}
+  // Footer edit button
+  const footerEditBtn2=pop.querySelector('#lip-footer-edit-btn');
+  if(footerEditBtn2){footerEditBtn2.addEventListener('mousedown',function(ev2){ev2.stopPropagation();});footerEditBtn2.addEventListener('click',function(ev2){ev2.stopPropagation();closeLessonInfoPopup(function(){openAddEventModal(dk,ev.id);});});}
   function openNoteEditor(ev2){
     ev2.stopPropagation();
     closeLessonInfoPopup(function(){showEventNotePopup(ev.id,dk,null);});
@@ -2592,7 +2642,7 @@ function setWeekdayOrder(wi,order){if(!order||order.length===0||!order.some(func
 function isMobile(){return window.innerWidth<=900}
 function closeSidebar(){document.getElementById('sidebar').classList.add('collapsed');document.getElementById('sidebar-overlay').style.display='none'}
 function toggleSidebar(){const sb=document.getElementById('sidebar');const ov=document.getElementById('sidebar-overlay');const isCollapsed=sb.classList.toggle('collapsed');if(isMobile()){ov.style.display=isCollapsed?'none':'block'}}
-function exportData(){const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,weekdayLessonInfo,lessonTypes,lessonCabinets,weekdayCabinets,lessonDayOrder,lessonWeekdayOrder,customLessonTimes,deletedLessons,customEvents:[...customEvents],eventNotes,classStates:{}};try{data.todos=JSON.parse(localStorage.getItem('teacherCalendarTodos')||'[]')}catch(e){data.todos=[]}slots.forEach(s=>{try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v)}catch(e){}});const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='calendar_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);showNotification('Експортовано!','success')}
+function exportData(){const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,weekdayLessonInfo,lessonTypes,lessonCabinets,weekdayCabinets,lessonDayOrder,lessonWeekdayOrder,customLessonTimes,deletedLessons,lessonMoves,customEvents:[...customEvents],eventNotes,classStates:{}};try{data.todos=JSON.parse(localStorage.getItem('teacherCalendarTodos')||'[]')}catch(e){data.todos=[]}slots.forEach(s=>{try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v)}catch(e){}});const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='calendar_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);showNotification('Експортовано!','success')}
 
 function exportToGoogleCalendar(){
   if(!cachedAllData)cachedAllData=buildAllClassesData();
@@ -2654,7 +2704,7 @@ function exportToGoogleCalendar(){
   },400);
   showNotification('Файл .ics готовий!','success');
 }
-function importData(){const inp=document.getElementById('import-file-input');inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.slots){slots=d.slots;saveSlots()}if(d.bellSchedule){bellSchedule=d.bellSchedule;saveBellSchedule()}if(d.hiddenClasses){hiddenClasses=new Set(d.hiddenClasses);saveHiddenClasses()}if(d.dayNotes){dayNotes=d.dayNotes;saveNotes()}if(d.weekdayNotes){weekdayNotes=d.weekdayNotes;saveWeekdayNotes()}if(d.lessonNotes){lessonNotes=d.lessonNotes;saveLessonNotes()}if(d.weekdayLessonInfo){weekdayLessonInfo=d.weekdayLessonInfo;saveWeekdayLessonInfo()}if(d.lessonTypes){lessonTypes=d.lessonTypes;saveLessonTypes()}if(d.lessonCabinets){lessonCabinets=d.lessonCabinets;saveLessonCabinets()}if(d.weekdayCabinets){weekdayCabinets=d.weekdayCabinets;saveWeekdayCabinets()}if(d.lessonDayOrder){lessonDayOrder=d.lessonDayOrder;saveDayOrder()}if(d.lessonWeekdayOrder){lessonWeekdayOrder=d.lessonWeekdayOrder;saveWeekdayOrder()}if(d.customLessonTimes){customLessonTimes=d.customLessonTimes;saveCustomTimes()}if(d.deletedLessons){deletedLessons=d.deletedLessons;saveDeletedLessons()}if(d.customEvents){customEvents=d.customEvents;saveCustomEvents()}if(d.eventNotes){eventNotes=d.eventNotes;saveEventNotes()}if(d.holidays)applyPeriodState(d.holidays);if(d.classStates)Object.keys(d.classStates).forEach(id=>{try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]))}catch(e){}});if(d.todos){try{localStorage.setItem('teacherCalendarTodos',JSON.stringify(d.todos))}catch(e){}if(window.reloadTodosFromStorage)window.reloadTodosFromStorage()}cachedAllData=null;renderSidebar();if(homeView==='month')renderHomeCalendar();else renderWeekView();showNotification('\u0406\u043c\u043f\u043e\u0440\u0442\u043e\u0432\u0430\u043d\u043e!','success')}catch(err){showNotification('\u041f\u043e\u043c\u0438\u043b\u043a\u0430!','error')}};r.readAsText(f);inp.value=''};inp.click()}
+function importData(){const inp=document.getElementById('import-file-input');inp.onchange=function(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.slots){slots=d.slots;saveSlots()}if(d.bellSchedule){bellSchedule=d.bellSchedule;saveBellSchedule()}if(d.hiddenClasses){hiddenClasses=new Set(d.hiddenClasses);saveHiddenClasses()}if(d.dayNotes){dayNotes=d.dayNotes;saveNotes()}if(d.weekdayNotes){weekdayNotes=d.weekdayNotes;saveWeekdayNotes()}if(d.lessonNotes){lessonNotes=d.lessonNotes;saveLessonNotes()}if(d.weekdayLessonInfo){weekdayLessonInfo=d.weekdayLessonInfo;saveWeekdayLessonInfo()}if(d.lessonTypes){lessonTypes=d.lessonTypes;saveLessonTypes()}if(d.lessonCabinets){lessonCabinets=d.lessonCabinets;saveLessonCabinets()}if(d.weekdayCabinets){weekdayCabinets=d.weekdayCabinets;saveWeekdayCabinets()}if(d.lessonDayOrder){lessonDayOrder=d.lessonDayOrder;saveDayOrder()}if(d.lessonWeekdayOrder){lessonWeekdayOrder=d.lessonWeekdayOrder;saveWeekdayOrder()}if(d.customLessonTimes){customLessonTimes=d.customLessonTimes;saveCustomTimes()}if(d.deletedLessons){deletedLessons=d.deletedLessons;saveDeletedLessons()}if(d.lessonMoves){lessonMoves=d.lessonMoves;saveLessonMoves()}if(d.customEvents){customEvents=d.customEvents;saveCustomEvents()}if(d.eventNotes){eventNotes=d.eventNotes;saveEventNotes()}if(d.holidays)applyPeriodState(d.holidays);if(d.classStates)Object.keys(d.classStates).forEach(id=>{try{localStorage.setItem('teacherCalendarClass_'+id,JSON.stringify(d.classStates[id]))}catch(e){}});if(d.todos){try{localStorage.setItem('teacherCalendarTodos',JSON.stringify(d.todos))}catch(e){}if(window.reloadTodosFromStorage)window.reloadTodosFromStorage()}cachedAllData=null;renderSidebar();if(homeView==='month')renderHomeCalendar();else renderWeekView();showNotification('\u0406\u043c\u043f\u043e\u0440\u0442\u043e\u0432\u0430\u043d\u043e!','success')}catch(err){showNotification('\u041f\u043e\u043c\u0438\u043b\u043a\u0430!','error')}};r.readAsText(f);inp.value=''};inp.click()}
 async function resetAllSettings(){
   closeSettingsModal();
   const ok=await showConfirmModal({
@@ -2673,7 +2723,7 @@ async function resetAllSettings(){
   const keysToRemove=[
     BELL_KEY,NOTES_KEY,LESSON_NOTES_KEY,TYPES_KEY,HIDDEN_KEY,THEME_KEY,
     CABINETS_KEY,WEEKDAY_CABINETS_KEY,
-    DAY_ORDER_KEY,WEEKDAY_ORDER_KEY,CUSTOM_TIME_KEY,DELETED_KEY,WEEKDAY_NOTES_KEY,WEEKDAY_LESSON_INFO_KEY,
+    DAY_ORDER_KEY,WEEKDAY_ORDER_KEY,CUSTOM_TIME_KEY,DELETED_KEY,LESSON_MOVES_KEY,WEEKDAY_NOTES_KEY,WEEKDAY_LESSON_INFO_KEY,
     CUSTOM_EVENTS_KEY,EVENT_NOTES_KEY,PERIOD_KEY,'teacherCalendarSlots','teacherCalendarActiveClass',
     'teacherCalendarSound','teacherCalendarSoundMinutes','teacherCalendarHomeView',
     'teacherCalendarViewMode','teacherCalendarShareToken',
@@ -2713,7 +2763,7 @@ function savePeriodState(){try{localStorage.setItem(PERIOD_KEY,JSON.stringify(co
 function loadPeriodState(){try{const s=localStorage.getItem(PERIOD_KEY);applyPeriodState(s?JSON.parse(s):{startDate:currentYear+'-09-01',endDate:(currentYear+1)+'-05-31',holidays:[],currentPeriod:'semester1'})}catch(e){applyPeriodState({startDate:currentYear+'-09-01',endDate:(currentYear+1)+'-05-31',holidays:[],currentPeriod:'semester1'})}}
 function getPeriodDataFromStorage(){try{const s=localStorage.getItem(PERIOD_KEY);if(s){const st=JSON.parse(s);const start=new Date(st.startDate),end=new Date(st.endDate);start.setHours(0,0,0,0);end.setHours(0,0,0,0);return{start,end,holidays:(st.holidays||[]).map(h=>({s:new Date(h.s),e:new Date(h.e)}))}}}catch(e){}const start=new Date(currentYear+'-09-01'),end=new Date((currentYear+1)+'-05-31');start.setHours(0,0,0,0);end.setHours(0,0,0,0);return{start,end,holidays:[]}}
 function isDateInHoliday(d,hl){return hl.some(h=>{const hs=new Date(h.s);hs.setHours(0,0,0,0);const he=new Date(h.e);he.setHours(0,0,0,0);return d>=hs&&d<=he})}
-function buildLessonDataForClass(classId,className,start,end,holidaysList){const state=getClassStateFromStorage(classId);const selected={};dayNamesList.forEach(d=>{const ds=state.days&&state.days[d];if(ds&&ds.checked)selected[d]={numerator:ds.numerator,denominator:ds.denominator}});const dayMap={},entries=[];let cur=new Date(start);cur.setHours(0,0,0,0);const sw=getWeek(cur);while(cur<=end){const di=(cur.getDay()+6)%7;const dn=['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431','\u041d\u0434'][di];if(selected[dn]){const{numerator,denominator}=selected[dn];const wd=(getWeek(cur)-sw)%2;const lessons=wd===0?numerator:denominator;if(lessons>0&&!isDateInHoliday(cur,holidaysList)){const dk=dateKey(cur);if(!dayMap[dk])dayMap[dk]=[];if(!isLessonDeletedFull(dk,classId)){dayMap[dk].push({classId,className,lessons});const ds=cur.toLocaleDateString('uk',{day:'2-digit',month:'2-digit',year:'2-digit'});for(let i=0;i<lessons;i++)entries.push(ds)}}}cur.setDate(cur.getDate()+1);cur.setHours(0,0,0,0)}return{dayMap,entries}}
+function buildLessonDataForClass(classId,className,start,end,holidaysList){const state=getClassStateFromStorage(classId);const selected={};dayNamesList.forEach(d=>{const ds=state.days&&state.days[d];if(ds&&ds.checked)selected[d]={numerator:ds.numerator,denominator:ds.denominator}});const dayMap={},entries=[];let cur=new Date(start);cur.setHours(0,0,0,0);const sw=getWeek(cur);while(cur<=end){const di=(cur.getDay()+6)%7;const dn=['\u041f\u043d','\u0412\u0442','\u0421\u0440','\u0427\u0442','\u041f\u0442','\u0421\u0431','\u041d\u0434'][di];const dk=dateKey(cur);let baseLessons=0;if(selected[dn]){const{numerator,denominator}=selected[dn];const wd=(getWeek(cur)-sw)%2;const num=wd===0?numerator:denominator;if(num>0&&!isDateInHoliday(cur,holidaysList)&&!isLessonDeletedFull(dk,classId)){baseLessons=num;}}const _movedOut=Object.keys(lessonMoves).filter(function(k){const m=lessonMoves[k];return m&&m.fromDk===dk&&m.classId===classId;});const _movedIn=Object.keys(lessonMoves).filter(function(k){const m=lessonMoves[k];return m&&m.toDk===dk&&m.classId===classId;});const totalLessons=Math.max(0,baseLessons+_movedIn.length-_movedOut.length);if(totalLessons>0){if(!dayMap[dk])dayMap[dk]=[];dayMap[dk].push({classId,className,lessons:totalLessons});const ds=cur.toLocaleDateString('uk',{day:'2-digit',month:'2-digit',year:'2-digit'});for(let i=0;i<totalLessons;i++)entries.push(ds);}cur.setDate(cur.getDate()+1);cur.setHours(0,0,0,0)}return{dayMap,entries}}
 function buildAllClassesData(){const period=getPeriodDataFromStorage();const allDayMap={},classColorMap={};slots.forEach((slot,idx)=>{classColorMap[slot.id]=CLASS_COLORS[idx%CLASS_COLORS.length];const{dayMap}=buildLessonDataForClass(slot.id,slot.name,period.start,period.end,period.holidays);Object.keys(dayMap).forEach(dk=>{if(!allDayMap[dk])allDayMap[dk]=[];allDayMap[dk].push(...dayMap[dk])})});return{period,allDayMap,classColorMap}}
 function pluralLesson(n){const mod10=n%10,mod100=n%100;if(mod10===1&&mod100!==11)return n+' урок';if(mod10>=2&&mod10<=4&&!(mod100>=12&&mod100<=14))return n+' уроки';return n+' уроків'}
 
@@ -2783,7 +2833,7 @@ function updateNowLessonPanel(){
   if(dC.length>0){
     const si=(activeSlot||breakNext).idx;
     const key=slotArr[si];
-    if(key){const p=key.split(':');const cid=p[0];const les=allL.find(l=>l.classId===cid);if(les){lessonName=les.className;lessonColor=classColorMap[cid]||'var(--blue)';lessonClassId=cid;lessonSlotIdx=si;}}
+    if(key){const p=key.split(':');const cid=p[0];const les=_findLessonOrSlot(allL,cid,parseInt(p[1],10));if(les){lessonName=les.className;lessonColor=classColorMap[cid]||'var(--blue)';lessonClassId=cid;lessonSlotIdx=si;}}
   }
   // Determine which mode
   const mode=activeSlot?'active':'break';
@@ -2827,7 +2877,7 @@ function updateNowLessonPanel(){
     const key2=slotArr[si];
     if(!key2)return{name:'',color:'var(--blue)',classId:''};
     const p2=key2.split(':');const cid2=p2[0];
-    const les2=allL.find(l=>l.classId===cid2);
+    const les2=_findLessonOrSlot(allL,cid2);
     return les2?{name:les2.className,color:classColorMap[cid2]||'var(--blue)',classId:cid2}:{name:'',color:'var(--blue)',classId:''};
   }
   // Next lesson panel
@@ -2950,7 +3000,7 @@ if(!outside){
   }
 }
 return cell}
-function renderWeekView(){if(!weekStartDate)weekStartDate=getMonday(new Date());if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;updateTitle();const hEl=document.getElementById('week-header');hEl.innerHTML='';hEl.style.gridTemplateColumns='60px repeat(7,1fr)';const th=document.createElement('div');th.className='week-header-cell';hEl.appendChild(th);const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);const c=document.createElement('div');c.className='week-header-cell';const wi=(dt.getDay()+6)%7;if(wi>=5)c.classList.add('weekend');if(dt.getTime()===today.getTime())c.classList.add('today');c.innerHTML='<div class="week-header-day">'+DAY_HEADERS_UK[wi]+'</div><div class="week-header-date">'+dt.getDate()+'</div>';hEl.appendChild(c)}const gEl=document.getElementById('week-grid');gEl.innerHTML='';gEl.style.gridTemplateColumns='60px repeat(7,1fr)';const tCol=document.createElement('div');tCol.className='week-time-col';const tH=DAY_END_HOUR-DAY_START_HOUR;tCol.style.height=tH*HOUR_HEIGHT+'px';for(let h=DAY_START_HOUR;h<=DAY_END_HOUR;h++){const l=document.createElement('div');l.className='week-time-label';l.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+'px';l.textContent=String(h).padStart(2,'0')+':00';tCol.appendChild(l)}gEl.appendChild(tCol);for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);const dc=document.createElement('div');dc.className='week-day-col';const wi=(dt.getDay()+6)%7;if(wi>=5)dc.classList.add('weekend');dc.style.height=tH*HOUR_HEIGHT+'px';dc.dataset.dayIndex=i;dc.dataset.dateKey=dateKey(dt);for(let h=DAY_START_HOUR;h<=DAY_END_HOUR;h++){const ln=document.createElement('div');ln.className='week-hour-line';ln.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+'px';dc.appendChild(ln);if(h<DAY_END_HOUR){const hl=document.createElement('div');hl.className='week-half-line';hl.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+HOUR_HEIGHT/2+'px';dc.appendChild(hl)}}const dk=dateKey(dt);const inR=dt>=period.start&&dt<=period.end;const dC=inR?(allDayMap[dk]||[]):[];if(dC.length>0){const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);slotArr.forEach((key,si)=>{if(!key)return;const p=key.split(':');const cid=p[0],oi=parseInt(p[1],10);const lesson=allL.find(l=>l.classId===cid&&l.origIdx===oi);if(!lesson)return;if(isLessonDeletedFull(dk,cid))return;if(hiddenClasses.has(cid))return;const color=classColorMap[lesson.classId]||'#1a73e8';const bell=getBellForSlot(dk,si);const hasCustomT=!!getCustomTime(dk,si);const sm=timeToMinutes(bell.start),em=timeToMinutes(bell.end);const top=((sm/60)-DAY_START_HOUR)*HOUR_HEIGHT;const height=Math.max(((em-sm)/60)*HOUR_HEIGHT,20);const les=document.createElement('div');les.className='week-lesson';les.style.background=color;les.style.top=top+'px';les.style.height=height+'px';
+function renderWeekView(){if(!weekStartDate)weekStartDate=getMonday(new Date());if(!cachedAllData)cachedAllData=buildAllClassesData();const{period,allDayMap,classColorMap}=cachedAllData;updateTitle();const hEl=document.getElementById('week-header');hEl.innerHTML='';hEl.style.gridTemplateColumns='60px repeat(7,1fr)';const th=document.createElement('div');th.className='week-header-cell';hEl.appendChild(th);const today=new Date();today.setHours(0,0,0,0);for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);const c=document.createElement('div');c.className='week-header-cell';const wi=(dt.getDay()+6)%7;if(wi>=5)c.classList.add('weekend');if(dt.getTime()===today.getTime())c.classList.add('today');c.innerHTML='<div class="week-header-day">'+DAY_HEADERS_UK[wi]+'</div><div class="week-header-date">'+dt.getDate()+'</div>';hEl.appendChild(c)}const gEl=document.getElementById('week-grid');gEl.innerHTML='';gEl.style.gridTemplateColumns='60px repeat(7,1fr)';const tCol=document.createElement('div');tCol.className='week-time-col';const tH=DAY_END_HOUR-DAY_START_HOUR;tCol.style.height=tH*HOUR_HEIGHT+'px';for(let h=DAY_START_HOUR;h<=DAY_END_HOUR;h++){const l=document.createElement('div');l.className='week-time-label';l.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+'px';l.textContent=String(h).padStart(2,'0')+':00';tCol.appendChild(l)}gEl.appendChild(tCol);for(let i=0;i<7;i++){const dt=new Date(weekStartDate);dt.setDate(dt.getDate()+i);dt.setHours(0,0,0,0);const dc=document.createElement('div');dc.className='week-day-col';const wi=(dt.getDay()+6)%7;if(wi>=5)dc.classList.add('weekend');dc.style.height=tH*HOUR_HEIGHT+'px';dc.dataset.dayIndex=i;dc.dataset.dateKey=dateKey(dt);for(let h=DAY_START_HOUR;h<=DAY_END_HOUR;h++){const ln=document.createElement('div');ln.className='week-hour-line';ln.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+'px';dc.appendChild(ln);if(h<DAY_END_HOUR){const hl=document.createElement('div');hl.className='week-half-line';hl.style.top=(h-DAY_START_HOUR)*HOUR_HEIGHT+HOUR_HEIGHT/2+'px';dc.appendChild(hl)}}const dk=dateKey(dt);const inR=dt>=period.start&&dt<=period.end;const dC=inR?(allDayMap[dk]||[]):[];if(dC.length>0){const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);slotArr.forEach((key,si)=>{if(!key)return;const p=key.split(':');const cid=p[0],oi=parseInt(p[1],10);const lesson=_findLessonOrSlot(allL,cid,oi);if(!lesson)return;if(isLessonDeletedFull(dk,cid))return;if(hiddenClasses.has(cid))return;const color=classColorMap[lesson.classId]||'#1a73e8';const bell=getBellForSlot(dk,si);const hasCustomT=!!getCustomTime(dk,si);const sm=timeToMinutes(bell.start),em=timeToMinutes(bell.end);const top=((sm/60)-DAY_START_HOUR)*HOUR_HEIGHT;const height=Math.max(((em-sm)/60)*HOUR_HEIGHT,20);const les=document.createElement('div');les.className='week-lesson';les.style.background=color;les.style.top=top+'px';les.style.height=height+'px';
 // Mark past lessons: whole day in the past, OR today but end time already passed
 (function(){const _now=new Date();const _todayMidnight=new Date();_todayMidnight.setHours(0,0,0,0);const _nmNow=_now.getHours()*60+_now.getMinutes();const _isPast=dt<_todayMidnight||(dt.getTime()===_todayMidnight.getTime()&&em<=_nmNow);if(_isPast){les.classList.add('past');}})();
 var wkCab=getLessonCabinet(dk,lesson.classId,si);
@@ -3016,120 +3066,391 @@ clearInterval(window._nowLineTimer);window._nowLineTimer=setInterval(function(){
 const wb=document.getElementById('week-body');let scrollMin=null;if(bellSchedule&&bellSchedule.length>0){scrollMin=Math.min.apply(null,bellSchedule.map(b=>timeToMinutes(b.start)))}if(scrollMin!==null){wb.scrollTop=Math.max(0,((scrollMin/60)-DAY_START_HOUR-0.5)*HOUR_HEIGHT)}else{const nm=new Date().getHours()*60+new Date().getMinutes();wb.scrollTop=Math.max(0,((nm/60)-DAY_START_HOUR-1)*HOUR_HEIGHT)}}
 function weekSlotTop(idx){const bell=bellSchedule[idx]||bellSchedule[bellSchedule.length-1]||{start:'00:00',end:'00:00'};return ((timeToMinutes(bell.start)/60)-DAY_START_HOUR)*HOUR_HEIGHT}
 function weekSlotHeight(idx){const bell=bellSchedule[idx]||bellSchedule[bellSchedule.length-1]||{start:'00:00',end:'00:00'};return Math.max(((timeToMinutes(bell.end)-timeToMinutes(bell.start))/60)*HOUR_HEIGHT,20)}
-function moveWeekLesson(dk,fromIdx,toIdx){if(fromIdx===toIdx){renderWeekView();return}if(!cachedAllData)cachedAllData=buildAllClassesData();const dC=cachedAllData.allDayMap[dk]||[];const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);if(toIdx<0||toIdx>=totalSlots){renderWeekView();return}const newArr=slotArr.slice();const tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope){renderWeekView();return}if(scope==='day'){// For day-only move: swap lessonNotes between positions so notes follow the lesson
-const _wd=weekdayFromDateKey(dk);const _kA=slotArr[fromIdx];const _kB=slotArr[toIdx];const _cA=_kA?_kA.split(':')[0]:null;const _cB=_kB?_kB.split(':')[0]:null;
-if(_cA){const _noteA=getLessonNote(dk,_cA,fromIdx);const _wnA=weekdayNotes[weekdayNoteKey(_wd,_cA,fromIdx)]||'';const _effA=_noteA.lessonNote||_wnA;const _newA=getLessonNote(dk,_cA,toIdx);if(!_newA.lessonNote&&_effA){_newA.lessonNote=_effA;}setLessonNote(dk,_cA,toIdx,_newA);if(_noteA.lessonNote){setLessonNote(dk,_cA,fromIdx,{dayNote:_noteA.dayNote||'',lessonNote:''}); }}
-if(_cB){const _noteB=getLessonNote(dk,_cB,toIdx);const _wnB=weekdayNotes[weekdayNoteKey(_wd,_cB,toIdx)]||'';const _effB=_noteB.lessonNote||_wnB;const _newB=getLessonNote(dk,_cB,fromIdx);if(!_newB.lessonNote&&_effB){_newB.lessonNote=_effB;}setLessonNote(dk,_cB,fromIdx,_newB);if(_noteB.lessonNote){setLessonNote(dk,_cB,toIdx,{dayNote:_noteB.dayNote||'',lessonNote:''}); }}
-setDayOrder(dk,newArr)}else if(scope==='all'){// migrate weekly notes AND day-specific lessonNotes for swapped classes
+function moveWeekLesson(dk,fromIdx,toIdx){if(fromIdx===toIdx){renderWeekView();return}if(!cachedAllData)cachedAllData=buildAllClassesData();const dC=cachedAllData.allDayMap[dk]||[];const allL=buildDayOrderList(dC);const totalSlots=Math.max(allL.length,bellSchedule.length);const slotArr=getSlotOrder(dk,allL,totalSlots);if(toIdx<0||toIdx>=totalSlots){renderWeekView();return}const newArr=slotArr.slice();const tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope){renderWeekView();return}
 const wd=weekdayFromDateKey(dk);const keyA=slotArr[fromIdx];const keyB=slotArr[toIdx];const cidA=keyA?keyA.split(':')[0]:null;const cidB=keyB?keyB.split(':')[0]:null;
-// Migrate weekdayNotes
+if(scope==='day'){
+if(cidA){const _noteA=getLessonNote(dk,cidA,fromIdx);const _wnA=weekdayNotes[weekdayNoteKey(wd,cidA,fromIdx)]||'';const _effA=_noteA.lessonNote||_wnA;const _newA=getLessonNote(dk,cidA,toIdx);if(!_newA.lessonNote&&_effA){_newA.lessonNote=_effA;}setLessonNote(dk,cidA,toIdx,_newA);if(_noteA.lessonNote){setLessonNote(dk,cidA,fromIdx,{dayNote:_noteA.dayNote||'',lessonNote:''});}}
+if(cidB){const _noteB=getLessonNote(dk,cidB,toIdx);const _wnB=weekdayNotes[weekdayNoteKey(wd,cidB,toIdx)]||'';const _effB=_noteB.lessonNote||_wnB;const _newB=getLessonNote(dk,cidB,fromIdx);if(!_newB.lessonNote&&_effB){_newB.lessonNote=_effB;}setLessonNote(dk,cidB,fromIdx,_newB);if(_noteB.lessonNote){setLessonNote(dk,cidB,toIdx,{dayNote:_noteB.dayNote||'',lessonNote:''});}}
+if(cidA){const cA=getLessonCabinet(dk,cidA,fromIdx);if(cA){setLessonCabinet(dk,cidA,toIdx,cA);setLessonCabinet(dk,cidA,fromIdx,'');}}
+if(cidB){const cB=getLessonCabinet(dk,cidB,toIdx);if(cB){setLessonCabinet(dk,cidB,fromIdx,cB);setLessonCabinet(dk,cidB,toIdx,'');}}
+if(cidA){const tA=getLessonType(dk,cidA,fromIdx);if(tA&&tA!=='lesson'){setLessonType(dk,cidA,toIdx,tA);setLessonType(dk,cidA,fromIdx,'lesson');}}
+if(cidB){const tB=getLessonType(dk,cidB,toIdx);if(tB&&tB!=='lesson'){setLessonType(dk,cidB,fromIdx,tB);setLessonType(dk,cidB,toIdx,'lesson');}}
+setDayOrder(dk,newArr);
+}else if(scope==='all'){
 if(cidA){const nkA=weekdayNoteKey(wd,cidA,fromIdx);const nkAto=weekdayNoteKey(wd,cidA,toIdx);const noteA=weekdayNotes[nkA];if(noteA){weekdayNotes[nkAto]=noteA;delete weekdayNotes[nkA];}else{delete weekdayNotes[nkAto];}}
 if(cidB){const nkB=weekdayNoteKey(wd,cidB,toIdx);const nkBto=weekdayNoteKey(wd,cidB,fromIdx);const noteB=weekdayNotes[nkB];if(noteB){weekdayNotes[nkBto]=noteB;delete weekdayNotes[nkB];}else{delete weekdayNotes[nkBto];}}
 saveWeekdayNotes();
-// Also migrate lessonNotes for this specific date (e.g. set by a prior day-move)
-if(cidA){const lnA=getLessonNote(dk,cidA,fromIdx);if(lnA.lessonNote){const lnAto=getLessonNote(dk,cidA,toIdx);if(!lnAto.lessonNote){lnAto.lessonNote=lnA.lessonNote;setLessonNote(dk,cidA,toIdx,lnAto);}setLessonNote(dk,cidA,fromIdx,{dayNote:lnA.dayNote||'',lessonNote:''}); }}
-if(cidB){const lnB=getLessonNote(dk,cidB,toIdx);if(lnB.lessonNote){const lnBto=getLessonNote(dk,cidB,fromIdx);if(!lnBto.lessonNote){lnBto.lessonNote=lnB.lessonNote;setLessonNote(dk,cidB,fromIdx,lnBto);}setLessonNote(dk,cidB,toIdx,{dayNote:lnB.dayNote||'',lessonNote:''}); }}
-setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr)}cachedAllData=null;renderWeekView()})}
-function makeDraggable(el,dk,si,totalSlots){let isDrag=false,startY=0,startTop=0,curTarget=si,_moved=false;const badge=document.getElementById('drag-slot-badge');function nearestSlot(top){let best=0,bd=Infinity;for(let i=0;i<totalSlots;i++){const d=Math.abs(weekSlotTop(i)-top);if(d<bd){bd=d;best=i}}return best}function showBadge(cx,cy,slot){if(!badge)return;const bell=bellSchedule[slot]||bellSchedule[bellSchedule.length-1]||{start:'',end:''};badge.textContent=(slot+1)+'\u0443\u0440 \u00b7 '+bell.start;badge.style.left=cx+'px';badge.style.top=cy+'px';badge.style.display='block'}function hideBadge(){if(badge)badge.style.display='none'}function onS(cx,cy){if(typeof closeLessonInfoPopup==='function')closeLessonInfoPopup();isDrag=true;_moved=false;startY=cy;startTop=parseInt(el.style.top);curTarget=si;el.classList.add('dragging');showBadge(cx,cy,curTarget)}function onM(cx,cy){if(!isDrag)return;_moved=true;el.dataset.wasDragged='1';const raw=startTop+(cy-startY);const clamped=Math.max(0,Math.min(raw,(DAY_END_HOUR-DAY_START_HOUR)*HOUR_HEIGHT));curTarget=nearestSlot(clamped);el.style.top=weekSlotTop(curTarget)+'px';el.style.height=weekSlotHeight(curTarget)+'px';const bell=getBellForSlot(dk,curTarget);const tr=el.querySelector('.lesson-time-range');if(tr)tr.textContent=bell.start+' \u2013 '+bell.end;showBadge(cx,cy,curTarget)}function onE(){if(!isDrag)return;isDrag=false;el.classList.remove('dragging');hideBadge();if(curTarget!==si)moveWeekLesson(dk,si,curTarget);if(_moved){setTimeout(function(){delete el.dataset.wasDragged;},200);}}el.addEventListener('mousedown',e=>{if(e.button!==0)return;onS(e.clientX,e.clientY);e.preventDefault();e.stopPropagation()});document.addEventListener('mousemove',e=>onM(e.clientX,e.clientY));document.addEventListener('mouseup',onE);el.addEventListener('touchstart',e=>{const t=e.touches[0];let lpTimer=setTimeout(()=>{lpTimer=null;onS(t.clientX,t.clientY);if(navigator.vibrate)navigator.vibrate(40);},400);function tmove(ev){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;return;}if(isDrag){closeContextMenu();onM(ev.touches[0].clientX,ev.touches[0].clientY);}}function tend(){let wasTap=false;if(lpTimer){wasTap=true;clearTimeout(lpTimer);lpTimer=null;}onE();document.removeEventListener('touchmove',tmove);document.removeEventListener('touchend',tend);if(wasTap){var fakeEvt={target:el,clientX:t.clientX,clientY:t.clientY,stopPropagation:function(){}};showLessonInfoPopup(fakeEvt,dk,si,el.dataset.className,el.dataset.classId,el.style.backgroundColor);}}document.addEventListener('touchmove',tmove,{passive:false});document.addEventListener('touchend',tend);e.preventDefault();},{passive:false});document.addEventListener('touchmove',e=>{if(isDrag)onM(e.touches[0].clientX,e.touches[0].clientY)},{passive:false});document.addEventListener('touchend',onE)}
+if(cidA){const lnA=getLessonNote(dk,cidA,fromIdx);if(lnA.lessonNote){const lnAto=getLessonNote(dk,cidA,toIdx);if(!lnAto.lessonNote){lnAto.lessonNote=lnA.lessonNote;setLessonNote(dk,cidA,toIdx,lnAto);}setLessonNote(dk,cidA,fromIdx,{dayNote:lnA.dayNote||'',lessonNote:''});}}
+if(cidB){const lnB=getLessonNote(dk,cidB,toIdx);if(lnB.lessonNote){const lnBto=getLessonNote(dk,cidB,fromIdx);if(!lnBto.lessonNote){lnBto.lessonNote=lnB.lessonNote;setLessonNote(dk,cidB,fromIdx,lnBto);}setLessonNote(dk,cidB,toIdx,{dayNote:lnB.dayNote||'',lessonNote:''});}}
+if(cidA){const ckA=wd+'|'+cidA+'|'+fromIdx;const ckAto=wd+'|'+cidA+'|'+toIdx;if(weekdayCabinets[ckA]){weekdayCabinets[ckAto]=weekdayCabinets[ckA];delete weekdayCabinets[ckA];}else delete weekdayCabinets[ckAto];}
+if(cidB){const ckB=wd+'|'+cidB+'|'+toIdx;const ckBto=wd+'|'+cidB+'|'+fromIdx;if(weekdayCabinets[ckB]){weekdayCabinets[ckBto]=weekdayCabinets[ckB];delete weekdayCabinets[ckB];}else delete weekdayCabinets[ckBto];}
+saveWeekdayCabinets();
+setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr);
+}
+if(typeof gdriveScheduleSave==='function')gdriveScheduleSave();
+cachedAllData=null;renderWeekView();
+})}
+
+function moveWeekLessonCrossDay(fromDk,fromSi,toDk,toSi,classId,className){
+  if(fromDk===toDk){if(fromSi===toSi){renderWeekView();return;}moveWeekLesson(fromDk,fromSi,toSi);return;}
+  showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u041f\u0435\u0440\u0435\u043d\u0435\u0441\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u043a\u043e\u0436\u0435\u043d \u0442\u0438\u0436\u0434\u0435\u043d\u044c (\u043d\u0430 \u043f\u043e\u0441\u0442\u0456\u0439\u043d\u0456\u0439 \u043e\u0441\u043d\u043e\u0432\u0456)?'}).then(function(scope){
+    if(!scope){renderWeekView();return;}
+    const fromWd=weekdayFromDateKey(fromDk);const toWd=weekdayFromDateKey(toDk);
+    const fromDayName=dayNamesList[fromWd];const toDayName=dayNamesList[toWd];
+    if(scope==='day'){
+      const existingKey=Object.keys(lessonMoves).find(function(k){
+        const m=lessonMoves[k];
+        return m&&m.toDk===fromDk&&m.toSi===fromSi&&m.classId===classId;
+      });
+      if(existingKey){
+        const em=lessonMoves[existingKey];
+        if(em.fromDk===toDk&&em.fromSi===toSi){
+          delete lessonMoves[existingKey];
+        }else{
+          em.toDk=toDk;em.toSi=toSi;
+        }
+      }else{
+        const moveKey=fromDk+'|'+classId+'|'+fromSi+'|'+Date.now();
+        lessonMoves[moveKey]={fromDk,fromSi,toDk,toSi,classId,className};
+      }
+      saveLessonMoves();
+      cachedAllData=null;const allData=buildAllClassesData();
+      const tgtDC=allData.allDayMap[toDk]||[];
+      const tgtAllL=buildDayOrderList(tgtDC);
+      const tgtTotal=Math.max(tgtAllL.length,bellSchedule.length);
+      const tgtArr=getSlotOrder(toDk,tgtAllL,tgtTotal).slice();
+      const classKeys=tgtAllL.filter(l=>l.classId===classId).map(l=>l.classId+':'+l.origIdx);
+      const movedKey=classKeys[classKeys.length-1]||(classId+':0');
+      if(toSi>=0&&toSi<tgtTotal){
+        const curIdx=tgtArr.indexOf(movedKey);
+        if(curIdx!==-1&&curIdx!==toSi){
+          tgtArr[curIdx]=tgtArr[toSi];
+        }else if(curIdx===-1&&tgtArr[toSi]!==null){
+          const emp=tgtArr.indexOf(null);
+          if(emp!==-1)tgtArr[emp]=tgtArr[toSi];
+        }
+        tgtArr[toSi]=movedKey;
+        setDayOrder(toDk,tgtArr);
+      }
+      const srcDC=allData.allDayMap[fromDk]||[];
+      const srcAllL=buildDayOrderList(srcDC);
+      const srcTotal=Math.max(srcAllL.length,bellSchedule.length);
+      const srcArr=getSlotOrder(fromDk,srcAllL,srcTotal).slice();
+      if(srcArr[fromSi]&&srcArr[fromSi].startsWith(classId+':')){
+        srcArr[fromSi]=null;
+      }
+      setDayOrder(fromDk,srcArr);
+      const noteData=getLessonNote(fromDk,classId,fromSi);
+      const effNote=noteData.lessonNote||weekdayNotes[weekdayNoteKey(fromWd,classId,fromSi)]||'';
+      if(effNote){
+        const targetNote=getLessonNote(toDk,classId,toSi);
+        targetNote.lessonNote=effNote;
+        setLessonNote(toDk,classId,toSi,targetNote);
+        setLessonNote(fromDk,classId,fromSi,{dayNote:noteData.dayNote||'',lessonNote:''});
+      }
+      const cab=getLessonCabinet(fromDk,classId,fromSi);
+      if(cab){
+        setLessonCabinet(toDk,classId,toSi,cab);
+        setLessonCabinet(fromDk,classId,fromSi,'');
+      }
+      const ltype=getLessonType(fromDk,classId,fromSi);
+      if(ltype&&ltype!=='lesson'){
+        setLessonType(toDk,classId,toSi,ltype);
+        setLessonType(fromDk,classId,fromSi,'lesson');
+      }
+      if(typeof gdriveScheduleSave==='function')gdriveScheduleSave();
+      cachedAllData=null;
+      if(homeView==='month')renderHomeCalendar();else renderWeekView();
+      renderSidebar();
+      showNotification('\u0423\u0440\u043e\u043a \u043f\u0435\u0440\u0435\u043d\u0435\u0441\u0435\u043d\u043e \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c!','success');
+    }else if(scope==='all'){
+      const stored=getClassStateFromStorage(classId);
+      if(!stored.days)stored.days={};
+      if(stored.days[fromDayName]){
+        const sNum=stored.days[fromDayName].numerator||0;
+        const sDen=stored.days[fromDayName].denominator||0;
+        if(sNum>1||sDen>1){
+          stored.days[fromDayName].numerator=Math.max(0,sNum-1);
+          stored.days[fromDayName].denominator=Math.max(0,sDen-1);
+          if(stored.days[fromDayName].numerator===0&&stored.days[fromDayName].denominator===0){
+            stored.days[fromDayName].checked=false;
+          }
+        }else{
+          stored.days[fromDayName].checked=false;
+          stored.days[fromDayName].numerator=0;
+          stored.days[fromDayName].denominator=0;
+        }
+      }
+      if(!stored.days[toDayName]){
+        stored.days[toDayName]={checked:true,numerator:1,denominator:1};
+      }else{
+        const prevChecked=stored.days[toDayName].checked;
+        stored.days[toDayName].checked=true;
+        if(!prevChecked){
+          stored.days[toDayName].numerator=1;
+          stored.days[toDayName].denominator=1;
+        }else{
+          stored.days[toDayName].numerator=(stored.days[toDayName].numerator||1)+1;
+          stored.days[toDayName].denominator=(stored.days[toDayName].denominator||1)+1;
+        }
+      }
+      try{localStorage.setItem(classKey(classId),JSON.stringify(stored));}catch(e){}
+      const cbFrom=document.getElementById('cb-'+fromDayName);
+      if(cbFrom){
+        cbFrom.checked=!!(stored.days[fromDayName]&&stored.days[fromDayName].checked);
+        const card=cbFrom.closest('.day-card');
+        if(card){
+          card.classList.toggle('is-active',cbFrom.checked);
+          const nEl=card.querySelector('.lesson-toggle[data-type="numerator"] .number');
+          const dEl=card.querySelector('.lesson-toggle[data-type="denominator"] .number');
+          if(nEl)nEl.textContent=stored.days[fromDayName].numerator||0;
+          if(dEl)dEl.textContent=stored.days[fromDayName].denominator||0;
+          updateDayPreview(card);
+        }
+      }
+      const cbTo=document.getElementById('cb-'+toDayName);
+      if(cbTo){
+        cbTo.checked=true;
+        const card=cbTo.closest('.day-card');
+        if(card){
+          card.classList.add('is-active');
+          const nEl=card.querySelector('.lesson-toggle[data-type="numerator"] .number');
+          const dEl=card.querySelector('.lesson-toggle[data-type="denominator"] .number');
+          if(nEl)nEl.textContent=stored.days[toDayName].numerator||1;
+          if(dEl)dEl.textContent=stored.days[toDayName].denominator||1;
+          updateDayPreview(card);
+        }
+      }
+      const fromOrder=(getWeekdayOrder(fromWd)||[]).slice();
+      if(fromOrder[fromSi]&&fromOrder[fromSi].startsWith(classId+':')){
+        fromOrder[fromSi]=null;
+        setWeekdayOrder(fromWd,fromOrder);
+      }
+      const toOrder=(getWeekdayOrder(toWd)||[]).slice();
+      while(toOrder.length<=toSi)toOrder.push(null);
+      if(toOrder[toSi]&&!toOrder[toSi].startsWith(classId+':')){
+        const emp=toOrder.indexOf(null);
+        if(emp!==-1)toOrder[emp]=toOrder[toSi];
+        else toOrder.push(toOrder[toSi]);
+      }
+      toOrder[toSi]=classId+':0';
+      setWeekdayOrder(toWd,toOrder);
+      setDayOrder(fromDk,null);
+      setDayOrder(toDk,null);
+      Object.keys(lessonMoves).forEach(k=>{
+        const m=lessonMoves[k];
+        if(m&&m.classId===classId&&(m.fromDk===fromDk||m.toDk===toDk))delete lessonMoves[k];
+      });
+      saveLessonMoves();
+      const oldNk=weekdayNoteKey(fromWd,classId,fromSi);
+      const newNk=weekdayNoteKey(toWd,classId,toSi);
+      if(weekdayNotes[oldNk]){
+        weekdayNotes[newNk]=weekdayNotes[oldNk];
+        delete weekdayNotes[oldNk];
+        saveWeekdayNotes();
+      }
+      const oldCk=fromWd+'|'+classId+'|'+fromSi;
+      const newCk=toWd+'|'+classId+'|'+toSi;
+      if(weekdayCabinets[oldCk]){
+        weekdayCabinets[newCk]=weekdayCabinets[oldCk];
+        delete weekdayCabinets[oldCk];
+        saveWeekdayCabinets();
+      }
+      const oldIk=fromWd+'|'+classId+'|'+fromSi;
+      const newIk=toWd+'|'+classId+'|'+toSi;
+      if(weekdayLessonInfo[oldIk]){
+        weekdayLessonInfo[newIk]=weekdayLessonInfo[oldIk];
+        delete weekdayLessonInfo[oldIk];
+        saveWeekdayLessonInfo();
+      }
+      saveClassState();
+      if(typeof gdriveScheduleSave==='function')gdriveScheduleSave();
+      cachedAllData=null;
+      renderSidebar();
+      if(homeView==='month')renderHomeCalendar();else renderWeekView();
+      showNotification('\u0420\u043e\u0437\u043a\u043b\u0430\u0434 \u043e\u043d\u043e\u0432\u043b\u0435\u043d\u043e \u0434\u043b\u044f \u0432\u0441\u0456\u0445 \u0442\u0438\u0436\u043d\u0456\u0432!','success');
+    }
+  });
+}
+
+function makeDraggable(el,dk,si,totalSlots){
+  let isDrag=false,curTarget=si,_moved=false,curDk=dk,_hCol=null,_ghost=null;
+  const badge=document.getElementById('drag-slot-badge');
+
+  function _wCols(){return Array.from(document.querySelectorAll('#week-grid .week-day-col'));}
+  function _colForX(cx){const cols=_wCols();let best=null,bd=Infinity;cols.forEach(c=>{const r=c.getBoundingClientRect();const mid=(r.left+r.right)/2;const d=Math.abs(cx-mid);if(d<bd){bd=d;best=c;}});return best;}
+  function _hlCol(col){if(_hCol===col)return;if(_hCol)_hCol.style.background='';if(col)col.style.background='color-mix(in srgb,var(--blue) 8%,var(--bg-surface))';_hCol=col;}
+  function _clrHL(){if(_hCol){_hCol.style.background='';_hCol=null;}}
+  function nearestSlot(top){let best=0,bd=Infinity;for(let i=0;i<totalSlots;i++){const d=Math.abs(weekSlotTop(i)-top);if(d<bd){bd=d;best=i;}}return best;}
+  function showBadge(cx,cy,slot){if(!badge)return;const bell=bellSchedule[slot]||bellSchedule[bellSchedule.length-1]||{start:'',end:''};let pre='';if(curDk!==dk){try{const p=curDk.split('-');const wi=(new Date(+p[0],+p[1],+p[2]).getDay()+6)%7;pre=DAY_HEADERS_UK[wi]+' \u00b7 ';}catch(e){}}badge.textContent=pre+(slot+1)+'\u0443\u0440 \u00b7 '+bell.start;badge.style.left=cx+'px';badge.style.top=cy+'px';badge.style.display='block';}
+  function hideBadge(){if(badge)badge.style.display='none';}
+
+  function placeGhost(tCol,slot){
+    if(!_ghost)return;
+    if(_ghost.parentNode!==tCol)tCol.appendChild(_ghost);
+    _ghost.style.top=weekSlotTop(slot)+'px';
+    _ghost.style.height=weekSlotHeight(slot)+'px';
+    const bell=getBellForSlot(tCol.dataset.dateKey,slot);
+    const tr=_ghost.querySelector('.lesson-time-range');
+    if(tr)tr.textContent=bell.start+' \u2013 '+bell.end;
+  }
+
+  function onS(cx,cy){
+    if(typeof closeLessonInfoPopup==='function')closeLessonInfoPopup();
+    isDrag=true;_moved=false;curTarget=si;curDk=dk;
+    // Create ghost clone
+    _ghost=el.cloneNode(true);
+    _ghost.classList.add('dragging');
+    _ghost.style.position='absolute';
+    _ghost.style.pointerEvents='none';
+    _ghost.style.left='2px';_ghost.style.right='2px';_ghost.style.width='';
+    _ghost.style.zIndex='500';
+    el.style.opacity='0.25';
+    el.parentNode.appendChild(_ghost);
+    placeGhost(el.parentNode,si);
+    showBadge(cx,cy,curTarget);
+  }
+  function onM(cx,cy){
+    if(!isDrag)return;
+    _moved=true;el.dataset.wasDragged='1';
+    // Find target column by X
+    const tCol=_colForX(cx);
+    if(tCol){
+      curDk=tCol.dataset.dateKey||dk;
+      _hlCol(tCol);
+      // Find target slot by Y relative to column top
+      const cr=tCol.getBoundingClientRect();
+      const relY=(cy-cr.top);
+      curTarget=nearestSlot(relY);
+      placeGhost(tCol,curTarget);
+    }
+    showBadge(cx,cy,curTarget);
+  }
+  function onE(){
+    if(!isDrag)return;
+    isDrag=false;_clrHL();hideBadge();
+    // Remove ghost, restore original
+    if(_ghost&&_ghost.parentNode)_ghost.parentNode.removeChild(_ghost);
+    _ghost=null;
+    el.style.opacity='';
+    el.classList.remove('dragging');
+    if(_moved){
+      if(curDk!==dk){
+        moveWeekLessonCrossDay(dk,si,curDk,curTarget,el.dataset.classId,el.dataset.className);
+      } else if(curTarget!==si){
+        moveWeekLesson(dk,si,curTarget);
+      }
+      setTimeout(function(){delete el.dataset.wasDragged;},200);
+    }
+  }
+
+  el.addEventListener('mousedown',e=>{if(e.button!==0)return;onS(e.clientX,e.clientY);e.preventDefault();e.stopPropagation();});
+  document.addEventListener('mousemove',e=>{if(isDrag)onM(e.clientX,e.clientY);});
+  document.addEventListener('mouseup',()=>{if(isDrag)onE();});
+  el.addEventListener('touchstart',e=>{
+    const t=e.touches[0];
+    let lpTimer=setTimeout(()=>{lpTimer=null;onS(t.clientX,t.clientY);if(navigator.vibrate)navigator.vibrate(40);},400);
+    function tmove(ev){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;return;}if(isDrag){closeContextMenu();onM(ev.touches[0].clientX,ev.touches[0].clientY);ev.preventDefault();}}
+    function tend(){let wasTap=false;if(lpTimer){wasTap=true;clearTimeout(lpTimer);lpTimer=null;}if(isDrag)onE();document.removeEventListener('touchmove',tmove);document.removeEventListener('touchend',tend);if(wasTap){var fakeEvt={target:el,clientX:t.clientX,clientY:t.clientY,stopPropagation:function(){}};showLessonInfoPopup(fakeEvt,dk,si,el.dataset.className,el.dataset.classId,el.style.backgroundColor);}}
+    document.addEventListener('touchmove',tmove,{passive:false});document.addEventListener('touchend',tend);e.preventDefault();
+  },{passive:false});
+}
 function makeEventDraggable(el,ev,dk){
   if(document.body.classList.contains('readonly-mode'))return;
   const SNAP=10;
-  let isDrag=false,startClientY=0,startScrollY=0,startTop=0,curStartMin=0,durMin=0;
+  let isDrag=false,startClientY=0,startScrollY=0,startTop=0,curStartMin=0,durMin=0,curDk=dk;
+  let _hCol=null,_ghost=null;
 
   function minToTop(m){return((m/60)-DAY_START_HOUR)*HOUR_HEIGHT;}
   function topToMin(top){const raw=(top/HOUR_HEIGHT+DAY_START_HOUR)*60;return Math.round(raw/SNAP)*SNAP;}
   function fmt(m){return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
   function getWB(){return document.getElementById('week-body');}
+  function _wCols(){return Array.from(document.querySelectorAll('#week-grid .week-day-col'));}
+  function _colForX(cx){const cols=_wCols();let best=null,bd=Infinity;cols.forEach(c=>{const r=c.getBoundingClientRect();const mid=(r.left+r.right)/2;const d=Math.abs(cx-mid);if(d<bd){bd=d;best=c;}});return best;}
+  function _hlCol(col){if(_hCol===col)return;if(_hCol)_hCol.style.background='';if(col)col.style.background='color-mix(in srgb,var(--orange) 8%,var(--bg-surface))';_hCol=col;}
+  function _clrHL(){if(_hCol){_hCol.style.background='';_hCol=null;}}
 
-  function onStart(clientY){
+  function onStart(clientX,clientY){
     if(typeof closeLessonInfoPopup==='function')closeLessonInfoPopup();
-    isDrag=true;
+    isDrag=true;curDk=dk;
     const wb=getWB();
-    startClientY=clientY;
-    startScrollY=wb?wb.scrollTop:0;
-    startTop=parseFloat(el.style.top)||0;
+    startClientY=clientY;startScrollY=wb?wb.scrollTop:0;startTop=parseFloat(el.style.top)||0;
     durMin=timeToMinutes(ev.endTime)-timeToMinutes(ev.startTime);
     curStartMin=timeToMinutes(ev.startTime);
-    el.classList.add('dragging');
+    // Ghost
+    _ghost=el.cloneNode(true);
+    _ghost.classList.add('dragging');
+    _ghost.style.position='absolute';
+    _ghost.style.pointerEvents='none';
+    _ghost.style.left='2px';_ghost.style.right='2px';_ghost.style.width='';
+    _ghost.style.zIndex='500';
+    el.style.opacity='0.25';
+    el.parentNode.appendChild(_ghost);
     document.body.style.userSelect='none';
   }
-
-  function onMove(clientY){
+  function onMove(clientX,clientY){
     if(!isDrag)return;
     el.dataset.wasDragged='1';
     const wb=getWB();
     const scrollDelta=(wb?wb.scrollTop:0)-startScrollY;
     const dy=(clientY-startClientY)+scrollDelta;
     const rawTop=startTop+dy;
-    const maxTop=(DAY_END_HOUR-DAY_START_HOUR)*HOUR_HEIGHT-el.offsetHeight;
+    const maxTop=(DAY_END_HOUR-DAY_START_HOUR)*HOUR_HEIGHT-(_ghost?_ghost.offsetHeight:40);
     const clampedTop=Math.max(0,Math.min(rawTop,maxTop));
     const snapped=topToMin(clampedTop);
     const maxStart=DAY_END_HOUR*60-durMin;
     curStartMin=Math.max(DAY_START_HOUR*60,Math.min(snapped,maxStart));
-    el.style.top=minToTop(curStartMin)+'px';
-    const timeEl=el.querySelector('.cev-time');
-    if(timeEl)timeEl.textContent=fmt(curStartMin)+' – '+fmt(curStartMin+durMin);
+    // Column detection
+    const tCol=_colForX(clientX);
+    if(tCol){
+      curDk=tCol.dataset.dateKey||dk;
+      _hlCol(tCol);
+      if(_ghost){
+        if(_ghost.parentNode!==tCol)tCol.appendChild(_ghost);
+        _ghost.style.top=minToTop(curStartMin)+'px';
+        const timeEl=_ghost.querySelector('.cev-time');
+        if(timeEl)timeEl.textContent=fmt(curStartMin)+' \u2013 '+fmt(curStartMin+durMin);
+      }
+    }
   }
-
   function onEnd(){
     if(!isDrag)return;
-    isDrag=false;
+    isDrag=false;_clrHL();
+    if(_ghost&&_ghost.parentNode)_ghost.parentNode.removeChild(_ghost);
+    _ghost=null;
+    el.style.opacity='';
     el.classList.remove('dragging');
     document.body.style.userSelect='';
     setTimeout(function(){delete el.dataset.wasDragged;},200);
-    const origStart=timeToMinutes(ev.startTime);
-    if(curStartMin===origStart)return;
-    const newStart=fmt(curStartMin);
-    const newEnd=fmt(curStartMin+durMin);
-    if(ev.recurring){
-      _showEventRecurringEditModal(ev.id,ev.title,dk,newStart,newEnd,'edit');
+    const newStart=fmt(curStartMin);const newEnd=fmt(curStartMin+durMin);
+    const sameDay=curDk===dk;
+    const sameTime=curStartMin===timeToMinutes(ev.startTime);
+    if(sameDay&&sameTime)return;
+    if(!sameDay){
+      if(ev.recurring){_showEventRecurringEditModal(ev.id,ev.title,curDk,newStart,newEnd,'edit',dk);}
+      else{ev.date=curDk;ev.startTime=newStart;ev.endTime=newEnd;saveCustomEvents();_refreshAfterEventChange();showNotification('\u041f\u043e\u0434\u0456\u044e \u043f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043e!','success');}
     } else {
-      ev.startTime=newStart;ev.endTime=newEnd;
-      saveCustomEvents();_refreshAfterEventChange();
-      showNotification('Час змінено!','success');
+      if(ev.recurring){_showEventRecurringEditModal(ev.id,ev.title,dk,newStart,newEnd,'edit',dk);}
+      else{ev.startTime=newStart;ev.endTime=newEnd;saveCustomEvents();_refreshAfterEventChange();showNotification('\u0427\u0430\u0441 \u0437\u043c\u0456\u043d\u0435\u043d\u043e!','success');}
     }
   }
 
   el.addEventListener('mousedown',function(e){
-    if(e.button!==0)return;
-    e.stopPropagation();
-    onStart(e.clientY);
-    function mmove(e){onMove(e.clientY);}
+    if(e.button!==0)return;e.stopPropagation();
+    onStart(e.clientX,e.clientY);
+    function mmove(e){onMove(e.clientX,e.clientY);}
     function mup(){onEnd();document.removeEventListener('mousemove',mmove);document.removeEventListener('mouseup',mup);}
-    document.addEventListener('mousemove',mmove);
-    document.addEventListener('mouseup',mup);
+    document.addEventListener('mousemove',mmove);document.addEventListener('mouseup',mup);e.preventDefault();
   });
-
   el.addEventListener('touchstart',function(e){
     e.preventDefault();e.stopPropagation();
-    var _evTouchStartY=e.touches[0].clientY;
-    var _evMoved=false;
-    var _evLpTimer=setTimeout(function(){
-      _evLpTimer=null;
-      onStart(e.touches[0].clientY);
-      if(navigator.vibrate)navigator.vibrate(40);
-    },400);
-    function tmove(ev){
-      _evMoved=true;
-      if(_evLpTimer){clearTimeout(_evLpTimer);_evLpTimer=null;return;}
-      if(isDrag){ev.preventDefault();onMove(ev.touches[0].clientY);}
-    }
-    function tend(){
-      var wasTap=(_evLpTimer&&!_evMoved);
-      if(_evLpTimer){clearTimeout(_evLpTimer);_evLpTimer=null;}
-      onEnd();
-      document.removeEventListener('touchmove',tmove);
-      document.removeEventListener('touchend',tend);
-      if(wasTap){
-        var fakeEvt={target:el,clientX:100,clientY:_evTouchStartY,stopPropagation:function(){}};
-        showEventInfoPopup(fakeEvt,ev,dk);
-      }
-    }
-    document.addEventListener('touchmove',tmove,{passive:false});
-    document.addEventListener('touchend',tend);
+    var _ts=e.touches[0];var _moved=false;
+    var _lt=setTimeout(function(){_lt=null;onStart(_ts.clientX,_ts.clientY);if(navigator.vibrate)navigator.vibrate(40);},400);
+    function tmove(ev){_moved=true;if(_lt){clearTimeout(_lt);_lt=null;return;}if(isDrag){ev.preventDefault();onMove(ev.touches[0].clientX,ev.touches[0].clientY);}}
+    function tend(){var wasTap=(_lt&&!_moved);if(_lt){clearTimeout(_lt);_lt=null;}onEnd();document.removeEventListener('touchmove',tmove);document.removeEventListener('touchend',tend);if(wasTap){var fakeEvt={target:el,clientX:_ts.clientX,clientY:_ts.clientY,stopPropagation:function(){}};showEventInfoPopup(fakeEvt,ev,dk);}}
+    document.addEventListener('touchmove',tmove,{passive:false});document.addEventListener('touchend',tend);
   },{passive:false});
 }
-
 function buildDayOrderList(dC){var list=[];dC.forEach(function(c){for(var i=0;i<c.lessons;i++)list.push({classId:c.classId,className:c.className,origIdx:i})});return list}
 function getSlotOrder(dk,allL,totalSlots){
 var keys=allL.map(function(l){return l.classId+':'+l.origIdx});
@@ -3716,10 +4037,10 @@ var allL=buildDayOrderList(dC);
 var totalSlots=Math.max(allL.length,bellSchedule.length);
 var slotArr=getSlotOrder(dk,allL,totalSlots);
 var lastUsed=-1;for(var li0=0;li0<slotArr.length;li0++)if(slotArr[li0])lastUsed=li0;
-function findLesson(key){if(!key)return null;var p=key.split(':');var cid=p[0],oi=parseInt(p[1],10);for(var j=0;j<allL.length;j++){if(allL[j].classId===cid&&allL[j].origIdx===oi)return allL[j]}return null}
+function findLesson(key){if(!key)return null;var p=key.split(':');var cid=p[0],oi=parseInt(p[1],10);return _findLessonOrSlot(allL,cid,oi)}
 function moveCard(fromIdx,toIdx){if(fromIdx===toIdx||isNaN(fromIdx)||isNaN(toIdx))return;var newArr=slotArr.slice();var tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope)return;if(scope==='day'){// copy weekly notes into per-day lessonNotes for the new positions
 var _wd=weekdayFromDateKey(dk);var _kA=slotArr[fromIdx];var _kB=slotArr[toIdx];var _cA=_kA?_kA.split(':')[0]:null;var _cB=_kB?_kB.split(':')[0]:null;if(_cA){var _wn=weekdayNotes[weekdayNoteKey(_wd,_cA,fromIdx)];if(_wn){var _c=getLessonNote(dk,_cA,toIdx);if(!_c.lessonNote){_c.lessonNote=_wn;setLessonNote(dk,_cA,toIdx,_c);}}}if(_cB){var _wn2=weekdayNotes[weekdayNoteKey(_wd,_cB,toIdx)];if(_wn2){var _c2=getLessonNote(dk,_cB,fromIdx);if(!_c2.lessonNote){_c2.lessonNote=_wn2;setLessonNote(dk,_cB,fromIdx,_c2);}}}setDayOrder(dk,newArr)}else if(scope==='all'){// migrate weekly notes for swapped classes
-var wd=weekdayFromDateKey(dk);var keyA=slotArr[fromIdx];var keyB=slotArr[toIdx];var cidA=keyA?keyA.split(':')[0]:null;var cidB=keyB?keyB.split(':')[0]:null;if(cidA){var nkA=weekdayNoteKey(wd,cidA,fromIdx);var nkAto=weekdayNoteKey(wd,cidA,toIdx);var noteA=weekdayNotes[nkA];if(noteA){weekdayNotes[nkAto]=noteA;delete weekdayNotes[nkA];}else{delete weekdayNotes[nkAto];}}if(cidB){var nkB=weekdayNoteKey(wd,cidB,toIdx);var nkBto=weekdayNoteKey(wd,cidB,fromIdx);var noteB=weekdayNotes[nkB];if(noteB){weekdayNotes[nkBto]=noteB;delete weekdayNotes[nkB];}else{delete weekdayNotes[nkBto];}}saveWeekdayNotes();setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr)}renderDayModalLessons(gridEl,dk,dC,classColorMap)})}
+var wd=weekdayFromDateKey(dk);var keyA=slotArr[fromIdx];var keyB=slotArr[toIdx];var cidA=keyA?keyA.split(':')[0]:null;var cidB=keyB?keyB.split(':')[0]:null;if(cidA){var nkA=weekdayNoteKey(wd,cidA,fromIdx);var nkAto=weekdayNoteKey(wd,cidA,toIdx);var noteA=weekdayNotes[nkA];if(noteA){weekdayNotes[nkAto]=noteA;delete weekdayNotes[nkA];}else{delete weekdayNotes[nkAto];}}if(cidB){var nkB=weekdayNoteKey(wd,cidB,toIdx);var nkBto=weekdayNoteKey(wd,cidB,fromIdx);var noteB=weekdayNotes[nkB];if(noteB){weekdayNotes[nkBto]=noteB;delete weekdayNotes[nkB];}else{delete weekdayNotes[nkBto];}}saveWeekdayNotes();setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr)}cachedAllData=null;if(homeView==='month')renderHomeCalendar();else renderWeekView();renderDayModalLessons(gridEl,dk,dC,classColorMap)})}
 gridEl.innerHTML='';
 var dragSrc=null,dragFromIdx=null;
 for(let si=0;si<totalSlots;si++){
@@ -3932,7 +4253,7 @@ function showCabinetScopeModal(valLabel){return new Promise(resolve=>{const ov=d
 function showScopeModal({title,message}){return new Promise(resolve=>{const ov=document.createElement('div');ov.className='modal-overlay';const b=document.createElement('div');b.className='modal-box';b.innerHTML='<div class="modal-title">'+title+'</div><div class="modal-message">'+message+'</div><div class="modal-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="modal-btn modal-btn-cancel" id="sd" style="border-color:var(--blue);color:var(--blue)">\u041b\u0438\u0448\u0435 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c</button><button class="modal-btn modal-btn-confirm" id="sa">\u0426\u0435\u0439 \u0456 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456</button><button class="modal-btn modal-btn-cancel" id="sc" style="grid-column:1 / -1">\u0421\u043a\u0430\u0441\u0443\u0432\u0430\u0442\u0438</button></div>';ov.appendChild(b);document.body.appendChild(ov);function fin(v){ov.remove();document.removeEventListener('keydown',esc);resolve(v)}b.querySelector('#sd').onclick=()=>fin('day');b.querySelector('#sa').onclick=()=>fin('all');b.querySelector('#sc').onclick=()=>fin(null);ov.addEventListener('click',e=>{if(e.target===ov)fin(null)});const esc=e=>{if(e.key==='Escape')fin(null)};document.addEventListener('keydown',esc)})}
 async function addSlot(){const name=await showInputModal({title:'\u041d\u043e\u0432\u0438\u0439 \u043a\u043b\u0430\u0441/\u043f\u0440\u0435\u0434\u043c\u0435\u0442',confirmText:'\u0414\u043e\u0434\u0430\u0442\u0438'});if(name===null||!name)return;const id='s'+Date.now();slots.push({id,name});saveSlots();if(currentClass!==null)saveClassState();currentClass=id;renderClassTabs();loadClassState(id);localStorage.setItem('teacherCalendarActiveClass',id);generate();showNotification('\u041a\u043b\u0430\u0441 \u0434\u043e\u0434\u0430\u043d\u043e!','success')}
 async function renameSlot(id){const s=slots.find(s=>s.id===id);if(!s)return;const name=await showInputModal({title:'\u041f\u0435\u0440\u0435\u0439\u043c\u0435\u043d\u0443\u0432\u0430\u0442\u0438',defaultValue:s.name});if(name===null||!name)return;s.name=name;saveSlots();renderClassTabs();showNotification('\u041f\u0435\u0440\u0435\u0439\u043c\u0435\u043d\u043e\u0432\u0430\u043d\u043e!','success')}
-async function deleteSlot(id){if(slots.length<=1)return showNotification('\u041c\u0430\u0454 \u0437\u0430\u043b\u0438\u0448\u0438\u0442\u0438\u0441\u044c \u0445\u043e\u0447\u0430 \u0431 1!','error');const s=slots.find(s=>s.id===id);if(!s)return;const ok=await showConfirmModal({title:'\u0412\u0438\u0434\u0430\u043b\u0438\u0442\u0438?',message:'\u0420\u043e\u0437\u043a\u043b\u0430\u0434 \u00ab'+s.name+'\u00bb \u0431\u0443\u0434\u0435 \u0432\u0442\u0440\u0430\u0447\u0435\u043d\u043e.'});if(!ok)return;slots=slots.filter(s=>s.id!==id);saveSlots();try{localStorage.removeItem(classKey(id))}catch(e){}if(currentClass===id){currentClass=slots[0].id;renderClassTabs();loadClassState(slots[0].id);localStorage.setItem('teacherCalendarActiveClass',slots[0].id);generate()}else renderClassTabs();showNotification('\u0412\u0438\u0434\u0430\u043b\u0435\u043d\u043e!','success')}
+async function deleteSlot(id){if(slots.length<=1)return showNotification('\u041c\u0430\u0454 \u0437\u0430\u043b\u0438\u0448\u0438\u0442\u0438\u0441\u044c \u0445\u043e\u0447\u0430 \u0431 1!','error');const s=slots.find(s=>s.id===id);if(!s)return;const ok=await showConfirmModal({title:'\u0412\u0438\u0434\u0430\u043b\u0438\u0442\u0438?',message:'\u0420\u043e\u0437\u043a\u043b\u0430\u0434 \u00ab'+s.name+'\u00bb \u0431\u0443\u0434\u0435 \u0432\u0442\u0440\u0430\u0447\u0435\u043d\u043e.'});if(!ok)return;slots=slots.filter(s=>s.id!==id);saveSlots();Object.keys(lessonMoves).forEach(k=>{if(lessonMoves[k]&&lessonMoves[k].classId===id)delete lessonMoves[k];});saveLessonMoves();try{localStorage.removeItem(classKey(id))}catch(e){}if(currentClass===id){currentClass=slots[0].id;renderClassTabs();loadClassState(slots[0].id);localStorage.setItem('teacherCalendarActiveClass',slots[0].id);generate()}else renderClassTabs();showNotification('\u0412\u0438\u0434\u0430\u043b\u0435\u043d\u043e!','success')}
 function updateButtonState(id){['btn-semester1','btn-semester2','btn-fullyear'].forEach(b=>{const el=document.getElementById(b);if(b===id){el.classList.remove('inactive');el.classList.add('active')}else{el.classList.remove('active');el.classList.add('inactive')}});currentPeriod=id.replace('btn-','');savePeriodState()}
 function setSemester1(){const y=new Date().getFullYear();document.getElementById('start-date').value=y+'-09-01';document.getElementById('end-date').value=y+'-12-31';updateButtonState('btn-semester1');generate()}
 function setSemester2(){const y=new Date().getFullYear();document.getElementById('start-date').value=(y+1)+'-01-01';document.getElementById('end-date').value=(y+1)+'-05-31';updateButtonState('btn-semester2');generate()}
@@ -4009,7 +4330,7 @@ window.onload=function(){
   loadTheme();
   if(window.applySolidVars)window.applySolidVars();
   if(!_isReadonly){
-    loadNotes();loadWeekdayNotes();loadLessonNotes();loadWeekdayLessonInfo();loadLessonTypes();loadLessonCabinets();loadCustomTimes();loadDeletedLessons();loadHiddenClasses();loadSlots();loadBellSchedule();loadSoundState();loadCustomEvents();loadEventNotes();loadPushNotifState();
+    loadNotes();loadWeekdayNotes();loadLessonNotes();loadWeekdayLessonInfo();loadLessonTypes();loadLessonCabinets();loadCustomTimes();loadDeletedLessons();loadLessonMoves();loadHiddenClasses();loadSlots();loadBellSchedule();loadSoundState();loadCustomEvents();loadEventNotes();loadPushNotifState();
     const sa=localStorage.getItem('teacherCalendarActiveClass');
     currentClass=slots.some(s=>s.id===sa)?sa:slots[0].id;
     renderClassTabs();loadPeriodState();loadViewMode();loadClassState(currentClass);loadDayOrder();loadWeekdayOrder();
@@ -4125,7 +4446,7 @@ function printWeekSchedule(){
           const p=key.split(':');
           const cid=p[0];
           if(!isLessonDeletedFull(d.dk,cid)&&!hiddenClasses.has(cid)){
-            const les=d.allL.find(l=>l.classId===cid&&l.origIdx===parseInt(p[1],10));
+            const les=_findLessonOrSlot(d.allL,cid,parseInt(p[1],10))
             if(les){
               const color=classColorMap[cid]||'#1a73e8';
               const b=getBellForSlot(d.dk,si);
@@ -4394,7 +4715,7 @@ function gdriveSetSyncing(on){
 }
 
 function gdriveCollectData(){
-  const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,weekdayLessonInfo,lessonTypes,lessonCabinets,weekdayCabinets,lessonDayOrder,lessonWeekdayOrder,customLessonTimes,deletedLessons,customEvents:[...customEvents],eventNotes,classStates:{}};
+  const data={slots,bellSchedule,holidays:collectPeriodState(),hiddenClasses:[...hiddenClasses],dayNotes,weekdayNotes,lessonNotes,weekdayLessonInfo,lessonTypes,lessonCabinets,weekdayCabinets,lessonDayOrder,lessonWeekdayOrder,customLessonTimes,deletedLessons,lessonMoves,customEvents:[...customEvents],eventNotes,classStates:{}};
   slots.forEach(s=>{
     try{const v=localStorage.getItem('teacherCalendarClass_'+s.id);if(v)data.classStates[s.id]=JSON.parse(v);}catch(e){}
   });
@@ -4418,6 +4739,7 @@ function gdriveApplyData(d){
   if(d.lessonWeekdayOrder){lessonWeekdayOrder=d.lessonWeekdayOrder;saveWeekdayOrder();}
   if(d.customLessonTimes){customLessonTimes=d.customLessonTimes;saveCustomTimes();}
   if(d.deletedLessons){deletedLessons=d.deletedLessons;saveDeletedLessons();}
+  if(d.lessonMoves){lessonMoves=d.lessonMoves;saveLessonMoves();}
   if(d.customEvents){customEvents=d.customEvents;saveCustomEvents();}
   if(d.eventNotes){eventNotes=d.eventNotes;saveEventNotes();}
   if(d.holidays){applyPeriodState(d.holidays);savePeriodState();}
@@ -4561,6 +4883,8 @@ const _origSaveCustomTimes=saveCustomTimes;
 saveCustomTimes=function(){_origSaveCustomTimes();gdriveScheduleSave();};
 const _origSaveDeletedLessons=saveDeletedLessons;
 saveDeletedLessons=function(){_origSaveDeletedLessons();gdriveScheduleSave();};
+const _origSaveLessonMoves=saveLessonMoves;
+saveLessonMoves=function(){_origSaveLessonMoves();gdriveScheduleSave();};
 const _origSaveLessonNotes=saveLessonNotes;
 saveLessonNotes=function(){_origSaveLessonNotes();gdriveScheduleSave();};
 const _origSavePeriodState=savePeriodState;
@@ -4831,6 +5155,7 @@ function applyReadonlyData(d){
   if(d.lessonWeekdayOrder){lessonWeekdayOrder=d.lessonWeekdayOrder;}
   if(d.customLessonTimes){customLessonTimes=d.customLessonTimes;}
   if(d.deletedLessons){deletedLessons=d.deletedLessons;}
+  if(d.lessonMoves){lessonMoves=d.lessonMoves;}
   if(d.customEvents){customEvents=d.customEvents;}
   if(d.holidays){
     // Restore period from holidays state (startDate, endDate, holidays list)
@@ -5439,7 +5764,7 @@ function scheduleNextLessonNotification(){
             const key=slotArr[si];
             if(key){
               const p=key.split(':');
-              const les=allL.find(l=>l.classId===p[0]&&l.origIdx===parseInt(p[1],10));
+              const les=_findLessonOrSlot(allL,p[0],parseInt(p[1],10))
               if(les)lessonName=les.className;
             }
           }
