@@ -828,8 +828,13 @@ body.readonly-mode .week-lesson:hover{transform:none!important;box-shadow:0 1px 
 #print-doc.mono .print-legend{display:none!important}
 
 /* ── Print document ── */
-#print-doc{background:#fff;color:#111;max-width:900px;margin:0 auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)}
-.print-doc-header{background:#1a73e8;color:#fff;padding:16px 22px;display:flex;align-items:center;justify-content:space-between}
+/* Попередній перегляд друку — пропорції А4 landscape */
+#print-overlay.visible{display:flex!important;flex-direction:column;align-items:center}
+#print-doc{width:277mm;max-width:100%;background:#fff;color:#111;margin:0 auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);font-size:.82em}
+.print-week-table{table-layout:fixed;width:100%}
+.print-week-table th.day-col{min-width:0}
+.print-week-table td.time-cell{width:52px}
+
 .print-doc-title{font-size:1.2em;font-weight:700;letter-spacing:.2px}
 .print-doc-subtitle{font-size:.85em;opacity:.85;margin-top:2px}
 .print-doc-meta{font-size:.78em;opacity:.75;text-align:right}
@@ -849,6 +854,7 @@ td.weekend-col{background:#fff8f8}
 
 /* ── @media print: hide everything, show only #print-doc ── */
 @media print{
+
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   body>*:not(#print-overlay){display:none!important}
   #print-overlay{display:block!important;position:static!important;padding:0!important;background:#fff!important;overflow:visible!important}
@@ -1456,6 +1462,7 @@ body.app-loaded #app-loading-overlay{display:none}
     <span class="print-hint">&#9432; У діалозі друку: <b>Додаткові налаштування → вимкніть «Колонтитули»</b></span>
     <label class="print-mono-toggle"><input type="checkbox" id="print-mono-cb" onchange="togglePrintMono(this.checked)"> Монохром</label>
     <button class="print-toolbar-btn primary" onclick="window.print()"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Роздрукувати / PDF</button>
+    <button class="print-toolbar-btn secondary" onclick="savePrintAsPng()"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> Зберегти в PNG</button>
     <button class="print-toolbar-btn secondary" onclick="closePrintOverlay()">&#10005; Закрити</button>
   </div>
   <div id="print-doc"></div>
@@ -4468,6 +4475,52 @@ window.onload=function(){
 function closePrintOverlay(){
   const ov=document.getElementById('print-overlay');
   if(ov)ov.classList.remove('visible');
+}
+
+async function savePrintAsPng(){
+  const doc=document.getElementById('print-doc');
+  if(!doc||!doc.innerHTML.trim())return;
+  try{
+    const w=doc.offsetWidth,h=doc.scrollHeight;
+    const scale=2;
+    const clone=doc.cloneNode(true);
+    clone.style.width=w+'px';
+    // копіюємо всі стилі сторінки всередину клону (щоб збереглись кольори та шрифти)
+    const styles=document.querySelectorAll('style');
+    let css='';styles.forEach(s=>css+=s.textContent+'\n');
+    const styleEl=document.createElement('style');styleEl.textContent=css;
+    clone.insertBefore(styleEl,clone.firstChild);
+    // вимикаємо overflow, щоб нічого не обрізалось
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:fixed;left:-10000px;top:0;background:#fff;';
+    wrap.style.width=w+'px';
+    wrap.appendChild(clone);
+    document.body.appendChild(wrap);
+    // серіалізуємо wrap у XHTML
+    const serializer=new XMLSerializer();
+    const inner=serializer.serializeToString(wrap);
+    document.body.removeChild(wrap);
+    const fullSvg='<svg xmlns="http://www.w3.org/2000/svg" width="'+(w*scale)+'" height="'+(h*scale)+'">'+
+      '<foreignObject x="0" y="0" width="'+w+'" height="'+h+'">'+
+      inner+
+      '</foreignObject></svg>';
+    const img=new Image();
+    await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;
+      img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(fullSvg);});
+    const cv=document.createElement('canvas');
+    cv.width=w*scale;cv.height=h*scale;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.drawImage(img,0,0,cv.width,cv.height);
+    const a=document.createElement('a');
+    a.download='rozklad-tyzhnya.png';
+    a.href=cv.toDataURL('image/png');
+    a.click();
+    if(window.showNotification)showNotification('Збережено PNG','success');
+  }catch(err){
+    console.error('savePrintAsPng',err);
+    if(window.showNotification)showNotification('Не вдалося зберегти PNG: '+err.message,'error');
+  }
 }
 
 function printWeekSchedule(){
