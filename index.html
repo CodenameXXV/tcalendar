@@ -4498,13 +4498,10 @@ function printWeekSchedule(){
     return false;
   });
 
-  // Максимальна кількість слотів — кількість рядків таблиці
-  const maxSlots=Math.max(bellSchedule.length,...printDays.map(d=>d.totalSlots),1);
-
   const DAY_NAMES_FULL=['\u041f\u043e\u043d\u0435\u0434\u0456\u043b\u043e\u043a','\u0412\u0456\u0432\u0442\u043e\u0440\u043e\u043a','\u0421\u0435\u0440\u0435\u0434\u0430','\u0427\u0435\u0442\u0432\u0435\u0440','\u041f\u02bc\u044f\u0442\u043d\u0438\u0446\u044f','\u0421\u0443\u0431\u043e\u0442\u0430','\u041d\u0435\u0434\u0456\u043b\u044f'];
 
   // ── Будуємо HTML таблиці ──
-  let thead='<tr><th style="min-width:72px">\u0423\u0440\u043e\u043a</th>';
+  let thead='<tr><th style="min-width:72px">Час</th>';
   printDays.forEach((d,i)=>{
     const wi=(d.dt.getDay()+6)%7;
     const dayName=DAY_NAMES_FULL[wi];
@@ -4513,93 +4510,72 @@ function printWeekSchedule(){
   });
   thead+='</tr>';
 
-  // Підготовляємо кастомні події для кожного дня (сортовані за часом)
-  const dayEventsList=printDays.map(d=>getActiveEventsForDate(d.dk).slice().sort((a,b)=>a.startTime.localeCompare(b.startTime)));
+  // ── Єдина хронологічна сітка: уроки + події, рядки за часом початку ──
+  const dayItems=printDays.map(d=>{
+    const items=[];
+    if(d.inRange&&!(d.isHol&&d.dC.length===0)){
+      for(let si=0;si<d.totalSlots;si++){
+        const key=d.slotArr[si];
+        if(!key)continue;
+        const p=key.split(':');
+        const cid=p[0];
+        if(isLessonDeletedFull(d.dk,cid)||hiddenClasses.has(cid))continue;
+        const les=_findLessonOrSlot(d.allL,cid,parseInt(p[1],10));
+        if(!les)continue;
+        const b=getBellForSlot(d.dk,si);
+        const hasCustomT=!!getCustomTime(d.dk,si);
+        items.push({start:b.start,end:b.end,type:'lesson',color:classColorMap[cid]||'#1a73e8',name:les.className,custom:hasCustomT});
+      }
+      getActiveEventsForDate(d.dk).forEach(ev=>{
+        items.push({start:ev.startTime,end:ev.endTime,type:'event',color:'#e37400',name:ev.title,custom:false});
+      });
+      items.sort((a,b)=>a.start.localeCompare(b.start)||a.end.localeCompare(b.end));
+    }
+    return items;
+  });
 
-  // Трекер: скільки подій вже вставлено в кожен стовпець
-  const evInserted=printDays.map(()=>0);
+  // Спільні часові рядки для всього тижня: кожен унікальний час початку — окремий рядок
+  const rowKeys=[];
+  dayItems.forEach(items=>items.forEach(it=>{
+    if(!rowKeys.includes(it.start))rowKeys.push(it.start);
+  }));
+  rowKeys.sort();
 
   let tbody='';
-  for(let si=0;si<maxSlots;si++){
-    const bell=bellSchedule[si]||null;
-    const timeLabel=bell?(bell.start+'<br><span style="opacity:.7;font-size:.88em">\u2013'+bell.end+'</span>'):(si+1+'\u0443\u0440');
-    let row='<tr><td class="time-cell"><b>'+(si+1)+'</b><br>'+timeLabel+'</td>';
+  rowKeys.forEach((rk,ri)=>{
+    const firstItem=dayItems.map(items=>items.find(it=>it.start===rk)).find(Boolean);
+    const isEventRow=firstItem&&firstItem.type==='event';
+    let timeCell;
+    if(isEventRow){
+      timeCell='<span style="color:#e37400;font-weight:700">'+rk+'</span>';
+    } else {
+      let si=-1;
+      for(let k=0;k<bellSchedule.length;k++){if(bellSchedule[k].start===rk){si=k;break;}}
+      const endT=firstItem.end;
+      timeCell=(si>=0?'<b>'+(si+1)+'</b><br>':'')+rk+'<br><span style="opacity:.7;font-size:.88em">\u2013'+endT+'</span>';
+    }
+    let row='<tr><td class="time-cell">'+timeCell+'</td>';
     printDays.forEach((d,di)=>{
-      let cls='';
-      if(d.isWE)cls+=' weekend-col';
+      let cls=d.isWE?' weekend-col':'';
       let cell='';
       if(!d.inRange){
         cell='<span class="print-empty-cell">\u2014</span>';
       } else if(d.isHol&&d.dC.length===0){
-        if(si===0)cell='<span class="print-holiday-cell"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> \u041A\u0430\u043D\u0456\u043A\u0443\u043B\u0438</span>';
+        if(ri===0)cell='<span class="print-holiday-cell"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;display:inline-block"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> \u041A\u0430\u043D\u0456\u043A\u0443\u043B\u0438</span>';
       } else {
-        const key=d.slotArr[si];
-        if(key){
-          const p=key.split(':');
-          const cid=p[0];
-          if(!isLessonDeletedFull(d.dk,cid)&&!hiddenClasses.has(cid)){
-            const les=_findLessonOrSlot(d.allL,cid,parseInt(p[1],10))
-            if(les){
-              const color=classColorMap[cid]||'#1a73e8';
-              const b=getBellForSlot(d.dk,si);
-              const hasCustomT=!!getCustomTime(d.dk,si);
-              cell='<div class="print-cell-lesson" style="background:'+color+'">'+
-                '<span class="print-cell-name">'+escapeHtml(les.className)+'</span>'+
-                '<span class="print-cell-time">'+b.start+' \u2013 '+b.end+(hasCustomT?' \u23F0':'')+' </span>'+
-                '</div>';
-            }
-          }
-        }
-        // Якщо клітинка порожня — вставити наступну невставлену подію
-        if(!cell){
-          const evs=dayEventsList[di];
-          const idx=evInserted[di];
-          if(idx<evs.length){
-            const ev=evs[idx];
-            cell='<div class="print-cell-lesson" style="background:#e37400">'+
-              '<span class="print-cell-name">'+escapeHtml(ev.title)+'</span>'+
-              '<span class="print-cell-time">'+ev.startTime+' \u2013 '+ev.endTime+'</span>'+
-              '</div>';
-            evInserted[di]++;
-          }
-        }
+        dayItems[di].filter(it=>it.start===rk).forEach(it=>{
+          cell+='<div class="print-cell-lesson" style="background:'+it.color+'">'+
+            '<span class="print-cell-name">'+escapeHtml(it.name)+'</span>'+
+            '<span class="print-cell-time">'+it.start+' \u2013 '+it.end+(it.custom?' \u23F0':'')+'</span>'+
+            '</div>';
+        });
       }
       if(!cell)cell='<span class="print-empty-cell"></span>';
       row+='<td'+( cls?' class="'+cls.trim()+'"':'')+'>'+cell+'</td>';
     });
     row+='</tr>';
     tbody+=row;
-  }
-
-  // Якщо після всіх рядків уроків ще залишились невставлені події — додаємо додаткові рядки
-  const hasLeftover=evInserted.some((cnt,di)=>cnt<dayEventsList[di].length);
-  if(hasLeftover){
-    let maxExtra=0;
-    evInserted.forEach((cnt,di)=>{maxExtra=Math.max(maxExtra,dayEventsList[di].length-cnt);});
-    for(let ei=0;ei<maxExtra;ei++){
-      let row='<tr><td class="time-cell" style="color:#e37400;font-size:.8em;font-weight:700;text-align:center"><svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#e37400" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></td>';
-      printDays.forEach((d,di)=>{
-        let cls=d.isWE?' weekend-col':'';
-        const evs=dayEventsList[di];
-        const idx=evInserted[di];
-        let cell='';
-        if(idx<evs.length){
-          const ev=evs[idx];
-          cell='<div class="print-cell-lesson" style="background:#e37400">'+
-            '<span class="print-cell-name">'+escapeHtml(ev.title)+'</span>'+
-            '<span class="print-cell-time">'+ev.startTime+' \u2013 '+ev.endTime+'</span>'+
-            '</div>';
-          evInserted[di]++;
-        } else {
-          cell='<span class="print-empty-cell"></span>';
-        }
-        row+='<td'+( cls?' class="'+cls.trim()+'"':'')+'>'+cell+'</td>';
-      });
-      row+='</tr>';
-      tbody+=row;
-    }
-  }
-
+  });
   // Легенда класів
   let legend='<div class="print-legend" style="display:flex;flex-wrap:wrap;gap:10px;padding:12px 22px;border-top:1px solid #eee">';
   slots.forEach((slot,idx)=>{
