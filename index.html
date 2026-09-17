@@ -829,8 +829,10 @@ body.readonly-mode .week-lesson:hover{transform:none!important;box-shadow:0 1px 
 
 /* ── Print document ── */
 /* Попередній перегляд друку — пропорції А4 landscape */
-#print-overlay.visible{display:flex!important;flex-direction:column;align-items:center}
-#print-doc{width:277mm;max-width:100%;background:#fff;color:#111;margin:0 auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);font-size:.82em}
+#print-overlay.visible{display:block}
+.print-toolbar{flex-wrap:wrap}
+.print-doc-header{background:#1a73e8;color:#fff;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+#print-doc{width:277mm;max-width:none;min-height:190mm;background:#fff;color:#111;margin:0 auto;border:1px solid #ddd;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);font-size:13.12px;flex-shrink:0}
 .print-week-table{table-layout:fixed;width:100%}
 .print-week-table th.day-col{min-width:0}
 .print-week-table td.time-cell{width:52px}
@@ -852,7 +854,18 @@ td.weekend-col{background:#fff8f8}
 .print-empty-cell{color:#bbb;font-size:.72em;text-align:center;font-style:italic}
 .print-footer{padding:10px 22px;font-size:.72em;color:#999;border-top:1px solid #eee;text-align:right}
 
-/* ── @media print: hide everything, show only #print-doc ── */
+.print-week-table{table-layout:fixed;width:100%}
+.print-week-table th,.print-week-table td{padding:3px 4px;font-size:.92em;overflow-wrap:anywhere}
+.print-week-table th.day-col{min-width:0!important;width:auto}
+.print-week-table th:first-child{min-width:0!important;width:52px}
+.print-week-table td.time-cell{min-width:0!important;width:52px;font-size:.82em;padding:3px 2px}
+.print-cell-lesson{padding:2px 4px;margin-bottom:1px}
+.print-cell-name{font-size:.92em}
+.print-cell-time{font-size:.8em}
+.print-legend{padding:6px 10px!important;gap:7px!important}
+.print-legend span{font-size:.7em}
+.print-doc-header{padding:8px 12px!important}
+.print-footer{padding:5px 10px!important;font-size:.65em}
 @media print{
 
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -867,17 +880,7 @@ td.weekend-col{background:#fff8f8}
   @page{margin:6mm;size:A4 landscape}
   html,body{width:277mm!important;height:auto!important;overflow:visible!important}
   #print-doc{width:277mm!important;font-size:.82em}
-  .print-week-table{table-layout:fixed;width:100%}
-  .print-week-table th,.print-week-table td{padding:3px 4px;font-size:.92em;word-wrap:break-word}
-  .print-week-table th.day-col{min-width:0!important;width:auto}
-  .print-week-table td.time-cell{min-width:0!important;width:52px;font-size:.82em;padding:3px 2px}
-  .print-cell-lesson{padding:2px 4px;margin-bottom:1px}
-  .print-cell-name{font-size:.92em}
-  .print-cell-time{font-size:.8em}
-  .print-legend{padding:6px 10px!important;gap:7px!important}
-  .print-legend span{font-size:.7em}
-  .print-doc-header{padding:8px 12px!important}
-  .print-footer{padding:5px 10px!important;font-size:.65em}
+
 }
 /* ─────────────────────────────────────────────────────────────────
    МОБІЛЬНА АДАПТАЦІЯ — повністю переписана
@@ -4481,29 +4484,23 @@ async function savePrintAsPng(){
   const doc=document.getElementById('print-doc');
   if(!doc||!doc.innerHTML.trim())return;
   try{
-    const w=doc.offsetWidth,h=doc.scrollHeight;
+    await document.fonts.ready;
+    const w=Math.ceil(Math.max(doc.offsetWidth,doc.scrollWidth));
+    const h=Math.ceil(Math.max(doc.offsetHeight,doc.scrollHeight));
     const scale=2;
     const clone=doc.cloneNode(true);
-    clone.style.width=w+'px';
-    // копіюємо всі стилі сторінки всередину клону (щоб збереглись кольори та шрифти)
-    const styles=document.querySelectorAll('style');
-    let css='';styles.forEach(s=>css+=s.textContent+'\n');
-    const styleEl=document.createElement('style');styleEl.textContent=css;
-    clone.insertBefore(styleEl,clone.firstChild);
-    // вимикаємо overflow, щоб нічого не обрізалось
-    const wrap=document.createElement('div');
-    wrap.style.cssText='position:fixed;left:-10000px;top:0;background:#fff;';
-    wrap.style.width=w+'px';
-    wrap.appendChild(clone);
-    document.body.appendChild(wrap);
-    // серіалізуємо wrap у XHTML
-    const serializer=new XMLSerializer();
-    const inner=serializer.serializeToString(wrap);
-    document.body.removeChild(wrap);
-    const fullSvg='<svg xmlns="http://www.w3.org/2000/svg" width="'+(w*scale)+'" height="'+(h*scale)+'">'+
-      '<foreignObject x="0" y="0" width="'+w+'" height="'+h+'">'+
-      inner+
-      '</foreignObject></svg>';
+    const sources=[doc,...doc.querySelectorAll('*')];
+    const targets=[clone,...clone.querySelectorAll('*')];
+    sources.forEach((source,i)=>{
+      const computed=getComputedStyle(source);
+      for(const property of computed){
+        targets[i].style.setProperty(property,computed.getPropertyValue(property));
+      }
+    });
+    clone.style.cssText+=';position:static;margin:0;width:'+w+'px;height:'+h+'px;max-width:none;max-height:none;box-shadow:none;transform:none;zoom:1;';
+    const inner=new XMLSerializer().serializeToString(clone);
+    const fullSvg='<svg xmlns="http://www.w3.org/2000/svg" width="'+(w*scale)+'" height="'+(h*scale)+'" viewBox="0 0 '+w+' '+h+'">'+
+      '<foreignObject x="0" y="0" width="'+w+'" height="'+h+'">'+inner+'</foreignObject></svg>';
     const img=new Image();
     await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;
       img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(fullSvg);});
