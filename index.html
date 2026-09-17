@@ -858,7 +858,20 @@ td.weekend-col{background:#fff8f8}
   #print-doc.mono .print-doc-header{background:#fff!important;color:#111!important;border-bottom:2px solid #111!important}
   .print-cell-lesson{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   #print-doc.mono .print-cell-lesson{background:transparent!important;border:1.5px solid #333!important}
-  @page{margin:10mm;size:A4 landscape}
+  @page{margin:6mm;size:A4 landscape}
+  html,body{width:277mm!important;height:auto!important;overflow:visible!important}
+  #print-doc{width:277mm!important;font-size:.82em}
+  .print-week-table{table-layout:fixed;width:100%}
+  .print-week-table th,.print-week-table td{padding:3px 4px;font-size:.92em;word-wrap:break-word}
+  .print-week-table th.day-col{min-width:0!important;width:auto}
+  .print-week-table td.time-cell{min-width:0!important;width:52px;font-size:.82em;padding:3px 2px}
+  .print-cell-lesson{padding:2px 4px;margin-bottom:1px}
+  .print-cell-name{font-size:.92em}
+  .print-cell-time{font-size:.8em}
+  .print-legend{padding:6px 10px!important;gap:7px!important}
+  .print-legend span{font-size:.7em}
+  .print-doc-header{padding:8px 12px!important}
+  .print-footer{padding:5px 10px!important;font-size:.65em}
 }
 /* ─────────────────────────────────────────────────────────────────
    МОБІЛЬНА АДАПТАЦІЯ — повністю переписана
