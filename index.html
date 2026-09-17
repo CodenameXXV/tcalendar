@@ -2899,7 +2899,7 @@ function updateNowLessonPanel(){
       nextPanelEl.innerHTML=
         '<div class="next-lesson-panel">'+
         '<div class="next-lesson-header"><span class="next-lesson-icon">⏭</span><span class="next-lesson-status">Наступний урок '+(nextIdx+1)+'</span></div>'+
-        '<div class="next-lesson-name">'+(nextLesson.name?escapeHtml(nextLesson.name):'—')+'</div>'+
+        '<div class="next-lesson-name">'+(nextLesson.classId?escapeHtml(nextLesson.name):'Вікно')+'</div>'+
         nextCabHtml+
         '<div class="next-lesson-subject">'+nextBell.start+' – '+nextBell.end+'</div>'+
         '</div>';
@@ -2914,7 +2914,7 @@ function updateNowLessonPanel(){
     const remSec=Math.floor(remain*60);
     const countdown=remSec>=3600?(Math.floor(remSec/3600)+'год '+(Math.floor((remSec%3600)/60)>0?Math.floor((remSec%3600)/60)+'хв':'')):remSec>=60?(Math.floor(remSec/60)+'хв '+(remSec%60>0?remSec%60+'с':'')):(remSec+'с');
     const activeCab=lessonClassId?getLessonCabinet(dk,lessonClassId,lessonSlotIdx):'';
-    stEl.textContent='Зараз урок '+(activeSlot.idx+1);
+    stEl.textContent=lessonClassId?'Зараз урок '+(activeSlot.idx+1):'Вікно';
     if(nmEl){nmEl.textContent=lessonName;nmEl.style.display=lessonName?'':'none'}
     if(subEl){subEl.textContent=lessonName?('Урок '+(activeSlot.idx+1)+' з '+bellSchedule.length):'';subEl.style.display=lessonName?'':'none'}
     if(cabEl){cabEl.innerHTML=activeCab?'<svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; display:inline-block; margin-right:4px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> '+activeCab:'';cabEl.style.display=activeCab?'':'none'}
