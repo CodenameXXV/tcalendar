@@ -2777,15 +2777,16 @@ function updateNowLessonPanel(){
   el.hidden=false;
   const now=new Date();
   const nm=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+  const today=new Date(now);today.setHours(0,0,0,0);
+  const dk=dateKey(today);
+  const dayBells=bellSchedule.map((_,i)=>getBellForSlot(dk,i));
   let activeSlot=null,breakNext=null;
-  for(let i=0;i<bellSchedule.length;i++){
-    const s=timeToMinutes(bellSchedule[i].start),e=timeToMinutes(bellSchedule[i].end);
-    if(nm>=s&&nm<e){activeSlot={idx:i,start:s,end:e,bell:bellSchedule[i]};break}
-    if(nm<s&&!breakNext){breakNext={idx:i,start:s,bell:bellSchedule[i]};break}
+  for(let i=0;i<dayBells.length;i++){
+    const s=timeToMinutes(dayBells[i].start),e=timeToMinutes(dayBells[i].end);
+    if(nm>=s&&nm<e){activeSlot={idx:i,start:s,end:e,bell:dayBells[i]};break}
+    if(nm<s&&(!breakNext||s<breakNext.start))breakNext={idx:i,start:s,bell:dayBells[i]};
   }
   if(!activeSlot&&!breakNext){el.innerHTML='';const np=document.getElementById('next-lesson-panel');if(np)np.innerHTML='';return}
-  const today=new Date();today.setHours(0,0,0,0);
-  const dk=dateKey(today);
   if(!cachedAllData)cachedAllData=buildAllClassesData();
   const dC=cachedAllData.allDayMap[dk]||[];
   // якщо сьогодні немає уроків — перевіряємо події
@@ -2890,7 +2891,7 @@ function updateNowLessonPanel(){
   if(nextPanelEl){
     const curIdx=(activeSlot||breakNext).idx;
     const nextIdx=activeSlot?curIdx+1:curIdx;
-    const nextBell=bellSchedule[nextIdx];
+    const nextBell=dayBells[nextIdx];
     if(nextBell&&nextIdx<bellSchedule.length){
       const nextLesson=getLessonAtSlot(nextIdx);
       const nextCab=nextLesson.classId?getLessonCabinet(dk,nextLesson.classId,nextIdx):'';
@@ -2922,7 +2923,7 @@ function updateNowLessonPanel(){
     barEl.style.width=pct.toFixed(3)+'%';
     barEl.style.background='linear-gradient(90deg,'+lessonColor+',color-mix(in srgb,'+lessonColor+' 60%,#8ab4f8))';
   } else if(breakNext){
-    const prevBell=bellSchedule[breakNext.idx-1];
+    const prevBell=dayBells.filter(b=>timeToMinutes(b.end)<=nm).sort((a,b)=>timeToMinutes(b.end)-timeToMinutes(a.end))[0];
     const breakStart=prevBell?timeToMinutes(prevBell.end):null;
     const isBreak=breakStart!==null&&nm>=breakStart&&nm<breakNext.start;
     el.hidden=!isBreak;
