@@ -4394,20 +4394,20 @@ function initDateRowSelection(){
   if(_selPopupInited)return;_selPopupInited=true;
   const res=document.getElementById('result');
   const popup=document.getElementById('sel-count-popup');
-  function checkSel(){
+  function getSelectedRows(){
     const sel=window.getSelection();
-    if(!sel||sel.rangeCount===0||sel.isCollapsed){
-      popup.classList.remove('show');
-      _selectedDateRows=[];
-      return;
-    }
+    if(!sel||sel.rangeCount===0||sel.isCollapsed)return[];
     const range=sel.getRangeAt(0);
+    if(!res.contains(sel.anchorNode))return[];
     const rows=res.querySelectorAll('.date-row');
-    const selected=[];let lastRow=null;
-    rows.forEach(r=>{
-      if(range.intersectsNode(r)){selected.push(r);lastRow=r}
-    });
-    if(selected.length>0&&res.contains(sel.anchorNode)){
+    const selected=[];
+    rows.forEach(r=>{if(range.intersectsNode(r))selected.push(r)});
+    return selected;
+  }
+  function checkSel(){
+    const selected=getSelectedRows();
+    const lastRow=selected[selected.length-1];
+    if(selected.length>0){
       _selectedDateRows=selected;
       popup.textContent=selected.length+' \u0443\u0440\u043e\u043a\u0456\u0432';
       const rr=lastRow.getBoundingClientRect();
@@ -4419,10 +4419,15 @@ function initDateRowSelection(){
       popup.classList.remove('show');
     }
   }
-  document.addEventListener('selectionchange',()=>{
-    setTimeout(checkSel,10);
-  });
+  document.addEventListener('selectionchange',()=>{setTimeout(checkSel,10);});
+  // Зберігаємо виділення перед mousedown на copy-кнопку (браузер скидає selection при click)
   document.addEventListener('mousedown',e=>{
+    const copyBtn=e.target.closest('.copy-btn');
+    if(copyBtn){
+      // Знімаємо snapshot прямо зараз — до того як браузер скине виділення
+      _selectedDateRows=getSelectedRows();
+      return; // не скидаємо
+    }
     if(!res.contains(e.target)){
       popup.classList.remove('show');
       _selectedDateRows=[];
