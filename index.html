@@ -214,32 +214,28 @@ body.readonly-mode .fab-add-event{display:none!important}
 .sidebar.collapsed{width:0;border-right:none}
 .sidebar-header{padding:0 14px;height:52px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:8px;flex-shrink:0}
 .sidebar-header .logo{width:24px;height:24px;flex-shrink:0}
-.sidebar-header .app-name{font-size:.88em;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;position:relative;cursor:default}
-@media(min-width:901px){
-  .sidebar-header .app-name::after{
-    content:attr(data-stats-tooltip);
-    position:absolute;
-    left:0;top:calc(100% + 8px);
-    background:var(--bg-surface,#fff);
-    color:var(--text,#333);
-    border:1px solid var(--border,#e0e0e0);
-    border-radius:8px;
-    padding:7px 12px;
-    font-size:.82em;
-    font-weight:400;
-    white-space:nowrap;
-    box-shadow:0 4px 16px rgba(0,0,0,.13);
-    pointer-events:none;
-    opacity:0;
-    transform:translateY(-4px);
-    transition:opacity .18s,transform .18s;
-    z-index:200;
-    line-height:1.5;
-  }
-  .sidebar-header .app-name:hover::after{
-    opacity:1;
-    transform:translateY(0);
-  }
+.sidebar-header .app-name{font-size:.88em;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;cursor:default}
+#stats-tooltip-popup{
+  position:fixed;
+  background:var(--bg-surface,#fff);
+  color:var(--text,#333);
+  border:1px solid var(--border,#e0e0e0);
+  border-radius:8px;
+  padding:7px 12px;
+  font-size:.82em;
+  font-weight:400;
+  white-space:nowrap;
+  box-shadow:0 4px 16px rgba(0,0,0,.13);
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(-4px);
+  transition:opacity .18s,transform .18s;
+  z-index:9999;
+  line-height:1.5;
+}
+#stats-tooltip-popup.visible{
+  opacity:1;
+  transform:translateY(0);
 }
 .sidebar-section{padding:10px 14px;border-bottom:1px solid var(--border-light)}
 .sidebar-section.scrollable{border-bottom:none}
@@ -4796,8 +4792,33 @@ window.addEventListener('beforeunload',(e)=>{
 
 // ── Stats tooltip on app name (desktop only) ─────────────────────
 let _statsTooltipInterval=null;
+let _statsTooltipText='Завантаження...';
+
+function _initStatsTooltipEl(){
+  if(document.getElementById('stats-tooltip-popup'))return;
+  const tip=document.createElement('div');
+  tip.id='stats-tooltip-popup';
+  document.body.appendChild(tip);
+  const trigger=document.getElementById('app-name-title');
+  if(!trigger)return;
+  let _statsShowTimer=null;
+  trigger.addEventListener('mouseenter',function(){
+    if(window.innerWidth<901)return;
+    _statsShowTimer=setTimeout(function(){
+      tip.textContent=_statsTooltipText;
+      const r=trigger.getBoundingClientRect();
+      tip.style.left=r.left+'px';
+      tip.style.top=(r.bottom+6)+'px';
+      tip.classList.add('visible');
+    },3000);
+  });
+  trigger.addEventListener('mouseleave',function(){
+    clearTimeout(_statsShowTimer);
+    tip.classList.remove('visible');
+  });
+}
+
 async function _updateStatsTooltip(){
-  // Only bother on desktop (sidebar is always visible ≥901px)
   if(window.innerWidth<901)return;
   const db=window._fbDb;
   const colFn=window._fbCollection;
@@ -4812,15 +4833,14 @@ async function _updateStatsTooltip(){
     ]);
     const total=totalSnap.data().count;
     const online=onlineSnap.data().count;
-    const el=document.getElementById('app-name-title');
-    if(el)el.setAttribute('data-stats-tooltip',
-      'Всього користувачів календаря: '+total+' \u2022 Онлайн: '+online);
-  }catch(e){/* тихо ігноруємо помилки мережі */}
+    _statsTooltipText='Всього користувачів календаря: '+total+' • Онлайн: '+online;
+  }catch(e){_statsTooltipText='Статистика недоступна';}
 }
 function _startStatsTooltipUpdater(){
+  _initStatsTooltipEl();
   _updateStatsTooltip();
   if(_statsTooltipInterval)clearInterval(_statsTooltipInterval);
-  _statsTooltipInterval=setInterval(_updateStatsTooltip,120000); // кожні 2 хв
+  _statsTooltipInterval=setInterval(_updateStatsTooltip,120000);
 }
 
 function gdriveInit(){
