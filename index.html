@@ -41,58 +41,79 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Календар">
 <link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getCountFromServer, serverTimestamp, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+  // Firebase вантажиться динамічно ПІСЛЯ події load: повільний інтернет більше
+  // не блокує початкове відмальовування календаря з локальних даних.
+  const startFirebase = async () => {
+    const B = "https://www.gstatic.com/firebasejs/12.17.1/";
+    let appM, authM, fsM;
+    try {
+      [appM, authM, fsM] = await Promise.all([
+        import(B + "firebase-app.js"),
+        import(B + "firebase-auth.js"),
+        import(B + "firebase-firestore.js")
+      ]);
+    } catch (e) {
+      console.warn("Firebase не завантажився:", e);
+      window._fbLoadFailed = true;
+      if (window.showNotification) window.showNotification('Немає зв\u2019язку з сервером — працюю з локальними даними. Оновіть сторінку, коли з\u2019явиться інтернет.', 'info');
+      return;
+    }
+    const { initializeApp } = appM;
+    const { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, GoogleAuthProvider } = authM;
+    const { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getCountFromServer, serverTimestamp, onSnapshot, query, where } = fsM;
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDIJw1FgpTcP7mfulThkypc4mGSkbNeucM",
-    authDomain: "tcalendar-8e590.firebaseapp.com",
-    projectId: "tcalendar-8e590",
-    storageBucket: "tcalendar-8e590.firebasestorage.app",
-    messagingSenderId: "98555770410",
-    appId: "1:98555770410:web:af0ae937c0461cccdef553"
+    const firebaseConfig = {
+      apiKey: "AIzaSyDIJw1FgpTcP7mfulThkypc4mGSkbNeucM",
+      authDomain: "tcalendar-8e590.firebaseapp.com",
+      projectId: "tcalendar-8e590",
+      storageBucket: "tcalendar-8e590.firebasestorage.app",
+      messagingSenderId: "98555770410",
+      appId: "1:98555770410:web:af0ae937c0461cccdef553"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    window._fbAuth = auth;
+    window._fbDb = db;
+    window._fbProvider = provider;
+    window._fbSignInWithPopup = signInWithPopup;
+    window._fbSignInWithRedirect = signInWithRedirect;
+    window._fbGetRedirectResult = getRedirectResult;
+    window._fbSignOut = signOut;
+    window._fbOnAuthStateChanged = onAuthStateChanged;
+    window._fbDoc = doc;
+    window._fbSetDoc = setDoc;
+    window._fbGetDoc = getDoc;
+    window._fbDeleteDoc = deleteDoc;
+    window._fbCollection = collection;
+    window._fbGetCountFromServer = getCountFromServer;
+    window._fbServerTimestamp = serverTimestamp;
+    window._fbOnSnapshot = onSnapshot;
+    window._fbQuery = query;
+    window._fbWhere = where;
+
+    onAuthStateChanged(auth, (user) => {
+      if (window._fbAuthReady) window._fbAuthReady(user);
+    });
+
+    getRedirectResult(auth).then(result => {
+      // redirect sign-in handled automatically by onAuthStateChanged
+    }).catch(err => {
+      if (!err) return;
+      const ignore = ['auth/popup-closed-by-user','auth/cancelled-popup-request'];
+      const msg = (err.message||'').toLowerCase();
+      if (ignore.includes(err.code)) return;
+      if (msg.includes('closing') || msg.includes('hidden') || msg.includes('terminated')) return;
+      if (window.showNotification) window.showNotification('Помилка входу: ' + err.message, 'error');
+    });
   };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const provider = new GoogleAuthProvider();
-
-  window._fbAuth = auth;
-  window._fbDb = db;
-  window._fbProvider = provider;
-  window._fbSignInWithPopup = signInWithPopup;
-  window._fbSignInWithRedirect = signInWithRedirect;
-  window._fbGetRedirectResult = getRedirectResult;
-  window._fbSignOut = signOut;
-  window._fbOnAuthStateChanged = onAuthStateChanged;
-  window._fbDoc = doc;
-  window._fbSetDoc = setDoc;
-  window._fbGetDoc = getDoc;
-  window._fbDeleteDoc = deleteDoc;
-  window._fbCollection = collection;
-  window._fbGetCountFromServer = getCountFromServer;
-  window._fbServerTimestamp = serverTimestamp;
-  window._fbOnSnapshot = onSnapshot;
-  window._fbQuery = query;
-  window._fbWhere = where;
-
-  onAuthStateChanged(auth, (user) => {
-    if (window._fbAuthReady) window._fbAuthReady(user);
-  });
-
-  getRedirectResult(auth).then(result => {
-    // redirect sign-in handled automatically by onAuthStateChanged
-  }).catch(err => {
-    if (!err) return;
-    const ignore = ['auth/popup-closed-by-user','auth/cancelled-popup-request'];
-    const msg = (err.message||'').toLowerCase();
-    if (ignore.includes(err.code)) return;
-    if (msg.includes('closing') || msg.includes('hidden') || msg.includes('terminated')) return;
-    if (window.showNotification) window.showNotification('Помилка входу: ' + err.message, 'error');
-  });
+  if (document.readyState === 'complete') startFirebase();
+  else window.addEventListener('load', startFirebase);
 </script>
 <style>
 :root{--blue:#1a73e8;--blue-light:#e8f0fe;--green:#34a853;--red:#ea4335;--orange:#fbbc04;--text:#202124;--text-secondary:#5f6368;--text-light:#70757a;--border:#dadce0;--border-light:#e8eaed;--bg-hover:#f1f3f4;--bg-surface:#fff;--bg-page:#f8f9fa;--shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.1);--shadow-lg:0 8px 30px rgba(0,0,0,.12);--radius:8px;--radius-lg:12px;--transition:.2s cubic-bezier(.4,0,.2,1);--sidebar-w:280px}
@@ -1837,6 +1858,42 @@ function loadWeekdayLessonInfo(){try{const s=localStorage.getItem(WEEKDAY_LESSON
 function saveWeekdayLessonInfo(){try{localStorage.setItem(WEEKDAY_LESSON_INFO_KEY,JSON.stringify(weekdayLessonInfo))}catch(e){}}
 function getWeekdayLessonInfo(wd,cid,si){return weekdayLessonInfo[weekdayNoteKey(wd,cid,si)]||''}
 function setWeekdayLessonInfo(wd,cid,si,html){const k=weekdayNoteKey(wd,cid,si);if(!html)delete weekdayLessonInfo[k];else weekdayLessonInfo[k]=html;saveWeekdayLessonInfo()}
+// ── Відомості про урок «лише цей день» (після перетягування уроку) ──
+// Зберігаються в тому ж weekdayLessonInfo під ключем dk|cid|si (приватні, синхронізуються як і решта).
+// Порожній рядок = «на цю дату відомостей немає» (перекриває щотижневі).
+function lessonInfoDateKey(dk,cid,si){return dk+'|'+cid+'|'+si}
+function hasLessonInfoDate(dk,cid,si){return Object.prototype.hasOwnProperty.call(weekdayLessonInfo,lessonInfoDateKey(dk,cid,si))}
+function clearLessonInfoDate(dk,cid,si){delete weekdayLessonInfo[lessonInfoDateKey(dk,cid,si)]}
+function getLessonInfoEff(dk,cid,si){const k=lessonInfoDateKey(dk,cid,si);if(Object.prototype.hasOwnProperty.call(weekdayLessonInfo,k))return weekdayLessonInfo[k]||'';return getWeekdayLessonInfo(weekdayFromDateKey(dk),cid,si)||''}
+function setLessonInfoDate(dk,cid,si,html){const k=lessonInfoDateKey(dk,cid,si);if(html)weekdayLessonInfo[k]=html;else if(getWeekdayLessonInfo(weekdayFromDateKey(dk),cid,si))weekdayLessonInfo[k]='';else delete weekdayLessonInfo[k]}
+function lipInfoBadgeText(dk,cid,si,every){return hasLessonInfoDate(dk,cid,si)?'Лише цей день':every.charAt(0).toUpperCase()+every.slice(1)}
+// Обмін уроків у межах одного дня: відомості їдуть разом з уроком
+function moveLessonInfoSameDay(dk,fromIdx,toIdx,cidA,cidB,scope){
+  const iA=cidA?getLessonInfoEff(dk,cidA,fromIdx):'';
+  const iB=cidB?getLessonInfoEff(dk,cidB,toIdx):'';
+  if(scope==='day'){
+    if(cidA)clearLessonInfoDate(dk,cidA,fromIdx);
+    if(cidB)clearLessonInfoDate(dk,cidB,toIdx);
+    if(cidA)setLessonInfoDate(dk,cidA,toIdx,iA);
+    if(cidB)setLessonInfoDate(dk,cidB,fromIdx,iB);
+  }else{
+    const wd=weekdayFromDateKey(dk);
+    [[cidA,fromIdx],[cidA,toIdx],[cidB,toIdx],[cidB,fromIdx]].forEach(function(q){if(q[0]){delete weekdayLessonInfo[weekdayNoteKey(wd,q[0],q[1])];clearLessonInfoDate(dk,q[0],q[1]);}});
+    if(cidA&&iA)weekdayLessonInfo[weekdayNoteKey(wd,cidA,toIdx)]=iA;
+    if(cidB&&iB)weekdayLessonInfo[weekdayNoteKey(wd,cidB,fromIdx)]=iB;
+  }
+  saveWeekdayLessonInfo();
+}
+// Те саме для нотаток/кабінету/типу уроку (режим «лише цей день») — для модалки дня
+function moveLessonExtrasDay(dk,fromIdx,toIdx,cidA,cidB){
+  const wd=weekdayFromDateKey(dk);
+  if(cidA){const nA=getLessonNote(dk,cidA,fromIdx);const wA=weekdayNotes[weekdayNoteKey(wd,cidA,fromIdx)]||'';const eA=nA.lessonNote||wA;const tA=getLessonNote(dk,cidA,toIdx);if(!tA.lessonNote&&eA){tA.lessonNote=eA;}setLessonNote(dk,cidA,toIdx,tA);if(nA.lessonNote){setLessonNote(dk,cidA,fromIdx,{dayNote:nA.dayNote||'',lessonNote:''});}}
+  if(cidB){const nB=getLessonNote(dk,cidB,toIdx);const wB=weekdayNotes[weekdayNoteKey(wd,cidB,toIdx)]||'';const eB=nB.lessonNote||wB;const tB=getLessonNote(dk,cidB,fromIdx);if(!tB.lessonNote&&eB){tB.lessonNote=eB;}setLessonNote(dk,cidB,fromIdx,tB);if(nB.lessonNote){setLessonNote(dk,cidB,toIdx,{dayNote:nB.dayNote||'',lessonNote:''});}}
+  if(cidA){const cA=getLessonCabinet(dk,cidA,fromIdx);if(cA){setLessonCabinet(dk,cidA,toIdx,cA);setLessonCabinet(dk,cidA,fromIdx,'');}}
+  if(cidB){const cB=getLessonCabinet(dk,cidB,toIdx);if(cB){setLessonCabinet(dk,cidB,fromIdx,cB);setLessonCabinet(dk,cidB,toIdx,'');}}
+  if(cidA){const tA2=getLessonType(dk,cidA,fromIdx);if(tA2&&tA2!=='lesson'){setLessonType(dk,cidA,toIdx,tA2);setLessonType(dk,cidA,fromIdx,'lesson');}}
+  if(cidB){const tB2=getLessonType(dk,cidB,toIdx);if(tB2&&tB2!=='lesson'){setLessonType(dk,cidB,fromIdx,tB2);setLessonType(dk,cidB,toIdx,'lesson');}}
+}
 function loadLessonTypes(){try{const s=localStorage.getItem(TYPES_KEY);if(s)lessonTypes=JSON.parse(s)}catch(e){lessonTypes={}}}
 function saveLessonTypes(){try{localStorage.setItem(TYPES_KEY,JSON.stringify(lessonTypes))}catch(e){}}
 function getLessonType(dk,cid,li){return lessonTypes[dk+'|'+cid+'|'+li]||'lesson'}
@@ -2168,7 +2225,7 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
   if(type!=='lesson')metaHtml+='<div class="lip-row"><span class="lip-row-icon">🏷️</span><span class="lip-row-text">'+escapeHtml(typeInfo.label)+'</span></div>';
   function _sH(h){if(!h)return'';const _d=document.createElement('div');_d.innerHTML=h;return _d.textContent||_d.innerText||'';}
   const wdNoteVal=weekdayNotes[wdNoteKey]||'';
-  const lessonInfoVal=getWeekdayLessonInfo(wd,classId,si)||'';
+  const lessonInfoVal=getLessonInfoEff(dk,classId,si);
   const lesNoteVal=noteData.lessonNote||'';
   const hasWdNote=!!(_sH(wdNoteVal).trim());
   const hasLessonInfo=!!(_sH(lessonInfoVal).trim());
@@ -2228,17 +2285,7 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
       '<button class="lip-close" id="lip-close-btn" title="Закрити">✕</button>'+
     '</div>'+
     '<div class="lip-meta">'+metaHtml+'</div>'+
-    infoHtml+notesHtml+
-    (!document.body.classList.contains('readonly-mode')?
-      '<div class="lip-footer">'+
-        '<button class="lip-footer-btn note" id="lip-footer-note-btn">'+
-          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Нотатки'+
-        '</button>'+
-        '<button class="lip-footer-btn edit" id="lip-footer-edit-btn">'+
-          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>Редагувати'+
-        '</button>'+
-      '</div>'
-    :'');
+    infoHtml+notesHtml+'<div style="height:6px"></div>';
   document.body.appendChild(pop);
   const tile=e.target.closest('.week-lesson') || e.target.closest('.dm-slot-card') || e.target.closest('.day-modal-custom-event');
   const rect=tile?tile.getBoundingClientRect():{right:e.clientX,left:e.clientX,top:e.clientY};
@@ -2255,12 +2302,6 @@ function showLessonInfoPopup(e,dk,si,lessonName,classId,color){
     (left<rect.left?'right':'left'):'left';
   pop.style.transformOrigin=originX+' top';
   pop.querySelector('#lip-close-btn').addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup();});
-  // Footer note button
-  const footerNoteBtn=pop.querySelector('#lip-footer-note-btn');
-  if(footerNoteBtn){footerNoteBtn.addEventListener('mousedown',function(ev){ev.stopPropagation();});footerNoteBtn.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){const tileEl=document.querySelector('.week-lesson[data-date-key="'+dk+'"][data-lesson-idx="'+si+'"]');const lnBtn=tileEl?tileEl.querySelector('.ln-btn'):null;showLessonNotePopup(dk,classId,si,lessonName,lnBtn);});});}
-  // Footer edit button
-  const footerEditBtn=pop.querySelector('#lip-footer-edit-btn');
-  if(footerEditBtn){footerEditBtn.addEventListener('mousedown',function(ev){ev.stopPropagation();});footerEditBtn.addEventListener('click',function(ev){ev.stopPropagation();closeLessonInfoPopup(function(){enterEditMode();});});}
   // Note edit button(s) → open full note editor popup
   function openNoteEditor(ev){
     ev.stopPropagation();
@@ -3183,6 +3224,7 @@ if(cidA){const cA=getLessonCabinet(dk,cidA,fromIdx);if(cA){setLessonCabinet(dk,c
 if(cidB){const cB=getLessonCabinet(dk,cidB,toIdx);if(cB){setLessonCabinet(dk,cidB,fromIdx,cB);setLessonCabinet(dk,cidB,toIdx,'');}}
 if(cidA){const tA=getLessonType(dk,cidA,fromIdx);if(tA&&tA!=='lesson'){setLessonType(dk,cidA,toIdx,tA);setLessonType(dk,cidA,fromIdx,'lesson');}}
 if(cidB){const tB=getLessonType(dk,cidB,toIdx);if(tB&&tB!=='lesson'){setLessonType(dk,cidB,fromIdx,tB);setLessonType(dk,cidB,toIdx,'lesson');}}
+moveLessonInfoSameDay(dk,fromIdx,toIdx,cidA,cidB,'day');
 setDayOrder(dk,newArr);
 }else if(scope==='all'){
 if(cidA){const nkA=weekdayNoteKey(wd,cidA,fromIdx);const nkAto=weekdayNoteKey(wd,cidA,toIdx);const noteA=weekdayNotes[nkA];if(noteA){weekdayNotes[nkAto]=noteA;delete weekdayNotes[nkA];}else{delete weekdayNotes[nkAto];}}
@@ -3193,6 +3235,7 @@ if(cidB){const lnB=getLessonNote(dk,cidB,toIdx);if(lnB.lessonNote){const lnBto=g
 if(cidA){const ckA=wd+'|'+cidA+'|'+fromIdx;const ckAto=wd+'|'+cidA+'|'+toIdx;if(weekdayCabinets[ckA]){weekdayCabinets[ckAto]=weekdayCabinets[ckA];delete weekdayCabinets[ckA];}else delete weekdayCabinets[ckAto];}
 if(cidB){const ckB=wd+'|'+cidB+'|'+toIdx;const ckBto=wd+'|'+cidB+'|'+fromIdx;if(weekdayCabinets[ckB]){weekdayCabinets[ckBto]=weekdayCabinets[ckB];delete weekdayCabinets[ckB];}else delete weekdayCabinets[ckBto];}
 saveWeekdayCabinets();
+moveLessonInfoSameDay(dk,fromIdx,toIdx,cidA,cidB,'all');
 setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr);
 }
 if(typeof gdriveScheduleSave==='function')gdriveScheduleSave();
@@ -3261,6 +3304,9 @@ function moveWeekLessonCrossDay(fromDk,fromSi,toDk,toSi,classId,className){
         setLessonCabinet(toDk,classId,toSi,cab);
         setLessonCabinet(fromDk,classId,fromSi,'');
       }
+      setLessonInfoDate(toDk,classId,toSi,getLessonInfoEff(fromDk,classId,fromSi));
+      setLessonInfoDate(fromDk,classId,fromSi,'');
+      saveWeekdayLessonInfo();
       const ltype=getLessonType(fromDk,classId,fromSi);
       if(ltype&&ltype!=='lesson'){
         setLessonType(toDk,classId,toSi,ltype);
@@ -3789,7 +3835,7 @@ function showLessonNotePopup(dk,cid,si,lessonName,btnEl){
     if(lip&&lip.dataset&&(lip.dataset.lipDk===dk&&lip.dataset.lipSi==si&&lip.dataset.lipCid===cid)){
       const noteData2=getLessonNote(dk,cid,si);
       const wdNoteVal2=weekdayNotes[wdNoteKey]||'';
-      const lessonInfoVal2=getWeekdayLessonInfo(wd2,cid,si)||'';
+      const lessonInfoVal2=getLessonInfoEff(dk,cid,si);
       const lesNoteVal2=noteData2.lessonNote||'';
       function _sH2(h){if(!h)return'';const d=document.createElement('div');d.innerHTML=h;return d.textContent||d.innerText||'';}
       const hasWd2=!!(_sH2(wdNoteVal2).trim());
@@ -3845,7 +3891,7 @@ function showLessonInfoEditor(dk,cid,si,lessonName,btnEl){
   const wdInfoKey=weekdayNoteKey(wd,cid,si);
   const WD_EVERY=['кожен понеділок','кожен вівторок','кожну середу','кожен четвер','кожну п\'ятницю','кожну суботу','кожну неділю'];
   const wdEvery=WD_EVERY[wd]||'кожен цей день';
-  const existingInfo=getWeekdayLessonInfo(wd,cid,si)||'';
+  const existingInfo=getLessonInfoEff(dk,cid,si);
   const ov=document.createElement('div');ov.className='ln-popup-overlay';
   ov.addEventListener('touchmove',function(e){e.preventDefault();},{passive:false});
   document.body.style.overflow='hidden';
@@ -3891,14 +3937,14 @@ function showLessonInfoEditor(dk,cid,si,lessonName,btnEl){
   function getEditorContent(){return noteEditor.innerHTML.trim();}
   function save(){
     const html=getEditorContent();
-    setWeekdayLessonInfo(wd,cid,si,html);
+    if(hasLessonInfoDate(dk,cid,si)){setLessonInfoDate(dk,cid,si,html);saveWeekdayLessonInfo();}else setWeekdayLessonInfo(wd,cid,si,html);
     // Update info popup if open
     const lip=document.getElementById('lesson-info-popup');
     if(lip&&lip.dataset&&(lip.dataset.lipDk===dk&&lip.dataset.lipSi==si&&lip.dataset.lipCid===cid)){
       lip.querySelectorAll('.lip-info-section,.lip-notes-section,.lip-notes-empty').forEach(function(el){el.remove();});
       const metaEl=lip.querySelector('.lip-meta');
       const _sH2=function(h){if(!h)return'';const d=document.createElement('div');d.innerHTML=h;return d.textContent||d.innerText||'';};
-      const newInfo=getWeekdayLessonInfo(wd,cid,si)||'';
+      const newInfo=getLessonInfoEff(dk,cid,si);
       const hasNewInfo=!!(_sH2(newInfo).trim());
       const noteData2=getLessonNote(dk,cid,si);
       const wdNoteVal2=weekdayNotes[weekdayNoteKey(wd,cid,si)]||'';
@@ -4147,8 +4193,8 @@ var slotArr=getSlotOrder(dk,allL,totalSlots);
 var lastUsed=-1;for(var li0=0;li0<slotArr.length;li0++)if(slotArr[li0])lastUsed=li0;
 function findLesson(key){if(!key)return null;var p=key.split(':');var cid=p[0],oi=parseInt(p[1],10);return _findLessonOrSlot(allL,cid,oi)}
 function moveCard(fromIdx,toIdx){if(fromIdx===toIdx||isNaN(fromIdx)||isNaN(toIdx))return;var newArr=slotArr.slice();var tmp=newArr[toIdx];newArr[toIdx]=newArr[fromIdx];newArr[fromIdx]=tmp;showScopeModal({title:'\u041f\u0435\u0440\u0435\u043c\u0456\u0449\u0435\u043d\u043d\u044f \u0443\u0440\u043e\u043a\u0443',message:'\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u043b\u0438\u0448\u0435 \u043d\u0430 \u0446\u0435\u0439 \u0434\u0435\u043d\u044c \u0447\u0438 \u043d\u0430 \u0432\u0441\u0456 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0456 \u0443\u0440\u043e\u043a\u0438?'}).then(function(scope){if(!scope)return;if(scope==='day'){// copy weekly notes into per-day lessonNotes for the new positions
-var _wd=weekdayFromDateKey(dk);var _kA=slotArr[fromIdx];var _kB=slotArr[toIdx];var _cA=_kA?_kA.split(':')[0]:null;var _cB=_kB?_kB.split(':')[0]:null;if(_cA){var _wn=weekdayNotes[weekdayNoteKey(_wd,_cA,fromIdx)];if(_wn){var _c=getLessonNote(dk,_cA,toIdx);if(!_c.lessonNote){_c.lessonNote=_wn;setLessonNote(dk,_cA,toIdx,_c);}}}if(_cB){var _wn2=weekdayNotes[weekdayNoteKey(_wd,_cB,toIdx)];if(_wn2){var _c2=getLessonNote(dk,_cB,fromIdx);if(!_c2.lessonNote){_c2.lessonNote=_wn2;setLessonNote(dk,_cB,fromIdx,_c2);}}}setDayOrder(dk,newArr)}else if(scope==='all'){// migrate weekly notes for swapped classes
-var wd=weekdayFromDateKey(dk);var keyA=slotArr[fromIdx];var keyB=slotArr[toIdx];var cidA=keyA?keyA.split(':')[0]:null;var cidB=keyB?keyB.split(':')[0]:null;if(cidA){var nkA=weekdayNoteKey(wd,cidA,fromIdx);var nkAto=weekdayNoteKey(wd,cidA,toIdx);var noteA=weekdayNotes[nkA];if(noteA){weekdayNotes[nkAto]=noteA;delete weekdayNotes[nkA];}else{delete weekdayNotes[nkAto];}}if(cidB){var nkB=weekdayNoteKey(wd,cidB,toIdx);var nkBto=weekdayNoteKey(wd,cidB,fromIdx);var noteB=weekdayNotes[nkB];if(noteB){weekdayNotes[nkBto]=noteB;delete weekdayNotes[nkB];}else{delete weekdayNotes[nkBto];}}saveWeekdayNotes();setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr)}cachedAllData=null;if(homeView==='month')renderHomeCalendar();else renderWeekView();renderDayModalLessons(gridEl,dk,dC,classColorMap)})}
+var _wd=weekdayFromDateKey(dk);var _kA=slotArr[fromIdx];var _kB=slotArr[toIdx];var _cA=_kA?_kA.split(':')[0]:null;var _cB=_kB?_kB.split(':')[0]:null;moveLessonExtrasDay(dk,fromIdx,toIdx,_cA,_cB);moveLessonInfoSameDay(dk,fromIdx,toIdx,_cA,_cB,'day');setDayOrder(dk,newArr)}else if(scope==='all'){// migrate weekly notes for swapped classes
+var wd=weekdayFromDateKey(dk);var keyA=slotArr[fromIdx];var keyB=slotArr[toIdx];var cidA=keyA?keyA.split(':')[0]:null;var cidB=keyB?keyB.split(':')[0]:null;if(cidA){var nkA=weekdayNoteKey(wd,cidA,fromIdx);var nkAto=weekdayNoteKey(wd,cidA,toIdx);var noteA=weekdayNotes[nkA];if(noteA){weekdayNotes[nkAto]=noteA;delete weekdayNotes[nkA];}else{delete weekdayNotes[nkAto];}}if(cidB){var nkB=weekdayNoteKey(wd,cidB,toIdx);var nkBto=weekdayNoteKey(wd,cidB,fromIdx);var noteB=weekdayNotes[nkB];if(noteB){weekdayNotes[nkBto]=noteB;delete weekdayNotes[nkB];}else{delete weekdayNotes[nkBto];}}saveWeekdayNotes();moveLessonInfoSameDay(dk,fromIdx,toIdx,cidA,cidB,'all');setDayOrder(dk,null);setWeekdayOrder(weekdayFromDateKey(dk),newArr)}cachedAllData=null;if(homeView==='month')renderHomeCalendar();else renderWeekView();renderDayModalLessons(gridEl,dk,dC,classColorMap)})}
 gridEl.innerHTML='';
 var dragSrc=null,dragFromIdx=null;
 for(let si=0;si<totalSlots;si++){
@@ -4520,6 +4566,7 @@ window.onload=function(){
       requestNotificationPermission().then(()=>scheduleNextLessonNotification());
     }
   });
+  if(!_isReadonly)setTimeout(()=>{try{fbBaseline=JSON.stringify(gdriveCollectData());}catch(e){}},400);
 };
 
 // ── Друк розкладу тижня ──────────────────────────────────────────
@@ -4735,6 +4782,32 @@ let fbSaveTimer=null;
 const FB_DOC_NAME='calendarData';
 const FB_DEVICE_ID=(()=>{let id;try{id=sessionStorage.getItem('tcDeviceId');}catch(e){}if(!id){id=Math.random().toString(36).slice(2)+Date.now().toString(36);try{sessionStorage.setItem('tcDeviceId',id);}catch(e){}}return id;})();
 let fbRealtimeUnsubscribe=null;
+// Захист від перезапису: знімок локальних даних після старту + одноразове рішення,
+// що робити, якщо користувач змінив дані ще до того, як підвантажилась хмара
+let fbBaseline=null;
+let _initDecisionP=null,_initDecisionDone=false;
+function _shouldApplyInitialRemote(rawRemote){
+  if(_initDecisionP)return _initDecisionP;
+  _initDecisionP=(async()=>{
+    try{
+      if(fbBaseline===null)return true;
+      const cur=JSON.stringify(gdriveCollectData());
+      if(cur===fbBaseline||cur===rawRemote)return true; // локальних правок немає / дані однакові
+      const loadCloud=await showConfirmModal({
+        title:'Зміни до синхронізації',
+        message:'Поки хмара завантажувалась, ви змінили дані на цьому пристрої.<br><br>«Завантажити з хмари» — ваші нові зміни буде замінено даними з хмари.<br>«Скасувати» — залишити ваші зміни, вони збережуться в хмару.',
+        confirmText:'Завантажити з хмари',
+        danger:true,
+        zIndex:100000
+      });
+      if(loadCloud)return true;
+      gdriveScheduleSave(); // залишаємо локальні зміни й відправляємо їх у хмару
+      return false;
+    }catch(e){console.error('initial sync decision',e);return true;}
+    finally{_initDecisionDone=true;}
+  })();
+  return _initDecisionP;
+}
 let fbLastSaveTime=0; // timestamp останнього власного збереження
 let fbLocalPending=false; // true = є незбережені локальні зміни
 let fbBlockUntil=0;      // ігнорувати listener до цього timestamp
@@ -4748,6 +4821,8 @@ function appReady(){
   ov.classList.add('fading');
   setTimeout(()=>{document.body.classList.add('app-loaded');},460);
 }
+// Поганий інтернет: не тримаємо екран «Завантаження…», показуємо локальні дані за 2.5 с
+setTimeout(appReady,2500);
 window._fbAuthReady=function(user){
   fbUser=user;
   if(user){
@@ -4999,16 +5074,19 @@ function gdriveApplyData(d){
 async function gdriveLoad(){
   if(!fbUser)return;
   const db=window._fbDb,docFn=window._fbDoc,getDocFn=window._fbGetDoc;
-  if(!db)return;
+  if(!db){appReady();return;}
   gdriveSetSyncing(true);
   try{
     const ref=docFn(db,'users',fbUser.uid,'data',FB_DOC_NAME);
-    const snap=await getDocFn(ref);
+    const snap=await Promise.race([
+      getDocFn(ref),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('cloud-timeout')),8000))
+    ]);
     if(snap.exists()){
       const raw=snap.data().payload;
       if(raw){
         const d=JSON.parse(raw);
-        gdriveApplyData(d);
+        if(await _shouldApplyInitialRemote(raw))gdriveApplyData(d);
       }
     } else {
       // First login — push current local data (but not right after a reset)
@@ -5017,7 +5095,8 @@ async function gdriveLoad(){
       else{await gdriveSave()}
     }
   }catch(e){
-    showNotification('Помилка завантаження з хмари','error');
+    if(e&&e.message==='cloud-timeout')showNotification('Повільний інтернет — показано локальні дані, хмара підтягнеться, коли з’явиться зв’язок','info');
+    else showNotification('Помилка завантаження з хмари','error');
     console.error(e);
   }
   gdriveSetSyncing(false);
@@ -5047,6 +5126,10 @@ function _startRealtimeListener(){
     // Зовнішня зміна з новішим timestamp — застосовуємо
     try{
       const d=JSON.parse(sdata.payload);
+      if(!_initDecisionDone){
+        _shouldApplyInitialRemote(sdata.payload).then(ok=>{if(ok)gdriveApplyData(d);});
+        return;
+      }
       gdriveApplyData(d);
     }catch(e){console.error('Realtime sync parse error',e);}
   },err=>{console.error('Realtime listener error',err);});
@@ -5348,7 +5431,7 @@ async function revokeShareLink(){
   let attempts=0;
   const tryLoad=async()=>{
     const db=window._fbDb,docFn=window._fbDoc,getDocFn=window._fbGetDoc;
-    if(!db&&attempts<30){attempts++;setTimeout(tryLoad,200);return;}
+    if(!db&&!window._fbLoadFailed&&attempts<100){attempts++;setTimeout(tryLoad,200);return;}
     if(!db){showNotification('Не вдалося підключитись до бази','error');return;}
     try{
       const ref=docFn(db,'public',shareToken);
