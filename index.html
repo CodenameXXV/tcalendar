@@ -3349,7 +3349,8 @@ function moveWeekLessonCrossDay(fromDk,fromSi,toDk,toSi,classId,className){
         }
       }
       try{localStorage.setItem(classKey(classId),JSON.stringify(stored));}catch(e){}
-      const cbFrom=document.getElementById('cb-'+fromDayName);
+      const _isCur=String(classId)===String(currentClass);
+      const cbFrom=_isCur?document.getElementById('cb-'+fromDayName):null;
       if(cbFrom){
         cbFrom.checked=!!(stored.days[fromDayName]&&stored.days[fromDayName].checked);
         const card=cbFrom.closest('.day-card');
@@ -3362,7 +3363,7 @@ function moveWeekLessonCrossDay(fromDk,fromSi,toDk,toSi,classId,className){
           updateDayPreview(card);
         }
       }
-      const cbTo=document.getElementById('cb-'+toDayName);
+      const cbTo=_isCur?document.getElementById('cb-'+toDayName):null;
       if(cbTo){
         cbTo.checked=true;
         const card=cbTo.closest('.day-card');
@@ -3417,7 +3418,7 @@ function moveWeekLessonCrossDay(fromDk,fromSi,toDk,toSi,classId,className){
         delete weekdayLessonInfo[oldIk];
         saveWeekdayLessonInfo();
       }
-      saveClassState();
+      if(_isCur)saveClassState();
       if(typeof gdriveScheduleSave==='function')gdriveScheduleSave();
       cachedAllData=null;
       renderSidebar();
